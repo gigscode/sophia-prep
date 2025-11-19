@@ -19,18 +19,12 @@ export function HomePage() {
             {/* Hero Content */}
             <div className="flex-1 text-white space-y-6">
               <div className="flex items-center gap-3 mb-4">
-                <img
-                  src="/sophialogo2.png"
-                  alt="Sophia Prep"
-                  className="w-16 h-16 md:w-20 md:h-20 object-contain"
-                />
+               
                 <div>
                   <h1 className="text-4xl md:text-6xl font-bold text-yellow-400">
                     Sophia Prep
                   </h1>
-                  <p className="text-lg md:text-xl text-yellow-300 mt-1">
-                    Divinely Inspired to Reign in Knowledge
-                  </p>
+                 
                 </div>
               </div>
               
@@ -65,9 +59,9 @@ export function HomePage() {
             {/* Hero Image/Illustration */}
             <div className="flex-1 flex justify-center">
               <img
-                src="/sophialogo1.png"
-                alt="Sophia Prep Logo"
-                className="w-64 h-64 md:w-96 md:h-96 object-contain animate-pulse"
+                src="/sophiahero2.png"
+                alt="Hero Image"
+                className="w-64 h-64 sm:w-100 sm:h-100 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain"
               />
             </div>
           </div>
