@@ -8,7 +8,7 @@ export function Footer() {
     <footer className="bg-blue-950 text-white">
       {/* Main Footer Content */}
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center md:text-left">
           {/* Brand Section */}
           <div>
             <div className="flex items-right gap-3 mb-4">
@@ -27,7 +27,7 @@ export function Footer() {
               Master your exams with interactive quizzes and study materials.
             </p>
             {/* Social Media Links */}
-            <div className="flex gap-3">
+            <div className="flex justify-center md:justify-start gap-3">
               <a 
                 href="https://facebook.com/sophiaprep" 
                 target="_blank" 
@@ -125,24 +125,27 @@ export function Footer() {
           {/* Contact Info */}
           <div>
             <h4 className="text-lg font-semibold text-yellow-400 mb-4">Contact Us</h4>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-2 text-blue-200">
-                <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <a href="mailto:support@sophiaprep.app" className="hover:text-yellow-400 transition-colors">
-                  support@sophiaprep.app
-                </a>
-              </li>
-              <li className="flex items-start gap-2 text-blue-200">
-                <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <a href="tel:+2348012345678" className="hover:text-yellow-400 transition-colors">
-                  +234 801 234 5678
-                </a>
-              </li>
-              <li className="flex items-start gap-2 text-blue-200">
-                <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <span>Lagos, Nigeria</span>
-              </li>
-            </ul>
+           <ul className="space-y-3">
+  <li className="flex items-center md:items-start justify-center md:justify-start gap-2 text-blue-200 text-center md:text-left">
+    <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
+    <a href="mailto:support@sophiaprep.app" className="hover:text-yellow-400 transition-colors">
+      support@sophiaprep.app
+    </a>
+  </li>
+
+  <li className="flex items-center md:items-start justify-center md:justify-start gap-2 text-blue-200 text-center md:text-left">
+    <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
+    <a href="tel:+2348012345678" className="hover:text-yellow-400 transition-colors">
+      +234 801 234 5678
+    </a>
+  </li>
+
+  <li className="flex items-center md:items-start justify-center md:justify-start gap-2 text-blue-200 text-center md:text-left">
+    <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
+    <span>Lagos, Nigeria</span>
+  </li>
+</ul>
+
           </div>
         </div>
       </div>
