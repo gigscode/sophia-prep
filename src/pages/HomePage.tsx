@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom';
 import { BookOpen, Target, Trophy, GraduationCap, Clock, Users, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 
 export function HomePage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [imageVisible, setImageVisible] = useState(false);
+
+  useEffect(() => {
+    const t = setTimeout(() => setImageVisible(true), 80);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <Layout>
@@ -20,8 +26,8 @@ export function HomePage() {
             <div className="flex-1 text-white space-y-6 text-center md:text-left">
               <div className="flex items-center gap-3 mb-4">
                
-                <div>
-                  <h1 className="text-4xl md:text-6xl font-bold text-yellow-400">
+                <div className='text-center'>
+                  <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 hidden sm:block">
                     Sophia Prep
                   </h1>
                  
@@ -61,7 +67,7 @@ export function HomePage() {
               <img
                 src="/sophiahero2.png"
                 alt="Hero Image"
-                className="w-80 h-80 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain"
+                className={`w-80 h-80 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain transform transition-transform duration-700 ease-out ${imageVisible ? 'translate-x-0 opacity-100' : '-translate-x-6 opacity-0'}`}
                 sizes="(max-width: 640px) 320px, (max-width: 1024px) 460px, 620px"
                 loading="eager"
               />
