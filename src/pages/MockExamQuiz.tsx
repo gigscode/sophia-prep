@@ -41,7 +41,8 @@ export function MockExamQuiz() {
         } else {
           qs = await quizService.getRandomQuestions(20);
         }
-        setQuestions(qs.map(q => ({ id: q.id, text: q.text, options: q.options, correct: q.correct })));
+        // ensure correct keys are present and options exist
+        setQuestions(qs.map(q => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || '').toString() })));
       } catch (e) {
         console.error('Failed to load quiz questions:', e);
       }
@@ -60,7 +61,8 @@ export function MockExamQuiz() {
     }
   }, [timeLeft, completed]);
 
-  const current = questions.length > 0 ? questions[index] : sampleQuestions[index];
+  const pool = questions.length > 0 ? questions : sampleQuestions;
+  const current = pool[index];
 
   const score = useMemo(() => {
     if (!completed) return 0;
@@ -68,12 +70,12 @@ export function MockExamQuiz() {
     return pool.reduce((acc, q) => acc + (answers[q.id] === q.correct ? 1 : 0), 0);
   }, [completed, answers]);
 
-  const select = (key: 'A'|'B'|'C'|'D') => {
+  const select = (key: string) => {
     if (completed) return;
     setAnswers(a => ({ ...a, [current.id]: key }));
   };
 
-  const next = () => setIndex(i => Math.min(sampleQuestions.length - 1, i + 1));
+  const next = () => setIndex(i => Math.min(pool.length - 1, i + 1));
   const prev = () => setIndex(i => Math.max(0, i - 1));
 
   return (
@@ -88,7 +90,7 @@ export function MockExamQuiz() {
           </div>
           <p className="text-lg mb-4">{current.text}</p>
           <div className="grid grid-cols-1 gap-3">
-            {current.options.map(opt => (
+            {current.options.map((opt: any) => (
               <button
                 key={opt.key}
                 onClick={() => select(opt.key)}
@@ -108,13 +110,13 @@ export function MockExamQuiz() {
       ) : (
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold mb-2">Exam Completed</h2>
-          <p className="mb-4">Score: {score} / {sampleQuestions.length}</p>
+          <p className="mb-4">Score: {score} / {pool.length}</p>
           <div className="space-y-2">
-            {sampleQuestions.map(q => (
+            {pool.map((q: any) => (
               <div key={q.id} className="p-3 border rounded">
                 <div className="font-semibold">{q.text}</div>
                 <div>Your answer: {answers[q.id] ?? '—'}</div>
-                <div>Correct answer: {q.correct}</div>
+                <div>Correct answer: {q.correct || '—'}</div>
               </div>
             ))}
           </div>

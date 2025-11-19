@@ -55,43 +55,44 @@ export function PracticeModeQuiz() {
         } else {
           qs = await quizService.getRandomQuestions(10);
         }
-        if (qs && qs.length > 0) setQuestions(qs.map(q => ({ id: q.id, text: q.text, options: q.options, correct: q.correct, explanation: q.explanation })));
+        if (qs && qs.length > 0) setQuestions(qs.map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || '').toString(), explanation: q.explanation || '' })));
       } catch (e) {
         // ignore, use sample
       }
     })();
   }, []);
 
-  const q = questions[index];
+  const pool = questions;
+  const q = pool[index];
 
-  const onSelect = (key: 'A'|'B'|'C'|'D') => {
-    if (showFeedback) return;
-    setSelected(key);
+  const onSelect = (key: string) => {
+    if (showFeedback || !q) return;
+    setSelected(key as any);
     setShowFeedback(true);
-    if (key === q.correct) setScore(s => s + 1);
+    if (key === (q.correct || '')) setScore(s => s + 1);
   };
 
   const next = () => {
     setSelected(null);
     setShowFeedback(false);
-    if (index < sampleQuestions.length - 1) {
+    if (index < pool.length - 1) {
       setIndex(i => i + 1);
     }
   };
 
-  const isCorrect = selected && selected === q.correct;
+  const isCorrect = selected && q && selected === (q.correct || '');
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Practice Mode</h1>
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex justify-between mb-4">
-          <div>Question {index + 1} / {sampleQuestions.length}</div>
+          <div>Question {index + 1} / {pool.length}</div>
           <div>Score: {score}</div>
         </div>
         <p className="text-lg mb-4">{q.text}</p>
         <div className="grid grid-cols-1 gap-3">
-          {q.options.map(opt => (
+          {q.options.map((opt: any) => (
             <button
               key={opt.key}
               onClick={() => onSelect(opt.key)}

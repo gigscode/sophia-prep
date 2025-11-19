@@ -15,7 +15,8 @@ function normalizeEntry(entry: any, idPrefix = ''): QuizQuestion {
   const id = entry.id || `${idPrefix}${Math.random().toString(36).slice(2, 9)}`;
   const text = entry.question_text || entry.question || entry.text || '';
   const explanation = entry.explanation || entry.explain || entry.explanation_text || '';
-  const correct = (entry.correct_answer || entry.answer || entry.correct || '').toString();
+  // raw correct value may be an index (1/0), a key (A/B/C/D), or the option text.
+  const rawCorrect = (entry.correct_answer ?? entry.answer ?? entry.correct ?? '').toString();
   const options = [] as { key: string; text: string }[];
 
   // Support different field names
@@ -33,6 +34,37 @@ function normalizeEntry(entry: any, idPrefix = ''): QuizQuestion {
     if (entry.answers && Array.isArray(entry.answers)) {
       entry.answers.forEach((a: any, i: number) => options.push({ key: String.fromCharCode(65 + i), text: a }));
     }
+  }
+
+  // Determine canonical correct key (A/B/C/...)
+  let correct = '';
+  const normalizeToKey = (val: string) => {
+    if (!val) return '';
+    const v = val.trim();
+    // If already a letter key
+    if (/^[A-Za-z]$/.test(v)) return v.toUpperCase();
+    // If a 1-based index
+    if (/^[0-9]+$/.test(v)) {
+      const idx = parseInt(v, 10) - 1;
+      if (idx >= 0 && idx < options.length) return String.fromCharCode(65 + idx);
+    }
+    // If matches option text, find index
+    const found = options.findIndex(o => o.text && o.text.toString().trim().toLowerCase() === v.toLowerCase());
+    if (found >= 0) return String.fromCharCode(65 + found);
+    // If value looks like 'option_a' or ends with a letter
+    const m = v.match(/[A-Za-z]$/);
+    if (m) {
+      const letter = m[0].toUpperCase();
+      const idx = letter.charCodeAt(0) - 65;
+      if (idx >= 0 && idx < options.length) return letter;
+    }
+    return '';
+  };
+
+  try {
+    correct = normalizeToKey(rawCorrect);
+  } catch (e) {
+    correct = '';
   }
 
   return { id, text, options, correct, explanation };
