@@ -12,7 +12,6 @@ const PRECACHE_URLS = [
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
   '/sophiahero2.png',
-  '/sophiahero2.webp',
 ];
 
 // Install event - cache essential assets

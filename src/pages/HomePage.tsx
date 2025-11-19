@@ -17,7 +17,7 @@ export function HomePage() {
         <div className="relative container mx-auto px-4 py-16 md:py-24">
           <div className="flex flex-col md:flex-row items-center justify-between gap-12">
             {/* Hero Content */}
-            <div className="flex-1 text-white space-y-6">
+            <div className="flex-1 text-white space-y-6 text-center md:text-left">
               <div className="flex items-center gap-3 mb-4">
                
                 <div>
@@ -38,7 +38,7 @@ export function HomePage() {
                 excellence in their JAMB and WAEC examinations.
               </p>
               
-              <div className="flex flex-wrap gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
                 <Link
                   to="/subjects"
                   className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
@@ -58,19 +58,13 @@ export function HomePage() {
 
             {/* Hero Image/Illustration */}
             <div className="flex-1 flex justify-center">
-              <picture>
-                <source
-                  srcSet="/sophiahero2.webp 620w, /sophiahero2-460.webp 460w, /sophiahero2-320.webp 320w"
-                  type="image/webp"
-                />
-                <img
-                  src="/sophiahero2.png"
-                  alt="Hero Image"
-                  className="w-80 h-80 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain"
-                  sizes="(max-width: 640px) 320px, (max-width: 1024px) 460px, 620px"
-                  loading="eager"
-                />
-              </picture>
+              <img
+                src="/sophiahero2.png"
+                alt="Hero Image"
+                className="w-80 h-80 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain"
+                sizes="(max-width: 640px) 320px, (max-width: 1024px) 460px, 620px"
+                loading="eager"
+              />
             </div>
           </div>
         </div>
