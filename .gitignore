@@ -1,0 +1,65 @@
+# Node dependencies
+node_modules/
+
+# Vite / build output
+dist/
+build/
+.vite/
+node_modules/.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+
+# Local env files
+.env
+.env.*.local
+.env.local
+.env.production.local
+.env.development.local
+
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test coverage
+coverage/
+coverage/**/*
+
+# Cache
+.cache/
+.parcel-cache/
+.next/
+.turbo/
+
+# JetBrains
+*.iml
+
+# ESLint cache
+.eslintcache
+
+# Misc
+*.local
+*.log
+
+# Optional: ignore lock files if you don't want them in repo
+# Uncomment only if you manage lockfiles elsewhere
+# pnpm-lock.yaml

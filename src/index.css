@@ -1,0 +1,312 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+}
+
+@layer base {
+  :root {
+    /* Sophia Prep Blue and Gold Theme */
+    --background: 220 33% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary: Blue (#1E40AF) */
+    --primary: 221 83% 40%;
+    --primary-foreground: 210 40% 98%;
+
+    /* Secondary: Light Blue */
+    --secondary: 217 91% 60%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent: Gold (#D4AF37) */
+    --accent: 43 74% 53%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 40%;
+
+    --radius: 0.75rem;
+
+    /* Sophia Prep specific colors */
+    --sophia-blue: 221 83% 40%;
+    --sophia-gold: 43 74% 53%;
+    --sophia-light-blue: 217 91% 60%;
+    --sophia-dark-blue: 221 83% 30%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 221 83% 40%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 221 83% 40%;
+  }
+
+  .dark {
+    --background: 221 83% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 221 83% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 221 83% 12%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary: Blue in dark mode */
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 221 83% 20%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 221 83% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Accent: Gold in dark mode */
+    --accent: 43 74% 53%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 221 83% 20%;
+    --input: 221 83% 20%;
+    --ring: 217 91% 60%;
+
+    /* Sophia Prep specific colors for dark mode */
+    --sophia-blue: 217 91% 60%;
+    --sophia-gold: 43 74% 53%;
+    --sophia-light-blue: 217 91% 70%;
+    --sophia-dark-blue: 221 83% 15%;
+
+    --sidebar-background: 221 83% 8%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 221 83% 15%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 221 83% 15%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Poppins', sans-serif;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02", "cv03";
+  }
+
+  /* Sophia Prep themed custom classes */
+  .sophia-card {
+    @apply bg-white/90 backdrop-blur-sm border border-blue-200/30 shadow-md rounded-xl overflow-hidden;
+  }
+
+  .sophia-glow {
+    @apply relative;
+  }
+
+  .sophia-glow::after {
+    content: '';
+    @apply absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-xl blur opacity-30 -z-10 transition-all duration-300;
+  }
+
+  .sophia-glow:hover::after {
+    @apply opacity-60;
+  }
+
+  /* Premium button hover effect */
+  .premium-btn:hover {
+    @apply text-red-600 border-red-500;
+  }
+
+  /* Mobile-first responsive improvements */
+  @media (max-width: 640px) {
+    .container {
+      @apply px-3;
+    }
+
+    /* Ensure cards don't overflow on mobile */
+    .card-container {
+      @apply w-full min-w-0;
+    }
+
+    /* Better touch targets for mobile */
+    .mobile-touch-target {
+      @apply min-h-[44px] min-w-[44px];
+    }
+
+    /* Improved text readability on mobile */
+    .mobile-text-shadow {
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+  }
+
+  /* Enhanced backdrop blur for better readability */
+  .enhanced-backdrop {
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+  }
+
+  /* Better contrast for overlaid text */
+  .text-contrast {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Admin button hover effect */
+  .admin-btn:hover {
+    @apply text-red-600;
+  }
+
+  .sophia-grid-bg {
+    background-image:
+      linear-gradient(to right, rgba(30, 64, 175, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 64, 175, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center justify-center text-xs font-medium text-muted-foreground;
+  }
+
+  .bottom-nav-item.active {
+    @apply text-blue-600;
+  }
+
+  .quiz-option {
+    @apply relative p-4 rounded-lg border bg-card w-full text-left transition-all duration-300
+           hover:bg-blue-50 hover:border-blue-600/50 hover:shadow-md;
+  }
+
+  .quiz-option.selected {
+    @apply border-blue-600 bg-blue-50/50;
+  }
+
+  .quiz-option.correct {
+    @apply border-green-600 bg-green-50/10;
+  }
+
+  .quiz-option.incorrect {
+    @apply border-red-600 bg-red-50/10;
+  }
+
+  .progress-bar {
+    @apply h-2 rounded-full bg-blue-600/20 overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply h-full bg-blue-600 transition-all duration-300;
+  }
+
+  .explanation-box {
+    @apply mt-6 p-4 bg-blue-600/5 border border-blue-600/20 rounded-md animate-in fade-in duration-300;
+  }
+
+  .explanation-icon {
+    @apply bg-blue-600/10 p-1 rounded-full flex-shrink-0;
+  }
+
+  .explanation-title {
+    @apply text-sm font-medium mb-1 text-blue-600;
+  }
+
+  .explanation-text {
+    @apply text-sm text-muted-foreground leading-relaxed;
+  }
+
+  /* Custom styles for learning material content */
+  .prose {
+    font-family: 'Poppins', sans-serif !important;
+  }
+
+  .prose p, .prose li, .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6,
+  .prose ul, .prose ol, .prose blockquote, .prose pre, .prose code, .prose a, .prose strong, .prose em {
+    font-family: 'Poppins', sans-serif !important;
+  }
+
+  /* Ensure all content in learning material pages uses Poppins */
+  .learning-material-content * {
+    font-family: 'Poppins', sans-serif !important;
+  }
+
+  /* Profile avatar container with proper spacing for subscription badge */
+  .profile-avatar-container {
+    @apply relative inline-block;
+    /* Add padding to accommodate the subscription badge */
+    padding-top: 0.5rem;
+    padding-right: 1.5rem;
+    padding-left: 0.25rem;
+  }
+
+  /* Subscription badge positioning */
+  .subscription-badge-overlay {
+    @apply absolute z-10;
+    top: 0.25rem;
+    right: 0.5rem;
+    /* Ensure the badge doesn't overflow */
+    max-width: calc(100% - 1rem);
+  }
+
+  /* Prevent badge text overflow */
+  .subscription-badge-compact {
+    @apply inline-flex items-center justify-center;
+    min-width: fit-content;
+    white-space: nowrap;
+  }
+
+  /* Responsive adjustments for small screens */
+  @media (max-width: 640px) {
+    .profile-avatar-container {
+      padding-right: 1.25rem;
+    }
+
+    .subscription-badge-overlay {
+      right: 0.25rem;
+      top: 0.125rem;
+    }
+  }
+}

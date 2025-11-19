@@ -1,0 +1,14 @@
+# Sophia Prep - JAMB/WAEC Exam Preparation Platform
+# https://sophiaprep.app
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/private/
+
+# Sitemap
+Sitemap: https://sophiaprep.app/sitemap.xml
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

@@ -1,0 +1,14 @@
+project_id = "agdyycknlxojiwhlqicq"
+
+[functions.create-payment]
+verify_jwt = true
+
+# Auth configuration
+[auth]
+enable_signup = true
+site_url = "https://sophiaprep.app"
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
