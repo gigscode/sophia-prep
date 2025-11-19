@@ -29,10 +29,10 @@ const subjectSlugs = {
   biology: 'biology'
 };
 
-async function getSubjectId(subjectSlug) {
+async function getSubjectDetails(subjectSlug) {
   const { data, error } = await supabase
     .from('subjects')
-    .select('id')
+    .select('id, subject_category')
     .eq('slug', subjectSlug)
     .single();
 
@@ -41,7 +41,7 @@ async function getSubjectId(subjectSlug) {
     return null;
   }
 
-  return data?.id;
+  return data || null;
 }
 
 async function getOrCreateTopic(subjectId, topicName) {
@@ -97,8 +97,8 @@ async function importQuestions() {
       continue;
     }
 
-    const subjectId = await getSubjectId(subjectSlug);
-    if (!subjectId) {
+    const subject = await getSubjectDetails(subjectSlug);
+    if (!subject) {
       console.error(`❌ Subject not found: ${subjectName}`);
       continue;
     }
@@ -106,12 +106,39 @@ async function importQuestions() {
     for (const question of questions) {
       try {
         // Get or create topic
-        const topicId = await getOrCreateTopic(subjectId, question.topic);
+        const topicId = await getOrCreateTopic(subject.id, question.topic);
         if (!topicId) {
           console.error(`❌ Failed to get/create topic: ${question.topic}`);
           totalFailed++;
           continue;
         }
+
+        const bloomLevel = (question.difficulty_level || '').toUpperCase() === 'EASY'
+          ? 'Remember'
+          : (question.difficulty_level || '').toUpperCase() === 'HARD'
+          ? 'Analyze'
+          : 'Apply';
+        const timeMinutes = (question.difficulty_level || '').toUpperCase() === 'EASY' ? 1 : (question.difficulty_level || '').toUpperCase() === 'HARD' ? 3 : 2;
+        const markWeighting = (question.difficulty_level || '').toUpperCase() === 'HARD' ? 3 : 2;
+        const relatedPast = (question.exam_year && question.exam_type)
+          ? [{ year: question.exam_year, exam_type: question.exam_type, topic: question.topic }]
+          : [];
+        const applicableExamTypes = question.exam_type ? [question.exam_type] : ['JAMB','WAEC'];
+        const refs = applicableExamTypes.map(t => ({
+          title: t === 'JAMB' ? 'JAMB IBASS' : 'WAEC Syllabus',
+          url: t === 'JAMB' ? 'https://www.jamb.gov.ng/' : 'https://waecsyllabus.com/download/ssce/GENERAL%20MATHEMATICS%20OR%20MATHEMATICS%20(CORE).pdf',
+          section: question.topic
+        }));
+        const metadata = {
+          subject_classification: subject.subject_category,
+          topic_hierarchy: [question.topic],
+          time_minutes: timeMinutes,
+          mark_weighting: markWeighting,
+          bloom_level: bloomLevel,
+          related_past_questions: relatedPast,
+          applicable_exam_types: applicableExamTypes,
+          references: refs
+        };
 
         // Insert question
         const { error } = await supabase
@@ -128,6 +155,7 @@ async function importQuestions() {
             difficulty_level: question.difficulty_level,
             exam_year: question.exam_year,
             exam_type: question.exam_type,
+            metadata,
             is_active: true
           });
 
