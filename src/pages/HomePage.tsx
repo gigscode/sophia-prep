@@ -23,44 +23,43 @@ export function HomePage() {
         <div className="relative container mx-auto px-4 py-16 md:py-24">
           <div className="flex flex-col md:flex-row sm:items-center justify-between gap-12">
             {/* Hero Content */}
-            <div className="flex-1 text-white space-y-6 text-left">
-              <div className="flex items-center gap-3 mb-4">
-               
-                <div>
-                  <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 hidden sm:block">
-                    Sophia Prep
-                  </h1>
-                 
-                </div>
-              </div>
-              
-              <p className="text-xl md:text-2xl text-blue-100 text-left">
-                Your Complete JAMB & WAEC Exam Preparation Platform
-              </p>
-              
-              <p className="text-lg text-blue-200 max-w-2xl text-left">
-                Master your exams with interactive quizzes, comprehensive study materials, 
-                and personalized progress tracking. Join thousands of students achieving 
-                excellence in their JAMB and WAEC examinations.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-start items-start">
-                <Link
-                  to="/subjects"
-                  className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
-                           hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
-                >
-                  Start Practicing
-                </Link>
-                <Link
-                  to="/mock-exams"
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold 
-                           hover:bg-blue-700 transition-all border-2 border-white"
-                >
-                  Take Mock Exam
-                </Link>
-              </div>
-            </div>
+            <div className="flex-1 text-white space-y-6 text-center md:text-left">
+  <div className="flex flex-col md:flex-row items-center md:items-start gap-3 mb-4">
+    <div>
+      <h1 className="text-4xl md:text-6xl font-bold text-yellow-400">
+        Sophia Prep
+      </h1>
+    </div>
+  </div>
+  
+  <p className="text-xl md:text-2xl text-blue-100">
+    Your Complete JAMB & WAEC Exam Preparation Platform
+  </p>
+  
+  <p className="text-lg text-blue-200 max-w-2xl mx-auto md:mx-0">
+    Master your exams with interactive quizzes, comprehensive study materials, 
+    and personalized progress tracking. Join thousands of students achieving 
+    excellence in their JAMB and WAEC examinations.
+  </p>
+  
+  <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center items-center md:justify-start md:items-start">
+    <Link
+      to="/subjects"
+      className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
+               hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
+    >
+      Start Practicing
+    </Link>
+    <Link
+      to="/mock-exams"
+      className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold 
+               hover:bg-blue-700 transition-all border-2 border-white"
+    >
+      Take Mock Exam
+    </Link>
+  </div>
+</div>
+
 
             {/* Hero Image/Illustration */}
             <div className="flex-1 flex justify-center">
@@ -247,31 +246,37 @@ export function HomePage() {
 
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-16">
-        <div className="container mx-auto px-4 text-left">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Ready to Excel in Your Exams?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl">
-            Join thousands of students who are achieving their academic dreams with Sophia Prep
-          </p>
-          <div className="flex flex-wrap justify-start gap-4">
-            <Link
-              to="/signup"
-              className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
-                       hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
-            >
-              Get Started Free
-            </Link>
-            <Link
-              to="/subscription"
-              className="px-8 py-4 bg-transparent text-white rounded-lg font-semibold 
-                       hover:bg-blue-800 transition-all border-2 border-white"
-            >
-              View Plans
-            </Link>
-          </div>
-        </div>
-      </section>
+  <div className="container mx-auto px-4 text-center md:text-left">
+
+    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+      Ready to Excel in Your Exams?
+    </h2>
+
+    <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto md:mx-0">
+      Join thousands of students who are achieving their academic dreams with Sophia Prep
+    </p>
+
+    <div className="flex flex-wrap justify-center md:justify-start gap-4">
+      <Link
+        to="/signup"
+        className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
+        hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
+      >
+        Get Started Free
+      </Link>
+
+      <Link
+        to="/subscription"
+        className="px-8 py-4 bg-transparent text-white rounded-lg font-semibold 
+        hover:bg-blue-800 transition-all border-2 border-white"
+      >
+        View Plans
+      </Link>
+    </div>
+
+  </div>
+</section>
+
 
       </div>
     </Layout>
