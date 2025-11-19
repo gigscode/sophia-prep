@@ -23,7 +23,7 @@ export function HomePage() {
         <div className="relative container mx-auto px-4 py-16 md:py-24">
           <div className="flex flex-col md:flex-row sm:items-center justify-between gap-12">
             {/* Hero Content */}
-            <div className="flex-1 text-white space-y-6 sm:text-center md:text-left">
+            <div className="flex-1 text-white space-y-6 text-left">
               <div className="flex items-center gap-3 mb-4">
                
                 <div>
@@ -34,17 +34,17 @@ export function HomePage() {
                 </div>
               </div>
               
-              <p className="text-xl md:text-2xl text-blue-100">
+              <p className="text-xl md:text-2xl text-blue-100 text-left">
                 Your Complete JAMB & WAEC Exam Preparation Platform
               </p>
               
-              <p className="text-lg text-right text-blue-200 max-w-2xl sm:text-center">
+              <p className="text-lg text-blue-200 max-w-2xl text-left">
                 Master your exams with interactive quizzes, comprehensive study materials, 
                 and personalized progress tracking. Join thousands of students achieving 
                 excellence in their JAMB and WAEC examinations.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-end">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-start items-start">
                 <Link
                   to="/subjects"
                   className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
@@ -247,14 +247,14 @@ export function HomePage() {
 
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-16">
-        <div className="container mx-auto px-4 text-center">
+        <div className="container mx-auto px-4 text-left">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Ready to Excel in Your Exams?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl">
             Join thousands of students who are achieving their academic dreams with Sophia Prep
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
+          <div className="flex flex-wrap justify-start gap-4">
             <Link
               to="/signup"
               className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
@@ -272,22 +272,6 @@ export function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="bg-blue-950 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <img src="/sophialogo2.png" alt="Sophia Prep" className="w-10 h-10 object-contain" />
-            <div>
-              <p className="text-lg font-bold text-yellow-400">Sophia Prep</p>
-              <p className="text-sm text-blue-300">Divinely Inspired to Reign in Knowledge</p>
-            </div>
-          </div>
-          <p className="text-blue-300 text-sm">
-            © {new Date().getFullYear()} Sophia Prep. All rights reserved.
-          </p>
-        </div>
-      </footer>
 
       </div>
     </Layout>
