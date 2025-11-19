@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { quizService } from '../services/quiz-service';
 
 interface QuizQuestion {
   id: string;
@@ -41,7 +43,26 @@ export function PracticeModeQuiz() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
 
-  const q = sampleQuestions[index];
+  const [questions, setQuestions] = useState(sampleQuestions);
+  useEffect(() => {
+    (async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const subject = params.get('subject');
+        let qs;
+        if (subject) {
+          qs = await quizService.getQuestionsForSubject(subject);
+        } else {
+          qs = await quizService.getRandomQuestions(10);
+        }
+        if (qs && qs.length > 0) setQuestions(qs.map(q => ({ id: q.id, text: q.text, options: q.options, correct: q.correct, explanation: q.explanation })));
+      } catch (e) {
+        // ignore, use sample
+      }
+    })();
+  }, []);
+
+  const q = questions[index];
 
   const onSelect = (key: 'A'|'B'|'C'|'D') => {
     if (showFeedback) return;

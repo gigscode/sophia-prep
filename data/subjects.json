@@ -1,0 +1,67 @@
+[
+  {
+    "id": "sub-math",
+    "name": "Mathematics",
+    "slug": "mathematics",
+    "description": "Mathematics for JAMB and WAEC - Algebra, Geometry, Trigonometry",
+    "color_theme": "#1E40AF",
+    "icon": "BookOpen",
+    "exam_type": "BOTH",
+    "subject_category": "SCIENCE",
+    "is_active": true,
+    "is_mandatory": true,
+    "sort_order": 1
+  },
+  {
+    "id": "sub-eng",
+    "name": "English",
+    "slug": "english",
+    "description": "English language: Comprehension, Grammar, Vocabulary",
+    "color_theme": "#2563EB",
+    "icon": "BookOpen",
+    "exam_type": "BOTH",
+    "subject_category": "ARTS",
+    "is_active": true,
+    "is_mandatory": true,
+    "sort_order": 2
+  },
+  {
+    "id": "sub-bio",
+    "name": "Biology",
+    "slug": "biology",
+    "description": "Biology topics: Cell biology, Ecology, Genetics",
+    "color_theme": "#16A34A",
+    "icon": "GraduationCap",
+    "exam_type": "BOTH",
+    "subject_category": "SCIENCE",
+    "is_active": true,
+    "is_mandatory": false,
+    "sort_order": 3
+  },
+  {
+    "id": "sub-chem",
+    "name": "Chemistry",
+    "slug": "chemistry",
+    "description": "Chemistry: Reactions, Stoichiometry, Organic chemistry",
+    "color_theme": "#D97706",
+    "icon": "Flask",
+    "exam_type": "BOTH",
+    "subject_category": "SCIENCE",
+    "is_active": true,
+    "is_mandatory": false,
+    "sort_order": 4
+  },
+  {
+    "id": "sub-phy",
+    "name": "Physics",
+    "slug": "physics",
+    "description": "Physics: Mechanics, Electricity, Waves",
+    "color_theme": "#7C3AED",
+    "icon": "Target",
+    "exam_type": "BOTH",
+    "subject_category": "SCIENCE",
+    "is_active": true,
+    "is_mandatory": false,
+    "sort_order": 5
+  }
+]

@@ -21,12 +21,12 @@ export function HomePage() {
         <div className="absolute inset-0 sophia-grid-bg opacity-20" />
         
         <div className="relative container mx-auto px-4 py-16 md:py-24">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="flex flex-col md:flex-row sm:items-center justify-between gap-12">
             {/* Hero Content */}
-            <div className="flex-1 text-white space-y-6 text-center md:text-left">
+            <div className="flex-1 text-white space-y-6 sm:text-center md:text-left">
               <div className="flex items-center gap-3 mb-4">
                
-                <div className='text-center'>
+                <div>
                   <h1 className="text-4xl md:text-6xl font-bold text-yellow-400 hidden sm:block">
                     Sophia Prep
                   </h1>
@@ -38,13 +38,13 @@ export function HomePage() {
                 Your Complete JAMB & WAEC Exam Preparation Platform
               </p>
               
-              <p className="text-lg text-blue-200 max-w-2xl sm:text-center">
+              <p className="text-lg text-right text-blue-200 max-w-2xl sm:text-center">
                 Master your exams with interactive quizzes, comprehensive study materials, 
                 and personalized progress tracking. Join thousands of students achieving 
                 excellence in their JAMB and WAEC examinations.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-start">
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center md:justify-end">
                 <Link
                   to="/subjects"
                   className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
@@ -54,7 +54,7 @@ export function HomePage() {
                 </Link>
                 <Link
                   to="/mock-exams"
-                  className="px-8 py-4 bg-blue-600 text-white rounded-2xlg font-semibold 
+                  className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold 
                            hover:bg-blue-700 transition-all border-2 border-white"
                 >
                   Take Mock Exam

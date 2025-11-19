@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { quizService } from '../services/quiz-service';
 
 interface QuizQuestion {
   id: string;
@@ -26,6 +28,25 @@ export function MockExamQuiz() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, 'A'|'B'|'C'|'D'>>({});
   const [completed, setCompleted] = useState(false);
+  const [questions, setQuestions] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const subject = params.get('subject');
+        let qs;
+        if (subject) {
+          qs = await quizService.getQuestionsForSubject(subject);
+        } else {
+          qs = await quizService.getRandomQuestions(20);
+        }
+        setQuestions(qs.map(q => ({ id: q.id, text: q.text, options: q.options, correct: q.correct })));
+      } catch (e) {
+        console.error('Failed to load quiz questions:', e);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (completed) return;
@@ -39,11 +60,12 @@ export function MockExamQuiz() {
     }
   }, [timeLeft, completed]);
 
-  const current = sampleQuestions[index];
+  const current = questions.length > 0 ? questions[index] : sampleQuestions[index];
 
   const score = useMemo(() => {
     if (!completed) return 0;
-    return sampleQuestions.reduce((acc, q) => acc + (answers[q.id] === q.correct ? 1 : 0), 0);
+    const pool = questions.length > 0 ? questions : sampleQuestions;
+    return pool.reduce((acc, q) => acc + (answers[q.id] === q.correct ? 1 : 0), 0);
   }, [completed, answers]);
 
   const select = (key: 'A'|'B'|'C'|'D') => {

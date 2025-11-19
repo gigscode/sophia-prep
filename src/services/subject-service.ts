@@ -6,17 +6,32 @@ export class SubjectService {
    * Get all subjects
    */
   async getAllSubjects(): Promise<Subject[]> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true });
+    try {
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
 
-    if (error) {
-      throw new Error(`Failed to fetch subjects: ${error.message}`);
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data && Array.isArray(data) && data.length > 0) return data;
+    } catch (err) {
+      // fallback to local subjects.json when Supabase is not reachable
+      try {
+        const res = await fetch('/data/subjects.json');
+        if (res.ok) {
+          const local = await res.json();
+          return local as Subject[];
+        }
+      } catch (e) {
+        // ignore and fallthrough
+      }
     }
 
-    return data || [];
+    return [];
   }
 
   /**
@@ -79,20 +94,34 @@ export class SubjectService {
    * Get a single subject by slug
    */
   async getSubjectBySlug(slug: string): Promise<Subject | null> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('slug', slug)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .eq('slug', slug)
+        .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
+      if (error) {
+        if (error.code === 'PGRST116') return null;
+        throw new Error(error.message);
       }
-      throw new Error(`Failed to fetch subject: ${error.message}`);
+
+      if (data) return data;
+    } catch (err) {
+      // fallback to local subjects.json
+      try {
+        const res = await fetch('/data/subjects.json');
+        if (res.ok) {
+          const local = await res.json();
+          const found = (local as Subject[]).find(s => s.slug === slug);
+          return found || null;
+        }
+      } catch (e) {
+        // ignore
+      }
     }
 
-    return data;
+    return null;
   }
 
   /**

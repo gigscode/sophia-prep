@@ -34,6 +34,8 @@
     "test:coverage": "vitest run --coverage",
     "pwa:generate": "node scripts/generate-icons.js && node scripts/generate-screenshots.js",
     "fix:vercel": "node fix-vercel-build.js"
+    ,
+    "import:quizzes": "node scripts/import-quizzes-to-supabase.js"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.7",
