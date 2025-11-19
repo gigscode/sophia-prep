@@ -17,12 +17,14 @@ import { AdminPage } from './pages/AdminPage';
 import { AuthProvider } from './hooks/useAuth';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
+import PWAInstall from './components/PWAInstall';
 
 export function App() {
   return (
     <AuthProvider>
       <ScrollToTop />
       <WhatsAppButton />
+      <PWAInstall />
       <Routes>
       {/* HomePage without Layout - it has its own design */}
       <Route path="/" element={<HomePage />} />

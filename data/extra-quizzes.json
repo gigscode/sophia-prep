@@ -1,0 +1,92 @@
+[
+  {
+    "id": "q-eng-001",
+    "subject": "English",
+    "topic": "Comprehension",
+    "question": "In the sentence 'She had finished her homework before dinner,' which tense is used?",
+    "choices": ["Simple past","Past perfect","Present perfect","Past continuous"],
+    "answer": "Past perfect",
+    "explanation": "The past perfect ('had finished') is used to describe an action completed before another past action (dinner)."
+  },
+  {
+    "id": "q-math-001",
+    "subject": "Mathematics",
+    "topic": "Algebra",
+    "question": "Solve for x: 2x + 5 = 17.",
+    "choices": ["6","5","8","4"],
+    "answer": "6",
+    "explanation": "2x + 5 = 17 → 2x = 12 → x = 6."
+  },
+  {
+    "id": "q-bio-001",
+    "subject": "Biology",
+    "topic": "Cell Biology",
+    "question": "Which organelle is responsible for producing ATP in the cell?",
+    "choices": ["Ribosome","Chloroplast","Mitochondrion","Golgi apparatus"],
+    "answer": "Mitochondrion",
+    "explanation": "Mitochondria are the 'powerhouses' of the cell and generate ATP through cellular respiration."
+  },
+  {
+    "id": "q-chem-001",
+    "subject": "Chemistry",
+    "topic": "Stoichiometry",
+    "question": "How many moles are in 22 g of CO2? (Molar mass CO2 ≈ 44 g/mol)",
+    "choices": ["0.5","1","2","0.25"],
+    "answer": "0.5",
+    "explanation": "Moles = mass / molar mass = 22 / 44 = 0.5 mol."
+  },
+  {
+    "id": "q-phy-001",
+    "subject": "Physics",
+    "topic": "Kinematics",
+    "question": "An object moves at constant velocity 5 m/s for 10 s. What distance does it cover?",
+    "choices": ["50 m","15 m","5 m","100 m"],
+    "answer": "50 m",
+    "explanation": "Distance = speed × time = 5 m/s × 10 s = 50 m."
+  },
+  {
+    "id": "q-eco-001",
+    "subject": "Economics",
+    "topic": "Demand",
+    "question": "If the price of a good falls and the quantity demanded rises, this is an example of which law?",
+    "choices": ["Law of Supply","Law of Demand","Gresham's Law","Law of Diminishing Returns"],
+    "answer": "Law of Demand",
+    "explanation": "The Law of Demand states that, ceteris paribus, quantity demanded rises as price falls."
+  },
+  {
+    "id": "q-gov-001",
+    "subject": "Government",
+    "topic": "Civics",
+    "question": "Which of the following is NOT a function of government?",
+    "choices": ["Provision of public goods","Law enforcement","Private business management","Regulation of markets"],
+    "answer": "Private business management",
+    "explanation": "Private business management is typically a market activity, not a core function of government."
+  },
+  {
+    "id": "q-agr-001",
+    "subject": "Agriculture",
+    "topic": "Crops",
+    "question": "Which nutrient deficiency commonly leads to stunted growth in crops?",
+    "choices": ["Nitrogen deficiency","Calcium excess","Potassium surplus","Iron overload"],
+    "answer": "Nitrogen deficiency",
+    "explanation": "Nitrogen is crucial for vegetative growth; its deficiency often causes stunting and chlorosis."
+  },
+  {
+    "id": "q-lit-001",
+    "subject": "Literature",
+    "topic": "Poetry",
+    "question": "What is the term for a repeated line or set of lines in a poem?",
+    "choices": ["Stanza","Enjambment","Refrain","Meter"],
+    "answer": "Refrain",
+    "explanation": "A refrain is a repeated line or group of lines, often at the end of a stanza."
+  },
+  {
+    "id": "q-geo-001",
+    "subject": "Geography",
+    "topic": "Maps",
+    "question": "What does a scale of 1:100,000 mean on a map?",
+    "choices": ["1 unit on map = 100,000 units on ground","1 metre on map = 100,000 metres on ground","Both A and B","1 cm on map = 1 km on ground"],
+    "answer": "Both A and B",
+    "explanation": "1:100,000 means one unit on the map equals 100,000 of the same units on the ground (e.g., 1 cm = 1 km)."
+  }
+]

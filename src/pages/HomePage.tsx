@@ -32,7 +32,7 @@ export function HomePage() {
                 Your Complete JAMB & WAEC Exam Preparation Platform
               </p>
               
-              <p className="text-lg text-blue-200 max-w-2xl">
+              <p className="text-lg text-blue-200 max-w-2xl sm:text-center">
                 Master your exams with interactive quizzes, comprehensive study materials, 
                 and personalized progress tracking. Join thousands of students achieving 
                 excellence in their JAMB and WAEC examinations.
@@ -48,8 +48,8 @@ export function HomePage() {
                 </Link>
                 <Link
                   to="/mock-exams"
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg font-semibold 
-                           hover:bg-blue-700 transition-all border-2 border-yellow-400"
+                  className="px-8 py-4 bg-blue-600 text-white rounded-2xlg font-semibold 
+                           hover:bg-blue-700 transition-all border-2 border-white"
                 >
                   Take Mock Exam
                 </Link>
@@ -58,11 +58,19 @@ export function HomePage() {
 
             {/* Hero Image/Illustration */}
             <div className="flex-1 flex justify-center">
-              <img
-                src="/sophiahero2.png"
-                alt="Hero Image"
-                className="w-64 h-64 sm:w-100 sm:h-100 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain"
-              />
+              <picture>
+                <source
+                  srcSet="/sophiahero2.webp 620w, /sophiahero2-460.webp 460w, /sophiahero2-320.webp 320w"
+                  type="image/webp"
+                />
+                <img
+                  src="/sophiahero2.png"
+                  alt="Hero Image"
+                  className="w-80 h-80 sm:w-96 sm:h-96 md:w-[460px] md:h-[460px] lg:w-[620px] lg:h-[620px] object-contain"
+                  sizes="(max-width: 640px) 320px, (max-width: 1024px) 460px, 620px"
+                  loading="eager"
+                />
+              </picture>
             </div>
           </div>
         </div>
