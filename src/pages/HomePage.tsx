@@ -245,18 +245,18 @@ export function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-16">
-  <div className="container mx-auto px-4 text-center md:text-left">
+    <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-16">
+      <div className="container mx-auto px-4 text-center md:text-left">
 
-    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
       Ready to Excel in Your Exams?
-    </h2>
+        </h2>
 
-    <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto md:mx-0">
-      Join thousands of students who are achieving their academic dreams with Sophia Prep
-    </p>
+        <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto md:mx-0">
+          Join thousands of students who are achieving their academic dreams with Sophia Prep
+        </p>
 
-    <div className="flex flex-wrap justify-center md:justify-start gap-4">
+      <div className="flex flex-wrap justify-center md:justify-start gap-4">
       <Link
         to="/signup"
         className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
@@ -272,10 +272,10 @@ export function HomePage() {
       >
         View Plans
       </Link>
-    </div>
+      </div>
 
-  </div>
-</section>
+      </div>
+    </section>
 
 
       </div>

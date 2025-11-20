@@ -10,6 +10,10 @@ import { ReaderModeQuiz } from './pages/ReaderModeQuiz.tsx';
 import { PastQuestionsQuiz } from './pages/PastQuestionsQuiz.tsx';
 import { StudyHub } from './pages/StudyHub.tsx';
 import { HelpCenter } from './pages/HelpCenter.tsx';
+import { AboutPage } from './pages/AboutPage.tsx';
+import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx';
+import { TermsOfServicePage } from './pages/TermsOfServicePage.tsx';
+import { ContactPage } from './pages/ContactPage.tsx';
 import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginPage';
 import { SignupPage } from './pages/SignupPage';
@@ -43,6 +47,10 @@ export function App() {
       {/* Study & Help */}
       <Route path="/study" element={<Layout><StudyHub /></Layout>} />
       <Route path="/help" element={<Layout><HelpCenter /></Layout>} />
+      <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+      <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />
+      <Route path="/terms" element={<Layout><TermsOfServicePage /></Layout>} />
+      <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
 
       {/* Profile / Auth / Admin */}
       <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
