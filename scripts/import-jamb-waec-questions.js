@@ -10,12 +10,16 @@ dotenv.config({ path: '.env.local' });
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL;
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing Supabase credentials in .env.local');
   process.exit(1);
+}
+
+if (supabaseKey === process.env.VITE_SUPABASE_ANON_KEY) {
+  console.warn('⚠️ Using ANON key. Inserts will fail due to RLS. Set SUPABASE_SERVICE_KEY or SUPABASE_SERVICE_ROLE_KEY');
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey);

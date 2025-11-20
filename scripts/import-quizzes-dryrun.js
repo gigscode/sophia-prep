@@ -1,29 +1,7 @@
 #!/usr/bin/env node
-/*
-  Import local quiz JSON files into Supabase 'questions' table.
-
-  Usage:
-    SUPABASE_URL=https://... SUPABASE_SERVICE_KEY=your_service_role_key node scripts/import-quizzes-to-supabase.js
-
-  Notes:
-  - This script requires a Supabase service role key for upserting rows into protected tables.
-  - It reads `data/jamb-waec-questions.json` and `data/extra-quizzes.json` and normalizes entries.
-*/
-
 import fs from 'fs';
 import path from 'path';
-import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
-
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
-
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY. Set them in the environment.');
-  process.exit(1);
-}
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
 
 function loadJSON(filename) {
   const p = path.resolve(process.cwd(), filename);
@@ -75,14 +53,8 @@ function normalizeJambEntry(e) {
 }
 
 function normalizeExtraEntry(e) {
-  // extra-quizzes.json uses different shape: subject, question, choices, answer, explanation
   const opts = e.choices || [];
-  const a = opts[0] || null;
-  const b = opts[1] || null;
-  const c = opts[2] || null;
-  const d = opts[3] || null;
-  const qText = e.question || e.question_text || e.text || '';
-  const filled = [a, b, c, d].map(o => (o == null ? '' : String(o)));
+  const filled = [opts[0] || '', opts[1] || '', opts[2] || '', opts[3] || ''].map(o => (o == null ? '' : String(o)));
   const rawCorrect = (e.answer || e.correct || e.correct_answer || '').toString();
 
   const normalizeToKey = (val) => {
@@ -110,7 +82,7 @@ function normalizeExtraEntry(e) {
     id: e.id || uuidv4(),
     subject: (e.subject || '').toLowerCase(),
     topic: e.topic || null,
-    question_text: qText,
+    question_text: e.question || e.question_text || e.text || '',
     option_a: filled[0] || '',
     option_b: filled[1] || '',
     option_c: filled[2] || '',
@@ -123,44 +95,28 @@ function normalizeExtraEntry(e) {
   };
 }
 
-async function main() {
-  console.log('Loading local question banks...');
+function run() {
+  console.log('Dry-run: preparing normalized rows and printing example payloads (no network)');
   const jamb = loadJSON('data/jamb-waec-questions.json') || {};
   const extra = loadJSON('data/extra-quizzes.json') || [];
-
   const rows = [];
 
-  // jamb is grouped by subject keys
   Object.keys(jamb).forEach((subjectKey) => {
     const arr = jamb[subjectKey];
     if (!Array.isArray(arr)) return;
-    arr.forEach((e) => {
-      const normalized = normalizeJambEntry({ ...e, subject: subjectKey });
-      rows.push(normalized);
-    });
+    arr.forEach((e) => rows.push(normalizeJambEntry({ ...e, subject: subjectKey })));
   });
 
-  // extras
-  extra.forEach((e) => rows.push(normalizeExtraEntry(e)));
+  extra.forEach(e => rows.push(normalizeExtraEntry(e)));
 
-  console.log(`Prepared ${rows.length} rows to upsert into Supabase.`);
-
-  // Upsert in batches to avoid payload size issues
+  console.log(`Total rows prepared: ${rows.length}`);
   const batchSize = 200;
   for (let i = 0; i < rows.length; i += batchSize) {
     const chunk = rows.slice(i, i + batchSize);
-    console.log(`Upserting rows ${i + 1}-${i + chunk.length}...`);
-    const { data, error } = await supabase.from('questions').upsert(chunk, { onConflict: ['id'] });
-    if (error) {
-      console.error('Upsert error:', error);
-      process.exit(1);
-    }
+    console.log(`\n--- Batch ${Math.floor(i / batchSize) + 1} (rows ${i + 1}-${i + chunk.length}) ---`);
+    console.log(JSON.stringify(chunk.slice(0, 5), null, 2));
+    if (chunk.length > 5) console.log(`... (${chunk.length - 5} more rows in this batch)`);
   }
-
-  console.log('Import completed successfully.');
 }
 
-main().catch(err => {
-  console.error('Fatal error:', err);
-  process.exit(1);
-});
+run();

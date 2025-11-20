@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { quizService } from '../services/quiz-service';
+import { questionService } from '../services/question-service';
 
 interface QuizQuestion {
   id: string;
@@ -37,7 +38,13 @@ export function MockExamQuiz() {
         const subject = params.get('subject');
         let qs;
         if (subject) {
-          qs = await quizService.getQuestionsForSubject(subject);
+          const rows = await questionService.getQuestionsBySubjectSlug(subject, { limit: 50 });
+          qs = rows.map(r => ({ id: r.id, text: r.question_text, options: [
+            { key: 'A', text: r.option_a },
+            { key: 'B', text: r.option_b },
+            { key: 'C', text: r.option_c },
+            { key: 'D', text: r.option_d }
+          ], correct: r.correct_answer }));
         } else {
           qs = await quizService.getRandomQuestions(20);
         }

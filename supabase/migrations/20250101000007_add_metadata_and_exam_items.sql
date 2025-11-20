@@ -1,15 +1,17 @@
 DO $$
-DECLARE
-  v_log_id UUID;
 BEGIN
-  SELECT log_migration_operation(
-    'add_metadata_and_exam_items',
-    'START_MIGRATION',
-    'STARTED',
-    0,
-    NULL,
-    '{"description": "Add metadata to questions and create exam_items"}'::jsonb
-  ) INTO v_log_id;
+  IF EXISTS (
+    SELECT 1 FROM pg_proc WHERE proname = 'log_migration_operation'
+  ) THEN
+    PERFORM log_migration_operation(
+      'add_metadata_and_exam_items',
+      'START_MIGRATION',
+      'STARTED',
+      0,
+      NULL,
+      '{"description": "Add metadata to questions and create exam_items"}'::jsonb
+    );
+  END IF;
 END $$;
 
 ALTER TABLE questions
@@ -25,9 +27,9 @@ CREATE TABLE IF NOT EXISTS exam_items (
   mark_weighting INTEGER DEFAULT 0,
   time_minutes INTEGER DEFAULT 0,
   bloom_level TEXT,
-  related_past JSONB DEFAULT '[]',
+  related_past JSONB DEFAULT '[]'::jsonb,
   exam_types TEXT[] DEFAULT ARRAY['JAMB','WAEC'],
-  references JSONB DEFAULT '[]',
+  "references" JSONB DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -50,15 +52,17 @@ CREATE POLICY "Authenticated users can view all exam items"
   USING (TRUE);
 
 DO $$
-DECLARE
-  v_log_id UUID;
 BEGIN
-  SELECT log_migration_operation(
-    'add_metadata_and_exam_items',
-    'ALTER_AND_CREATE',
-    'COMPLETED',
-    0,
-    NULL,
-    '{"description": "Added questions.metadata and created exam_items table"}'::jsonb
-  ) INTO v_log_id;
+  IF EXISTS (
+    SELECT 1 FROM pg_proc WHERE proname = 'log_migration_operation'
+  ) THEN
+    PERFORM log_migration_operation(
+      'add_metadata_and_exam_items',
+      'ALTER_AND_CREATE',
+      'COMPLETED',
+      0,
+      NULL,
+      '{"description": "Added questions.metadata and created exam_items table"}'::jsonb
+    );
+  END IF;
 END $$;

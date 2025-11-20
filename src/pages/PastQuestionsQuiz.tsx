@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { questionService } from '../services/question-service';
 
 interface PastQuestion {
   id: string;
@@ -9,7 +10,7 @@ interface PastQuestion {
   correct: 'A'|'B'|'C'|'D';
 }
 
-const allQuestions: PastQuestion[] = [
+const sample: PastQuestion[] = [
   {
     id: 'pq-2019-1',
     exam_year: 2019,
@@ -40,13 +41,42 @@ const allQuestions: PastQuestion[] = [
 
 export function PastQuestionsQuiz() {
   const [year, setYear] = useState<number | 'ALL'>('ALL');
+  const [subject, setSubject] = useState<string>('mathematics');
+  const [loaded, setLoaded] = useState<PastQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<'A'|'B'|'C'|'D'|null>(null);
 
+  useEffect(() => {
+    (async () => {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('subject') || subject;
+      const y = params.get('year');
+      const t = params.get('type');
+      const ey = y ? Number(y) : undefined;
+      const et = t === 'JAMB' || t === 'WAEC' ? t : undefined;
+      const rows = await questionService.getQuestionsBySubjectSlug(slug, { exam_year: ey, exam_type: et, limit: 50 });
+      const mapped: PastQuestion[] = (rows || []).map(r => ({
+        id: r.id,
+        exam_year: r.exam_year || 0,
+        question_number: r.question_number || 0,
+        text: r.question_text,
+        options: [
+          { key: 'A', text: r.option_a },
+          { key: 'B', text: r.option_b },
+          { key: 'C', text: r.option_c },
+          { key: 'D', text: r.option_d },
+        ],
+        correct: r.correct_answer,
+      }));
+      setLoaded(mapped);
+    })();
+  }, [subject]);
+
+  const pool = loaded.length > 0 ? loaded : sample;
   const questions = useMemo(() => {
-    const filtered = year === 'ALL' ? allQuestions : allQuestions.filter(q => q.exam_year === year);
+    const filtered = year === 'ALL' ? pool : pool.filter(q => q.exam_year === year);
     return filtered;
-  }, [year]);
+  }, [year, pool]);
 
   const q = questions[index];
 
@@ -74,6 +104,22 @@ export function PastQuestionsQuiz() {
             <option value="ALL">All</option>
             <option value="2019">2019</option>
             <option value="2020">2020</option>
+          </select>
+          <label className="text-sm text-gray-700 ml-4">Subject:</label>
+          <select
+            value={subject}
+            onChange={(e) => {
+              setIndex(0);
+              setSelected(null);
+              setSubject(e.target.value);
+            }}
+            className="border rounded px-3 py-2"
+          >
+            <option value="mathematics">Mathematics</option>
+            <option value="english-language">English</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
           </select>
         </div>
         {q ? (
