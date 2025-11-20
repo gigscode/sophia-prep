@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { quizService } from '../services/quiz-service';
-import { questionService } from '../services/question-service';
+import { questionService, normalizeQuestions } from '../services/question-service';
 import { Card } from '../components/ui/Card';
 import { OptionButton } from '../components/ui/OptionButton';
 import { Button } from '../components/ui/Button';
@@ -48,29 +48,45 @@ export function PracticeModeQuiz() {
   const [score, setScore] = useState(0);
 
   const [questions, setQuestions] = useState<QuizQuestion[]>(sampleQuestions);
+  const params = new URLSearchParams(window.location.search);
+  const initialSubject = params.get('subject') || undefined;
+  const initialYearParam = params.get('year');
+  const initialTypeParam = params.get('type');
+  const [subjectSel, setSubjectSel] = useState<string | undefined>(initialSubject);
+  const [yearSel, setYearSel] = useState<'ALL' | number>(initialYearParam === 'ALL' ? 'ALL' : (initialYearParam ? Number(initialYearParam) : 'ALL'));
+  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' ? (initialTypeParam as any) : 'ALL');
+
+  const applyParams = (sub?: string | undefined, yr?: 'ALL' | number, typ?: 'ALL' | 'JAMB' | 'WAEC') => {
+    const sp = new URLSearchParams();
+    const s = sub ?? subjectSel;
+    const y = yr ?? yearSel;
+    const t = typ ?? typeSel;
+    if (s) sp.set('subject', s);
+    if (y) sp.set('year', y === 'ALL' ? 'ALL' : String(y));
+    if (t) sp.set('type', t);
+    const url = `${window.location.pathname}?${sp.toString()}`;
+    window.history.replaceState({}, '', url);
+  };
+
   useEffect(() => {
     (async () => {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const subject = params.get('subject');
-        let qs;
+        const subject = subjectSel;
+        const exam_year = yearSel;
+        const exam_type = typeSel;
+        let qs: any[] = [];
         if (subject) {
-          const rows = await questionService.getQuestionsBySubjectSlug(subject, { limit: 30 });
-          qs = rows.map((r: any) => ({ id: r.id, text: r.question_text, options: [
-            { key: 'A', text: r.option_a },
-            { key: 'B', text: r.option_b },
-            { key: 'C', text: r.option_c },
-            { key: 'D', text: r.option_d },
-          ], correct: r.correct_answer, explanation: r.explanation }));
+          const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type === 'ALL' ? undefined : (exam_type as any), limit: 50 });
+          qs = normalizeQuestions(rows, { exam_year: exam_year as any, exam_type: exam_type as any });
         } else {
-          qs = await quizService.getRandomQuestions(10);
+          const local = await quizService.getRandomQuestions(10);
+          qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
         }
-        if (qs && qs.length > 0) setQuestions(qs.map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: q.correct, explanation: q.explanation })));
+        if (qs && qs.length > 0) setQuestions(qs as any);
       } catch (e) {
-        // ignore, use sample
       }
     })();
-  }, []);
+  }, [subjectSel, yearSel, typeSel]);
 
   const pool = questions;
   const q = pool[index];
@@ -113,6 +129,33 @@ export function PracticeModeQuiz() {
       <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
 
       <Card>
+        <div className="flex items-center gap-3 flex-wrap mb-4">
+          <label className="text-xs text-gray-600">Subject</label>
+          <select className="border rounded px-3 py-2" value={subjectSel || ''} onChange={e => { const v = e.target.value || undefined; setSubjectSel(v); setIndex(0); setSelected(null); setShowFeedback(false); setScore(0); applyParams(v, undefined as any, undefined as any); }}>
+            <option value="">Any</option>
+            <option value="mathematics">Mathematics</option>
+            <option value="english-language">English</option>
+            <option value="physics">Physics</option>
+            <option value="chemistry">Chemistry</option>
+            <option value="biology">Biology</option>
+          </select>
+          <label className="text-xs text-gray-600">Year</label>
+          <select className="border rounded px-3 py-2" value={yearSel === 'ALL' ? 'ALL' : String(yearSel)} onChange={e => { const v = e.target.value; const next = v === 'ALL' ? 'ALL' : Number(v); setYearSel(next as any); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, next as any, undefined as any); }}>
+            <option value="ALL">All</option>
+            <option value="2019">2019</option>
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+          </select>
+          <label className="text-xs text-gray-600">Type</label>
+          <select className="border rounded px-3 py-2" value={typeSel} onChange={e => { const v = e.target.value as any; setTypeSel(v); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, undefined as any, v); }}>
+            <option value="ALL">All</option>
+            <option value="JAMB">JAMB</option>
+            <option value="WAEC">WAEC</option>
+          </select>
+        </div>
         <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
           <div className="text-sm text-gray-600">Score: <span className="font-semibold">{score}</span></div>

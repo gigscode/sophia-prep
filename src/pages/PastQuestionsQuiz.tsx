@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { questionService } from '../services/question-service';
+import { questionService, normalizeQuestions } from '../services/question-service';
 
 interface PastQuestion {
   id: string;
@@ -42,6 +42,7 @@ const sample: PastQuestion[] = [
 export function PastQuestionsQuiz() {
   const [year, setYear] = useState<number | 'ALL'>('ALL');
   const [subject, setSubject] = useState<string>('mathematics');
+  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>('ALL');
   const [loaded, setLoaded] = useState<PastQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<'A'|'B'|'C'|'D'|null>(null);
@@ -52,25 +53,21 @@ export function PastQuestionsQuiz() {
       const slug = params.get('subject') || subject;
       const y = params.get('year');
       const t = params.get('type');
-      const ey = y ? Number(y) : undefined;
-      const et = t === 'JAMB' || t === 'WAEC' ? t : undefined;
-      const rows = await questionService.getQuestionsBySubjectSlug(slug, { exam_year: ey, exam_type: et, limit: 50 });
-      const mapped: PastQuestion[] = (rows || []).map(r => ({
+      const ey = y === 'ALL' ? 'ALL' : (y ? Number(y) : year);
+      const et = t === 'ALL' ? 'ALL' : (t === 'JAMB' || t === 'WAEC' ? t : typeSel);
+      const rows = await questionService.getQuestionsBySubjectSlug(slug, { exam_year: typeof ey === 'number' ? ey : undefined, exam_type: et === 'ALL' ? undefined : (et as any), limit: 60 });
+      const normalized = normalizeQuestions(rows, { exam_year: ey as any, exam_type: et as any });
+      const mapped: PastQuestion[] = (normalized || []).map(r => ({
         id: r.id,
-        exam_year: r.exam_year || 0,
-        question_number: r.question_number || 0,
-        text: r.question_text,
-        options: [
-          { key: 'A', text: r.option_a },
-          { key: 'B', text: r.option_b },
-          { key: 'C', text: r.option_c },
-          { key: 'D', text: r.option_d },
-        ],
-        correct: r.correct_answer,
+        exam_year: (r as any).exam_year || 0,
+        question_number: 0,
+        text: r.text,
+        options: r.options as any,
+        correct: (r.correct as any) || 'A',
       }));
       setLoaded(mapped);
     })();
-  }, [subject]);
+  }, [subject, year, typeSel]);
 
   const pool = loaded.length > 0 ? loaded : sample;
   const questions = useMemo(() => {
@@ -104,6 +101,10 @@ export function PastQuestionsQuiz() {
             <option value="ALL">All</option>
             <option value="2019">2019</option>
             <option value="2020">2020</option>
+            <option value="2021">2021</option>
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
           </select>
           <label className="text-sm text-gray-700 ml-4">Subject:</label>
           <select
@@ -120,6 +121,20 @@ export function PastQuestionsQuiz() {
             <option value="physics">Physics</option>
             <option value="chemistry">Chemistry</option>
             <option value="biology">Biology</option>
+          </select>
+          <label className="text-sm text-gray-700 ml-4">Type:</label>
+          <select
+            value={typeSel}
+            onChange={(e) => {
+              setIndex(0);
+              setSelected(null);
+              setTypeSel(e.target.value as any);
+            }}
+            className="border rounded px-3 py-2"
+          >
+            <option value="ALL">All</option>
+            <option value="JAMB">JAMB</option>
+            <option value="WAEC">WAEC</option>
           </select>
         </div>
         {q ? (

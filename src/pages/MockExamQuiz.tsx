@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { quizService } from '../services/quiz-service';
-import { questionService } from '../services/question-service';
+import { questionService, normalizeQuestions } from '../services/question-service';
 import { Card } from '../components/ui/Card';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { OptionButton } from '../components/ui/OptionButton';
@@ -31,30 +31,50 @@ export function MockExamQuiz() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completed, setCompleted] = useState(false);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const params = new URLSearchParams(window.location.search);
+  const initialSubject = params.get('subject') || undefined;
+  const initialYearParam = params.get('year');
+  const initialTypeParam = params.get('type');
+  const [subjectSel, setSubjectSel] = useState<string | undefined>(initialSubject);
+  const [yearSel, setYearSel] = useState<'ALL' | number>(initialYearParam === 'ALL' ? 'ALL' : (initialYearParam ? Number(initialYearParam) : 'ALL'));
+  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' ? (initialTypeParam as any) : 'ALL');
+
+  const applyParams = (sub?: string | undefined, yr?: 'ALL' | number, typ?: 'ALL' | 'JAMB' | 'WAEC') => {
+    const sp = new URLSearchParams();
+    const s = sub ?? subjectSel;
+    const y = yr ?? yearSel;
+    const t = typ ?? typeSel;
+    if (s) sp.set('subject', s);
+    if (y) sp.set('year', y === 'ALL' ? 'ALL' : String(y));
+    if (t) sp.set('type', t);
+    const url = `${window.location.pathname}?${sp.toString()}`;
+    window.history.replaceState({}, '', url);
+  };
 
   useEffect(() => {
     (async () => {
       try {
-        const params = new URLSearchParams(window.location.search);
-        const subject = params.get('subject');
-        let qs: any;
+        const subject = subjectSel;
+        const exam_year = yearSel;
+        const exam_type = typeSel;
+        let qs: any[] = [];
         if (subject) {
-          const rows = await questionService.getQuestionsBySubjectSlug(subject, { limit: 50 });
-          qs = rows.map((r: any) => ({ id: r.id, text: r.question_text, options: [
-            { key: 'A', text: r.option_a },
-            { key: 'B', text: r.option_b },
-            { key: 'C', text: r.option_c },
-            { key: 'D', text: r.option_d },
-          ], correct: r.correct_answer }));
+          const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type === 'ALL' ? undefined : (exam_type as any), limit: 60 });
+          qs = normalizeQuestions(rows, { exam_year: exam_year as any, exam_type: exam_type as any });
         } else {
-          qs = await quizService.getRandomQuestions(20);
+          const local = await quizService.getRandomQuestions(20);
+          qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
         }
-        setQuestions(qs.map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: q.correct })));
+        setQuestions(qs as any);
+        setIndex(0);
+        setAnswers({});
+        setCompleted(false);
+        setTimeLeft(START_TIME);
       } catch (e) {
         console.error('Failed to load quiz questions:', e);
       }
     })();
-  }, []);
+  }, [subjectSel, yearSel, typeSel]);
 
   useEffect(() => {
     if (completed) return;
@@ -141,6 +161,33 @@ export function MockExamQuiz() {
           </div>
         </Card>
       )}
+      <div className="mt-4 md:mt-6 flex items-center gap-3 flex-wrap">
+        <label className="text-xs text-gray-600">Subject</label>
+        <select className="border rounded px-3 py-2" value={subjectSel || ''} onChange={e => { const v = e.target.value || undefined; setSubjectSel(v); applyParams(v, undefined as any, undefined as any); }}>
+          <option value="">Any</option>
+          <option value="mathematics">Mathematics</option>
+          <option value="english-language">English</option>
+          <option value="physics">Physics</option>
+          <option value="chemistry">Chemistry</option>
+          <option value="biology">Biology</option>
+        </select>
+        <label className="text-xs text-gray-600">Year</label>
+        <select className="border rounded px-3 py-2" value={yearSel === 'ALL' ? 'ALL' : String(yearSel)} onChange={e => { const v = e.target.value; const next = v === 'ALL' ? 'ALL' : Number(v); setYearSel(next as any); applyParams(undefined, next as any, undefined as any); }}>
+          <option value="ALL">All</option>
+          <option value="2019">2019</option>
+          <option value="2020">2020</option>
+          <option value="2021">2021</option>
+          <option value="2022">2022</option>
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+        </select>
+        <label className="text-xs text-gray-600">Type</label>
+        <select className="border rounded px-3 py-2" value={typeSel} onChange={e => { const v = e.target.value as any; setTypeSel(v); applyParams(undefined, undefined as any, v); }}>
+          <option value="ALL">All</option>
+          <option value="JAMB">JAMB</option>
+          <option value="WAEC">WAEC</option>
+        </select>
+      </div>
     </div>
   );
 }

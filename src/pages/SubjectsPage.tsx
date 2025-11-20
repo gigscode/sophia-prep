@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { BookOpen } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { PageHeader } from '../components/layout';
@@ -176,10 +177,15 @@ export function SubjectsPage() {
               </span>
             </div>
             <p className="text-gray-600 text-sm mb-3">{subject.description}</p>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-3">
               <span className="text-xs text-gray-500 capitalize">
                 {subject.subject_category.toLowerCase()}
               </span>
+              <div className="flex items-center gap-2">
+                <Link to={`/practice?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-blue-600 text-white rounded text-xs">Practice</Link>
+                <Link to={`/mock-exams?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-yellow-400 text-blue-900 rounded text-xs">Mock</Link>
+                <Link to={`/past-questions?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-gray-100 text-gray-800 rounded text-xs">Past</Link>
+              </div>
             </div>
           </div>
         ))}

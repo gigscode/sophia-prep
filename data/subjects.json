@@ -1,67 +1,26 @@
 [
-  {
-    "id": "sub-math",
-    "name": "Mathematics",
-    "slug": "mathematics",
-    "description": "Mathematics for JAMB and WAEC - Algebra, Geometry, Trigonometry",
-    "color_theme": "#1E40AF",
-    "icon": "BookOpen",
-    "exam_type": "BOTH",
-    "subject_category": "SCIENCE",
-    "is_active": true,
-    "is_mandatory": true,
-    "sort_order": 1
-  },
-  {
-    "id": "sub-eng",
-    "name": "English",
-    "slug": "english",
-    "description": "English language: Comprehension, Grammar, Vocabulary",
-    "color_theme": "#2563EB",
-    "icon": "BookOpen",
-    "exam_type": "BOTH",
-    "subject_category": "ARTS",
-    "is_active": true,
-    "is_mandatory": true,
-    "sort_order": 2
-  },
-  {
-    "id": "sub-bio",
-    "name": "Biology",
-    "slug": "biology",
-    "description": "Biology topics: Cell biology, Ecology, Genetics",
-    "color_theme": "#16A34A",
-    "icon": "GraduationCap",
-    "exam_type": "BOTH",
-    "subject_category": "SCIENCE",
-    "is_active": true,
-    "is_mandatory": false,
-    "sort_order": 3
-  },
-  {
-    "id": "sub-chem",
-    "name": "Chemistry",
-    "slug": "chemistry",
-    "description": "Chemistry: Reactions, Stoichiometry, Organic chemistry",
-    "color_theme": "#D97706",
-    "icon": "Flask",
-    "exam_type": "BOTH",
-    "subject_category": "SCIENCE",
-    "is_active": true,
-    "is_mandatory": false,
-    "sort_order": 4
-  },
-  {
-    "id": "sub-phy",
-    "name": "Physics",
-    "slug": "physics",
-    "description": "Physics: Mechanics, Electricity, Waves",
-    "color_theme": "#7C3AED",
-    "icon": "Target",
-    "exam_type": "BOTH",
-    "subject_category": "SCIENCE",
-    "is_active": true,
-    "is_mandatory": false,
-    "sort_order": 5
-  }
+  { "id": "sub-english", "name": "English", "slug": "english-language", "description": "English language: Comprehension, Grammar, Vocabulary", "color_theme": "#2563EB", "icon": "BookOpen", "exam_type": "BOTH", "subject_category": "GENERAL", "is_active": true, "is_mandatory": true, "sort_order": 1 },
+  { "id": "sub-math", "name": "Mathematics", "slug": "mathematics", "description": "Mathematics - Algebra, Geometry, Trigonometry", "color_theme": "#1E40AF", "icon": "Calculator", "exam_type": "BOTH", "subject_category": "SCIENCE", "is_active": true, "is_mandatory": true, "sort_order": 2 },
+  { "id": "sub-phy", "name": "Physics", "slug": "physics", "description": "Physics: Mechanics, Electricity, Waves", "color_theme": "#7C3AED", "icon": "Atom", "exam_type": "BOTH", "subject_category": "SCIENCE", "is_active": true, "is_mandatory": false, "sort_order": 3 },
+  { "id": "sub-chem", "name": "Chemistry", "slug": "chemistry", "description": "Chemistry: Physical, Inorganic, Organic", "color_theme": "#D97706", "icon": "FlaskRound", "exam_type": "BOTH", "subject_category": "SCIENCE", "is_active": true, "is_mandatory": false, "sort_order": 4 },
+  { "id": "sub-bio", "name": "Biology", "slug": "biology", "description": "Biology: Cell biology, Ecology, Genetics", "color_theme": "#16A34A", "icon": "Leaf", "exam_type": "BOTH", "subject_category": "SCIENCE", "is_active": true, "is_mandatory": false, "sort_order": 5 },
+  { "id": "sub-fmath", "name": "Further Mathematics", "slug": "further-mathematics", "description": "Advanced Mathematics for science students", "color_theme": "#0EA5E9", "icon": "Sigma", "exam_type": "BOTH", "subject_category": "SCIENCE", "is_active": true, "is_mandatory": false, "sort_order": 6 },
+  { "id": "sub-geo", "name": "Geography", "slug": "geography", "description": "Physical and Human Geography", "color_theme": "#F59E0B", "icon": "Map", "exam_type": "BOTH", "subject_category": "GENERAL", "is_active": true, "is_mandatory": false, "sort_order": 7 },
+  { "id": "sub-food", "name": "Food & Nutrition", "slug": "food-nutrition", "description": "Food science, nutrition, dietetics", "color_theme": "#EC4899", "icon": "Utensils", "exam_type": "WAEC", "subject_category": "SCIENCE", "is_active": true, "is_mandatory": false, "sort_order": 8 },
+
+  { "id": "sub-com", "name": "Commerce", "slug": "commerce", "description": "Trade, distribution, and business operations", "color_theme": "#22C55E", "icon": "ShoppingCart", "exam_type": "BOTH", "subject_category": "COMMERCIAL", "is_active": true, "is_mandatory": false, "sort_order": 9 },
+  { "id": "sub-acc", "name": "Accounting", "slug": "accounting", "description": "Financial accounting principles", "color_theme": "#14B8A6", "icon": "Receipt", "exam_type": "BOTH", "subject_category": "COMMERCIAL", "is_active": true, "is_mandatory": false, "sort_order": 10 },
+  { "id": "sub-eco", "name": "Economics", "slug": "economics", "description": "Micro and Macro Economics", "color_theme": "#EF4444", "icon": "BarChart3", "exam_type": "BOTH", "subject_category": "COMMERCIAL", "is_active": true, "is_mandatory": false, "sort_order": 11 },
+  { "id": "sub-mkt", "name": "Marketing", "slug": "marketing", "description": "Marketing concepts and management", "color_theme": "#6366F1", "icon": "Megaphone", "exam_type": "BOTH", "subject_category": "COMMERCIAL", "is_active": true, "is_mandatory": false, "sort_order": 12 },
+  { "id": "sub-civ", "name": "Civic Education", "slug": "civic-education", "description": "Citizenship and civic responsibilities", "color_theme": "#84CC16", "icon": "Users", "exam_type": "BOTH", "subject_category": "GENERAL", "is_active": true, "is_mandatory": false, "sort_order": 13 },
+
+  { "id": "sub-lit", "name": "Literature in English", "slug": "literature-in-english", "description": "Study of prose, poetry, and drama", "color_theme": "#A855F7", "icon": "BookText", "exam_type": "BOTH", "subject_category": "ARTS", "is_active": true, "is_mandatory": false, "sort_order": 14 },
+  { "id": "sub-gov", "name": "Government", "slug": "government", "description": "Political science and governance", "color_theme": "#0EA5E9", "icon": "Building2", "exam_type": "BOTH", "subject_category": "ARTS", "is_active": true, "is_mandatory": false, "sort_order": 15 },
+  { "id": "sub-crsirs", "name": "CRS/IRS", "slug": "crs-irs", "description": "Christian and Islamic Religious Studies", "color_theme": "#84CC16", "icon": "Church", "exam_type": "BOTH", "subject_category": "ARTS", "is_active": true, "is_mandatory": false, "sort_order": 16 },
+  { "id": "sub-music", "name": "Music", "slug": "music", "description": "Music theory, history, and performance", "color_theme": "#F43F5E", "icon": "Music", "exam_type": "WAEC", "subject_category": "ARTS", "is_active": true, "is_mandatory": false, "sort_order": 17 },
+  { "id": "sub-his", "name": "History", "slug": "history", "description": "World and African history", "color_theme": "#78716C", "icon": "ScrollText", "exam_type": "WAEC", "subject_category": "ARTS", "is_active": true, "is_mandatory": false, "sort_order": 18 },
+
+  { "id": "sub-yor", "name": "Yoruba", "slug": "yoruba", "description": "Yoruba language and literature", "color_theme": "#22C55E", "icon": "Languages", "exam_type": "BOTH", "subject_category": "LANGUAGE", "is_active": true, "is_mandatory": false, "sort_order": 19 },
+  { "id": "sub-hau", "name": "Hausa", "slug": "hausa", "description": "Hausa language and literature", "color_theme": "#06B6D4", "icon": "Languages", "exam_type": "BOTH", "subject_category": "LANGUAGE", "is_active": true, "is_mandatory": false, "sort_order": 20 },
+  { "id": "sub-ibo", "name": "Igbo", "slug": "igbo", "description": "Igbo language and literature", "color_theme": "#F59E0B", "icon": "Languages", "exam_type": "BOTH", "subject_category": "LANGUAGE", "is_active": true, "is_mandatory": false, "sort_order": 21 }
 ]
