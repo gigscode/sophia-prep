@@ -1,128 +1,51 @@
-import { supabase } from '../integrations/supabase/client';
 import type { Topic } from '../integrations/supabase/types';
 
 export class TopicService {
-  /**
-   * Get all topics for a subject
-   */
   async getTopicsBySubject(subjectId: string): Promise<Topic[]> {
-    const { data, error } = await supabase
-      .from('topics')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .eq('is_active', true)
-      .order('order_index', { ascending: true });
-
-    if (error) {
-      throw new Error(`Failed to fetch topics: ${error.message}`);
+    try {
+      const res = await fetch(`/api/topics?subject_id=${encodeURIComponent(subjectId)}`);
+      if (res.ok) return (await res.json()) as Topic[];
+    } catch (err) {
+      // ignore and fallback if needed
     }
 
-    return data || [];
+    return [];
   }
 
-  /**
-   * Get a single topic by ID
-   */
   async getTopicById(id: string): Promise<Topic | null> {
-    const { data, error } = await supabase
-      .from('topics')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
-      }
-      throw new Error(`Failed to fetch topic: ${error.message}`);
+    try {
+      const res = await fetch(`/api/topics/${encodeURIComponent(id)}`);
+      if (res.ok) return (await res.json()) as Topic;
+    } catch (err) {
+      // ignore
     }
-
-    return data;
+    return null;
   }
 
-  /**
-   * Create a new topic
-   */
-  async createTopic(topic: {
-    subject_id: string;
-    name: string;
-    description: string;
-    order_index?: number;
-  }): Promise<Topic> {
-    const { data, error } = await supabase
-      .from('topics')
-      .insert({
-        subject_id: topic.subject_id,
-        name: topic.name,
-        description: topic.description,
-        order_index: topic.order_index || 0,
-        is_active: true
-      })
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to create topic: ${error.message}`);
-    }
-
-    return data;
+  // Mutating operations should be performed via server-side admin endpoints.
+  async createTopic(_: { subject_id: string; name: string; description: string; order_index?: number; }): Promise<Topic> {
+    throw new Error('createTopic is disabled on the client. Use server-side admin endpoints to create topics.');
   }
 
-  /**
-   * Update a topic
-   */
-  async updateTopic(
-    id: string,
-    updates: {
-      name?: string;
-      description?: string;
-      order_index?: number;
-      is_active?: boolean;
-    }
-  ): Promise<Topic> {
-    const { data, error } = await supabase
-      .from('topics')
-      .update(updates)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      throw new Error(`Failed to update topic: ${error.message}`);
-    }
-
-    return data;
+  async updateTopic(_: string, __: { name?: string; description?: string; order_index?: number; is_active?: boolean; }): Promise<Topic> {
+    throw new Error('updateTopic is disabled on the client. Use server-side admin endpoints to update topics.');
   }
 
-  /**
-   * Delete a topic (soft delete by setting is_active to false)
-   */
-  async deleteTopic(id: string): Promise<void> {
-    const { error } = await supabase
-      .from('topics')
-      .update({ is_active: false })
-      .eq('id', id);
-
-    if (error) {
-      throw new Error(`Failed to delete topic: ${error.message}`);
-    }
+  async deleteTopic(_: string): Promise<void> {
+    throw new Error('deleteTopic is disabled on the client. Use server-side admin endpoints to delete topics.');
   }
 
-  /**
-   * Get topic count for a subject
-   */
   async getTopicCount(subjectId: string): Promise<number> {
-    const { count, error } = await supabase
-      .from('topics')
-      .select('*', { count: 'exact', head: true })
-      .eq('subject_id', subjectId)
-      .eq('is_active', true);
-
-    if (error) {
-      throw new Error(`Failed to count topics: ${error.message}`);
+    try {
+      const res = await fetch(`/api/topics/count?subject_id=${encodeURIComponent(subjectId)}`);
+      if (res.ok) {
+        const data = await res.json();
+        return typeof data.count === 'number' ? data.count : 0;
+      }
+    } catch (err) {
+      // ignore
     }
-
-    return count || 0;
+    return 0;
   }
 }
 

@@ -31,12 +31,25 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD; // used to mint admin JWT
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET; // secret to sign admin JWTs
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || '*';
 
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_SERVICE_KEY in environment. Server cannot start.');
-  process.exit(1);
+const USE_SUPABASE = Boolean(SUPABASE_URL && SUPABASE_KEY);
+if (!USE_SUPABASE) {
+  console.warn('SUPABASE_URL or SUPABASE_SERVICE_KEY missing — server will run in local-only read mode.');
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+const supabase = USE_SUPABASE ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } }) : null;
+
+function buildLocalRows() {
+  const extra = loadJSON(path.join('data', 'extra-quizzes.json')) || [];
+  const jamb = loadJSON(path.join('data', 'jamb-waec-questions.json')) || {};
+  const rows = [];
+  Object.keys(jamb).forEach(subjectKey => {
+    const arr = jamb[subjectKey];
+    if (!Array.isArray(arr)) return;
+    arr.forEach(e => rows.push(normalizeJambEntry({ ...e, subject: subjectKey })));
+  });
+  extra.forEach(e => rows.push(normalizeExtraEntry(e)));
+  return rows;
+}
 
 const app = express();
 app.use(cors({ origin: FRONTEND_ORIGIN }));
@@ -152,6 +165,16 @@ app.get('/api/questions', async (req, res) => {
   try {
     const { subject, count = 10 } = req.query;
     if (!subject) return res.status(400).json({ error: 'subject query param required' });
+    if (!USE_SUPABASE) {
+      // local mode: filter normalized rows by subject slug
+      const rows = buildLocalRows().filter(r => (r.subject || '').toLowerCase() === String(subject).toLowerCase());
+      const pool = rows.map(q => ({ id: q.id, text: q.question_text, options: [q.option_a, q.option_b, q.option_c, q.option_d].map((t, i) => ({ key: String.fromCharCode(65 + i), text: t })), correct: q.correct_answer || '', explanation: q.explanation }));
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      return res.json(pool.slice(0, Number(count)));
+    }
 
     // find subject id
     const { data: subjectRow, error: subErr } = await supabase
@@ -183,6 +206,47 @@ app.get('/api/questions', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'internal error' });
+  }
+});
+
+// Subjects endpoints (read-only proxy)
+app.get('/api/subjects', async (req, res) => {
+  try {
+    const { exam_type, category, mandatory, slug } = req.query;
+    if (!USE_SUPABASE) {
+      // local fallback: read subjects.json and apply simple filters
+      const local = loadJSON(path.join('data', 'subjects.json')) || [];
+      let arr = Array.isArray(local) ? local : [];
+      if (slug) arr = arr.filter(s => String(s.slug) === String(slug));
+      if (mandatory === 'true' || mandatory === true) arr = arr.filter(s => s.is_mandatory === true);
+      if (exam_type) arr = arr.filter(s => (s.exam_type === exam_type) || (s.exam_type === 'BOTH'));
+      if (category) arr = arr.filter(s => s.subject_category === category);
+      return res.json(arr);
+    }
+
+    let query = supabase.from('subjects').select('*');
+    if (slug) query = query.eq('slug', String(slug));
+    if (mandatory === 'true' || mandatory === true) query = query.eq('is_mandatory', true);
+    if (exam_type) query = query.or(`exam_type.eq.${String(exam_type)},exam_type.eq.BOTH`);
+    if (category) query = query.eq('subject_category', String(category));
+    const { data, error } = await query.order('sort_order', { ascending: true });
+    if (error) return res.status(500).json({ error: error.message || error });
+    return res.json(data || []);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'internal error' });
+  }
+});
+
+app.get('/api/subjects/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase.from('subjects').select('*').eq('id', id).single();
+    if (error) return res.status(404).json({ error: 'not found' });
+    return res.json(data);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'internal error' });
   }
 });
 
@@ -289,6 +353,45 @@ app.post('/api/admin-login', (req, res) => {
   if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'invalid credentials' });
   const token = jwt.sign({ role: 'admin' }, ADMIN_JWT_SECRET, { expiresIn: '1h' });
   res.json({ token, expiresIn: 3600 });
+});
+
+// Topics endpoints (read-only proxy)
+app.get('/api/topics', async (req, res) => {
+  try {
+    const { subject_id } = req.query;
+    if (!subject_id) return res.status(400).json({ error: 'subject_id required' });
+    const { data, error } = await supabase.from('topics').select('*').eq('subject_id', String(subject_id)).eq('is_active', true).order('order_index', { ascending: true });
+    if (error) return res.status(500).json({ error: error.message || error });
+    return res.json(data || []);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'internal error' });
+  }
+});
+
+app.get('/api/topics/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data, error } = await supabase.from('topics').select('*').eq('id', id).single();
+    if (error) return res.status(404).json({ error: 'not found' });
+    return res.json(data);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'internal error' });
+  }
+});
+
+app.get('/api/topics/count', async (req, res) => {
+  try {
+    const { subject_id } = req.query;
+    if (!subject_id) return res.status(400).json({ error: 'subject_id required' });
+    const { count, error } = await supabase.from('topics').select('*', { count: 'exact', head: true }).eq('subject_id', String(subject_id)).eq('is_active', true);
+    if (error) return res.status(500).json({ error: error.message || error });
+    return res.json({ count: count || 0 });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'internal error' });
+  }
 });
 
 const port = process.env.PORT || 4000;

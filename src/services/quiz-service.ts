@@ -72,16 +72,26 @@ function normalizeEntry(entry: any, idPrefix = ''): QuizQuestion {
 
 export const quizService = {
   async getQuestionsForSubject(subjectSlug: string): Promise<QuizQuestion[]> {
+    const url = `/api/questions?subject=${encodeURIComponent(subjectSlug)}&count=200`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        // Expecting normalized objects: { id, text, options: [{key,text}], correct, explanation }
+        return (data || []).map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || q.correct_answer || '').toString(), explanation: q.explanation }));
+      }
+    } catch (err) {
+      // ignore and fallback to local data
+      console.warn('quizService: server fetch failed, falling back to local data', err);
+    }
+
+    // Fallback: read from local bundled JSON
     const key = subjectSlug.toLowerCase();
     const result: QuizQuestion[] = [];
-
-    // jambData is structured by subject keys
     const jdata: RawBank = (jambData as any) || {};
     if (jdata[key] && Array.isArray(jdata[key])) {
       jdata[key].forEach((e: any, i: number) => result.push(normalizeEntry(e, `j-${key}-${i}-`)));
     }
-
-    // extra-quizzes.json contains array of items with 'subject' field
     (extra as any[]).forEach((e: any, i: number) => {
       if ((e.subject || '').toLowerCase() === key) {
         result.push(normalizeEntry(e, `x-${key}-${i}-`));
@@ -92,6 +102,17 @@ export const quizService = {
   },
 
   async getRandomQuestions(count = 10): Promise<QuizQuestion[]> {
+    const url = `/api/questions?count=${encodeURIComponent(String(count))}`;
+    try {
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        return (data || []).map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || q.correct_answer || '').toString(), explanation: q.explanation }));
+      }
+    } catch (err) {
+      console.warn('quizService: server fetch failed, falling back to local pool', err);
+    }
+
     const jdata: RawBank = (jambData as any) || {};
     let pool: QuizQuestion[] = [];
     Object.keys(jdata).forEach(subject => {

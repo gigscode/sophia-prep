@@ -1,114 +1,71 @@
-import { supabase } from '../integrations/supabase/client';
 import type { Subject, ExamType, SubjectCategory } from '../integrations/supabase/types';
 
 export class SubjectService {
   /**
-   * Get all subjects
+   * Get all subjects via server proxy, fallback to local JSON
    */
   async getAllSubjects(): Promise<Subject[]> {
     try {
-      const { data, error } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('is_active', true)
-        .order('sort_order', { ascending: true });
-
-      if (error) {
-        throw new Error(error.message);
+      const res = await fetch('/api/subjects');
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) return data as Subject[];
       }
-
-      if (data && Array.isArray(data) && data.length > 0) return data;
     } catch (err) {
-      // fallback to local subjects.json when Supabase is not reachable
-      try {
-        const res = await fetch('/data/subjects.json');
-        if (res.ok) {
-          const local = await res.json();
-          return local as Subject[];
-        }
-      } catch (e) {
-        // ignore and fallthrough
-      }
+      // ignore and fallback to local
+    }
+
+    try {
+      const res = await fetch('/data/subjects.json');
+      if (res.ok) return (await res.json()) as Subject[];
+    } catch (e) {
+      // ignore
     }
 
     return [];
   }
 
-  /**
-   * Get subjects filtered by exam type
-   */
   async getSubjectsByExamType(examType: ExamType): Promise<Subject[]> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('is_active', true)
-      .or(`exam_type.eq.${examType},exam_type.eq.BOTH`)
-      .order('sort_order', { ascending: true });
-
-    if (error) {
-      throw new Error(`Failed to fetch subjects by exam type: ${error.message}`);
+    try {
+      const res = await fetch(`/api/subjects?exam_type=${encodeURIComponent(String(examType))}`);
+      if (res.ok) return (await res.json()) as Subject[];
+    } catch (err) {
+      // ignore
     }
 
-    return data || [];
+    return [];
   }
 
-  /**
-   * Get subjects by category
-   */
   async getSubjectsByCategory(category: SubjectCategory): Promise<Subject[]> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('is_active', true)
-      .eq('subject_category', category)
-      .order('sort_order', { ascending: true });
-
-    if (error) {
-      throw new Error(`Failed to fetch subjects by category: ${error.message}`);
+    try {
+      const res = await fetch(`/api/subjects?category=${encodeURIComponent(String(category))}`);
+      if (res.ok) return (await res.json()) as Subject[];
+    } catch (err) {
+      // ignore
     }
-
-    return data || [];
+    return [];
   }
 
-  /**
-   * Get a single subject by ID
-   */
   async getSubjectById(id: string): Promise<Subject | null> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Not found
-      }
-      throw new Error(`Failed to fetch subject: ${error.message}`);
+    try {
+      const res = await fetch(`/api/subjects/${encodeURIComponent(id)}`);
+      if (res.ok) return (await res.json()) as Subject;
+    } catch (err) {
+      // ignore
     }
 
-    return data;
+    return null;
   }
 
-  /**
-   * Get a single subject by slug
-   */
   async getSubjectBySlug(slug: string): Promise<Subject | null> {
     try {
-      const { data, error } = await supabase
-        .from('subjects')
-        .select('*')
-        .eq('slug', slug)
-        .single();
-
-      if (error) {
-        if (error.code === 'PGRST116') return null;
-        throw new Error(error.message);
+      const res = await fetch(`/api/subjects?slug=${encodeURIComponent(slug)}`);
+      if (res.ok) {
+        const list = await res.json();
+        if (Array.isArray(list) && list.length > 0) return list[0] as Subject;
       }
-
-      if (data) return data;
     } catch (err) {
-      // fallback to local subjects.json
+      // fallback to local
       try {
         const res = await fetch('/data/subjects.json');
         if (res.ok) {
@@ -124,40 +81,24 @@ export class SubjectService {
     return null;
   }
 
-  /**
-   * Get mandatory subjects
-   */
   async getMandatorySubjects(): Promise<Subject[]> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('is_active', true)
-      .eq('is_mandatory', true)
-      .order('sort_order', { ascending: true });
-
-    if (error) {
-      throw new Error(`Failed to fetch mandatory subjects: ${error.message}`);
+    try {
+      const res = await fetch('/api/subjects?mandatory=true');
+      if (res.ok) return (await res.json()) as Subject[];
+    } catch (err) {
+      // ignore
     }
-
-    return data || [];
+    return [];
   }
 
-  /**
-   * Get language subjects (Yoruba, Hausa, Igbo)
-   */
   async getLanguageSubjects(): Promise<Subject[]> {
-    const { data, error } = await supabase
-      .from('subjects')
-      .select('*')
-      .eq('is_active', true)
-      .eq('subject_category', 'LANGUAGE')
-      .order('sort_order', { ascending: true });
-
-    if (error) {
-      throw new Error(`Failed to fetch language subjects: ${error.message}`);
+    try {
+      const res = await fetch('/api/subjects?category=LANGUAGE');
+      if (res.ok) return (await res.json()) as Subject[];
+    } catch (err) {
+      // ignore
     }
-
-    return data || [];
+    return [];
   }
 }
 

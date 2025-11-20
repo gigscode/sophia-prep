@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { subjectService } from '../services/subject-service';
 import { BookOpen, Users, Settings, ServerCog } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 type AdminTab = 'overview' | 'users' | 'subjects' | 'settings';
 
@@ -162,6 +163,13 @@ export function AdminPage() {
     return <div className="container mx-auto px-4 py-12">Loading admin...</div>;
   }
 
+  // Import preview / run states
+  const [previewRows, setPreviewRows] = useState<any[] | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [importLoading, setImportLoading] = useState(false);
+  const [importResult, setImportResult] = useState<{ imported?: number; error?: string } | null>(null);
+  const [adminPasswordInput, setAdminPasswordInput] = useState('');
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -183,7 +191,7 @@ export function AdminPage() {
 
           {/* Main */}
           <main className="md:col-span-4">
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="bg-white rounded-lg shadow p-6 mb-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-2xl font-bold">Admin Dashboard</h1>
@@ -207,7 +215,7 @@ export function AdminPage() {
                   <div className="text-2xl font-bold">Quick Tools</div>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Tab content */}
             {tab === 'overview' && (
@@ -215,8 +223,94 @@ export function AdminPage() {
                 <h2 className="text-xl font-semibold mb-3">Overview</h2>
                 <p className="text-sm text-gray-600">Quick insights about application content and user activity.</p>
                 <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-4 border rounded">Recent activity (placeholder)</div>
-                  <div className="p-4 border rounded">System health (placeholder)</div>
+                  <div className="p-4 border rounded">
+                    <h3 className="font-medium mb-2">Recent activity</h3>
+                    <div className="text-sm text-gray-500">No recent activity available (placeholder)</div>
+                  </div>
+
+                  <div className="p-4 border rounded">
+                    <h3 className="font-medium mb-2">Import Questions (Preview & Run)</h3>
+                    <div className="text-sm text-gray-600 mb-3">Preview normalized rows locally and run server-side import.</div>
+
+                    <div className="flex items-center gap-2 mb-3">
+                      <button
+                        onClick={async () => {
+                          setPreviewLoading(true);
+                          try {
+                            const res = await fetch('/api/preview-import');
+                            if (!res.ok) throw new Error('Failed to preview');
+                            const data = await res.json();
+                            setPreviewRows(data.sample || []);
+                          } catch (err: any) {
+                            setPreviewRows([]);
+                            alert('Preview failed: ' + (err.message || err));
+                          } finally {
+                            setPreviewLoading(false);
+                          }
+                        }}
+                        className="px-3 py-2 bg-indigo-600 text-white rounded"
+                      >
+                        {previewLoading ? 'Previewing...' : 'Preview Import'}
+                      </button>
+
+                      <button
+                        onClick={async () => {
+                          // run admin login then import
+                          if (!adminPasswordInput) {
+                            const pw = prompt('Enter admin password to run import');
+                            if (!pw) return;
+                            setAdminPasswordInput(pw);
+                          }
+                          setImportLoading(true);
+                          setImportResult(null);
+                          try {
+                            const login = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPasswordInput }) });
+                            if (!login.ok) throw new Error('Admin login failed');
+                            const { token } = await login.json();
+                            const imp = await fetch('/api/import-quizzes', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+                            if (!imp.ok) {
+                              const txt = await imp.text();
+                              throw new Error(txt || 'Import failed');
+                            }
+                            const result = await imp.json();
+                            setImportResult({ imported: result.imported });
+                            alert('Import completed: ' + (result.imported ?? 0));
+                          } catch (err: any) {
+                            setImportResult({ error: err.message || String(err) });
+                            alert('Import error: ' + (err.message || err));
+                          } finally {
+                            setImportLoading(false);
+                          }
+                        }}
+                        className="px-3 py-2 bg-emerald-600 text-white rounded"
+                      >
+                        {importLoading ? 'Importing...' : 'Run Import'}
+                      </button>
+                    </div>
+
+                    <div className="mb-3">
+                      <label className="text-xs text-gray-500">Admin password (stored only in this session)</label>
+                      <input type="password" value={adminPasswordInput} onChange={e => setAdminPasswordInput(e.target.value)} className="w-full mt-1 p-2 border rounded" placeholder="Enter admin password" />
+                    </div>
+
+                    <div>
+                      <div className="text-sm font-medium mb-1">Preview sample</div>
+                      {previewRows === null ? (
+                        <div className="text-xs text-gray-500">No preview yet</div>
+                      ) : previewRows.length === 0 ? (
+                        <div className="text-xs text-gray-500">No rows found</div>
+                      ) : (
+                        <div className="space-y-2 max-h-48 overflow-auto p-2 bg-gray-50 rounded">
+                          {previewRows.map((r: any) => (
+                            <div key={r.id} className="text-sm border-b pb-1">
+                              <div className="font-medium">{r.question_text.slice(0, 120)}{r.question_text.length>120?'...':''}</div>
+                              <div className="text-xs text-gray-500">Options: {r.option_a ? 'A,' : ''}{r.option_b ? 'B,' : ''}{r.option_c ? 'C,' : ''}{r.option_d ? 'D' : ''} • Correct: {r.correct_answer}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
