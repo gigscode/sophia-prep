@@ -97,20 +97,20 @@ export function MockExamQuiz() {
   }, [completed, select]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-extrabold mb-6">Mock Exam</h1>
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
 
       {!completed ? (
         <Card>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
             <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
-            <div className="text-sm font-mono text-gray-700">Time: {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</div>
+            <div className="text-sm md:text-base font-mono text-gray-700">Time: {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</div>
           </div>
 
           <ProgressBar value={index + 1} max={pool.length} className="mb-5" />
 
           <div className="mb-4">
-            <div className="text-lg font-semibold mb-3">{current.text}</div>
+            <div className="text-base md:text-lg font-semibold mb-3">{current.text}</div>
             <div className="grid grid-cols-1 gap-3">
               {current.options.map((opt: any) => (
                 <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={answers[current.id] === opt.key} onSelect={select} />
@@ -118,7 +118,7 @@ export function MockExamQuiz() {
             </div>
           </div>
 
-          <div className="mt-6 flex items-center gap-3">
+          <div className="mt-6 flex items-center gap-3 flex-wrap">
             <Button variant="ghost" onClick={prev} className="px-3">Previous</Button>
             <Button variant="ghost" onClick={next}>Next</Button>
             <div className="ml-auto flex items-center gap-3">

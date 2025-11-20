@@ -174,8 +174,8 @@ export function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6">
           {/* Sidebar */}
           <aside className="md:col-span-1 sticky top-24">
             <div className="mb-6">
@@ -210,7 +210,7 @@ export function AdminPage() {
                 <div className="text-sm text-gray-600">Super Admin: gigsdev007@gmail.com</div>
               </div>
 
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
                 <Card className="p-4 bg-gradient-to-r from-blue-50 to-white">
                   <div className="text-xs text-gray-500">Users</div>
                   <div className="text-2xl font-bold">{stats.users}</div>
@@ -231,7 +231,7 @@ export function AdminPage() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-semibold mb-3">Overview</h2>
                 <p className="text-sm text-gray-600">Quick insights about application content and user activity.</p>
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                   <div className="p-4 border rounded">
                     <h3 className="font-medium mb-2">Recent activity</h3>
                     <div className="text-sm text-gray-500">No recent activity available (placeholder)</div>
@@ -241,7 +241,7 @@ export function AdminPage() {
                     <h3 className="font-medium mb-2">Import Questions (Preview & Run)</h3>
                     <div className="text-sm text-gray-600 mb-3">Preview normalized rows locally and run server-side import.</div>
 
-                          <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
                             <Button variant="secondary" onClick={async () => {
                                 setPreviewLoading(true);
                                 try {

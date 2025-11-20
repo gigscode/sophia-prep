@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { quizService } from '../services/quiz-service';
+import { questionService } from '../services/question-service';
 import { Card } from '../components/ui/Card';
 import { OptionButton } from '../components/ui/OptionButton';
 import { Button } from '../components/ui/Button';
@@ -54,7 +55,13 @@ export function PracticeModeQuiz() {
         const subject = params.get('subject');
         let qs;
         if (subject) {
-          qs = await quizService.getQuestionsForSubject(subject);
+          const rows = await questionService.getQuestionsBySubjectSlug(subject, { limit: 30 });
+          qs = rows.map((r: any) => ({ id: r.id, text: r.question_text, options: [
+            { key: 'A', text: r.option_a },
+            { key: 'B', text: r.option_b },
+            { key: 'C', text: r.option_c },
+            { key: 'D', text: r.option_d },
+          ], correct: r.correct_answer, explanation: r.explanation }));
         } else {
           qs = await quizService.getRandomQuestions(10);
         }
@@ -102,11 +109,11 @@ export function PracticeModeQuiz() {
   }, [onSelect, pool.length, showFeedback]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-extrabold mb-6">Practice Mode</h1>
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
 
       <Card>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
           <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
           <div className="text-sm text-gray-600">Score: <span className="font-semibold">{score}</span></div>
         </div>
@@ -114,7 +121,7 @@ export function PracticeModeQuiz() {
         <ProgressBar value={index + 1} max={pool.length} className="mb-4" />
 
         <div className="mb-4">
-          <div className="text-lg font-semibold mb-3">{q.text}</div>
+          <div className="text-base md:text-lg font-semibold mb-3">{q.text}</div>
           <div className="grid grid-cols-1 gap-3">
             {q.options.map((opt: any) => (
               <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={selected === opt.key} onSelect={onSelect} disabled={!!showFeedback} />
