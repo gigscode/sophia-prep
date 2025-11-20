@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
 import { quizService } from '../services/quiz-service';
+import { Card } from '../components/ui/Card';
+import { OptionButton } from '../components/ui/OptionButton';
+import { Button } from '../components/ui/Button';
+import { ProgressBar } from '../components/ui/ProgressBar';
 
 interface QuizQuestion {
   id: string;
   text: string;
-  options: { key: 'A'|'B'|'C'|'D'; text: string }[];
-  correct: 'A'|'B'|'C'|'D';
-  explanation: string;
+  options: { key: string; text: string }[];
+  correct?: string;
+  explanation?: string;
 }
 
 const sampleQuestions: QuizQuestion[] = [
@@ -39,11 +42,11 @@ const sampleQuestions: QuizQuestion[] = [
 
 export function PracticeModeQuiz() {
   const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState<'A'|'B'|'C'|'D'|null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
 
-  const [questions, setQuestions] = useState(sampleQuestions);
+  const [questions, setQuestions] = useState<QuizQuestion[]>(sampleQuestions);
   useEffect(() => {
     (async () => {
       try {
@@ -55,7 +58,7 @@ export function PracticeModeQuiz() {
         } else {
           qs = await quizService.getRandomQuestions(10);
         }
-        if (qs && qs.length > 0) setQuestions(qs.map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || '').toString(), explanation: q.explanation || '' })));
+        if (qs && qs.length > 0) setQuestions(qs.map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: q.correct, explanation: q.explanation })));
       } catch (e) {
         // ignore, use sample
       }
@@ -65,12 +68,12 @@ export function PracticeModeQuiz() {
   const pool = questions;
   const q = pool[index];
 
-  const onSelect = (key: string) => {
+  const onSelect = useCallback((key: string) => {
     if (showFeedback || !q) return;
-    setSelected(key as any);
+    setSelected(key);
     setShowFeedback(true);
     if (key === (q.correct || '')) setScore(s => s + 1);
-  };
+  }, [q, showFeedback]);
 
   const next = () => {
     setSelected(null);
@@ -80,44 +83,55 @@ export function PracticeModeQuiz() {
     }
   };
 
-  const isCorrect = selected && q && selected === (q.correct || '');
+  const isCorrect = !!selected && q && selected === (q.correct || '');
+
+  // keyboard navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (showFeedback) {
+        if (e.key === 'Enter') next();
+        return;
+      }
+      const k = e.key.toUpperCase();
+      if (['A', 'B', 'C', 'D'].includes(k)) onSelect(k);
+      if (e.key === 'ArrowRight') setIndex(i => Math.min(pool.length - 1, i + 1));
+      if (e.key === 'ArrowLeft') setIndex(i => Math.max(0, i - 1));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onSelect, pool.length, showFeedback]);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Practice Mode</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between mb-4">
-          <div>Question {index + 1} / {pool.length}</div>
-          <div>Score: {score}</div>
+      <h1 className="text-3xl font-extrabold mb-6">Practice Mode</h1>
+
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
+          <div className="text-sm text-gray-600">Score: <span className="font-semibold">{score}</span></div>
         </div>
-        <p className="text-lg mb-4">{q.text}</p>
-        <div className="grid grid-cols-1 gap-3">
-          {q.options.map((opt: any) => (
-            <button
-              key={opt.key}
-              onClick={() => onSelect(opt.key)}
-              className={`text-left p-4 border rounded hover:bg-blue-50 ${selected === opt.key ? 'border-blue-600' : 'border-gray-300'}`}
-            >
-              <span className="font-semibold mr-2">{opt.key}.</span>
-              {opt.text}
-            </button>
-          ))}
+
+        <ProgressBar value={index + 1} max={pool.length} className="mb-4" />
+
+        <div className="mb-4">
+          <div className="text-lg font-semibold mb-3">{q.text}</div>
+          <div className="grid grid-cols-1 gap-3">
+            {q.options.map((opt: any) => (
+              <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={selected === opt.key} onSelect={onSelect} disabled={!!showFeedback} />
+            ))}
+          </div>
         </div>
+
         {showFeedback && (
-          <div className="mt-6 p-4 rounded border" style={{borderColor: isCorrect ? '#22c55e' : '#ef4444'}}>
-            <div className={`font-semibold ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-              {isCorrect ? 'Correct!' : 'Incorrect'}
-            </div>
+          <div className={`mt-6 p-4 rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+            <div className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>{isCorrect ? 'Correct!' : 'Incorrect'}</div>
             <p className="text-gray-700 mt-2">{q.explanation}</p>
-            <button
-              onClick={next}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Next Question
-            </button>
+            <div className="mt-4">
+              <Button variant="primary" onClick={next}>Next Question</Button>
+            </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

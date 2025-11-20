@@ -4,6 +4,8 @@ import { useAuth } from '../hooks/useAuth';
 import { subjectService } from '../services/subject-service';
 import { BookOpen, Users, Settings, ServerCog } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 type AdminTab = 'overview' | 'users' | 'subjects' | 'settings';
 
@@ -175,23 +177,31 @@ export function AdminPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
           {/* Sidebar */}
-          <aside className="md:col-span-1 bg-white rounded-lg shadow p-4 sticky top-24">
+          <aside className="md:col-span-1 sticky top-24">
             <div className="mb-6">
               <h3 className="text-lg font-semibold">Admin</h3>
               <p className="text-sm text-gray-500">Welcome, {user.name || user.email}</p>
             </div>
 
             <nav className="flex flex-col gap-2">
-              <button onClick={() => setTab('overview')} className={`flex items-center gap-3 p-3 rounded ${tab==='overview'?'bg-blue-50':''}`}><ServerCog className="w-5 h-5 text-blue-600"/> <span>Overview</span></button>
-              <button onClick={() => setTab('users')} className={`flex items-center gap-3 p-3 rounded ${tab==='users'?'bg-blue-50':''}`}><Users className="w-5 h-5 text-green-600"/> <span>Users</span></button>
-              <button onClick={() => setTab('subjects')} className={`flex items-center gap-3 p-3 rounded ${tab==='subjects'?'bg-blue-50':''}`}><BookOpen className="w-5 h-5 text-purple-600"/> <span>Subjects</span></button>
-              <button onClick={() => setTab('settings')} className={`flex items-center gap-3 p-3 rounded ${tab==='settings'?'bg-blue-50':''}`}><Settings className="w-5 h-5 text-yellow-600"/> <span>Settings</span></button>
+              <Button variant={tab==='overview' ? 'primary' : 'ghost'} onClick={() => setTab('overview')} className="flex items-center gap-3 justify-start">
+                <ServerCog className="w-5 h-5 text-blue-600"/> <span>Overview</span>
+              </Button>
+              <Button variant={tab==='users' ? 'primary' : 'ghost'} onClick={() => setTab('users')} className="flex items-center gap-3 justify-start">
+                <Users className="w-5 h-5 text-green-600"/> <span>Users</span>
+              </Button>
+              <Button variant={tab==='subjects' ? 'primary' : 'ghost'} onClick={() => setTab('subjects')} className="flex items-center gap-3 justify-start">
+                <BookOpen className="w-5 h-5 text-purple-600"/> <span>Subjects</span>
+              </Button>
+              <Button variant={tab==='settings' ? 'primary' : 'ghost'} onClick={() => setTab('settings')} className="flex items-center gap-3 justify-start">
+                <Settings className="w-5 h-5 text-yellow-600"/> <span>Settings</span>
+              </Button>
             </nav>
           </aside>
 
           {/* Main */}
           <main className="md:col-span-4">
-            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="bg-white rounded-lg shadow p-6 mb-6">
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="mb-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h1 className="text-2xl font-bold">Admin Dashboard</h1>
@@ -200,20 +210,19 @@ export function AdminPage() {
                 <div className="text-sm text-gray-600">Super Admin: gigsdev007@gmail.com</div>
               </div>
 
-              {/* Stats */}
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="p-4 bg-gradient-to-r from-blue-50 to-white rounded-lg">
+                <Card className="p-4 bg-gradient-to-r from-blue-50 to-white">
                   <div className="text-xs text-gray-500">Users</div>
                   <div className="text-2xl font-bold">{stats.users}</div>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-white rounded-lg">
+                </Card>
+                <Card className="p-4 bg-gradient-to-r from-purple-50 to-white">
                   <div className="text-xs text-gray-500">Subjects</div>
                   <div className="text-2xl font-bold">{stats.subjects}</div>
-                </div>
-                <div className="p-4 bg-gradient-to-r from-green-50 to-white rounded-lg">
+                </Card>
+                <Card className="p-4 bg-gradient-to-r from-green-50 to-white">
                   <div className="text-xs text-gray-500">Actions</div>
                   <div className="text-2xl font-bold">Quick Tools</div>
-                </div>
+                </Card>
               </div>
             </motion.div>
 
@@ -232,61 +241,54 @@ export function AdminPage() {
                     <h3 className="font-medium mb-2">Import Questions (Preview & Run)</h3>
                     <div className="text-sm text-gray-600 mb-3">Preview normalized rows locally and run server-side import.</div>
 
-                    <div className="flex items-center gap-2 mb-3">
-                      <button
-                        onClick={async () => {
-                          setPreviewLoading(true);
-                          try {
-                            const res = await fetch('/api/preview-import');
-                            if (!res.ok) throw new Error('Failed to preview');
-                            const data = await res.json();
-                            setPreviewRows(data.sample || []);
-                          } catch (err: any) {
-                            setPreviewRows([]);
-                            alert('Preview failed: ' + (err.message || err));
-                          } finally {
-                            setPreviewLoading(false);
-                          }
-                        }}
-                        className="px-3 py-2 bg-indigo-600 text-white rounded"
-                      >
-                        {previewLoading ? 'Previewing...' : 'Preview Import'}
-                      </button>
+                          <div className="flex items-center gap-2 mb-3">
+                            <Button variant="secondary" onClick={async () => {
+                                setPreviewLoading(true);
+                                try {
+                                  const res = await fetch('/api/preview-import');
+                                  if (!res.ok) throw new Error('Failed to preview');
+                                  const data = await res.json();
+                                  setPreviewRows(data.sample || []);
+                                } catch (err: any) {
+                                  setPreviewRows([]);
+                                  alert('Preview failed: ' + (err.message || err));
+                                } finally {
+                                  setPreviewLoading(false);
+                                }
+                              }} className="px-3 py-2">
+                              {previewLoading ? 'Previewing...' : 'Preview Import'}
+                            </Button>
 
-                      <button
-                        onClick={async () => {
-                          // run admin login then import
-                          if (!adminPasswordInput) {
-                            const pw = prompt('Enter admin password to run import');
-                            if (!pw) return;
-                            setAdminPasswordInput(pw);
-                          }
-                          setImportLoading(true);
-                          setImportResult(null);
-                          try {
-                            const login = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPasswordInput }) });
-                            if (!login.ok) throw new Error('Admin login failed');
-                            const { token } = await login.json();
-                            const imp = await fetch('/api/import-quizzes', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-                            if (!imp.ok) {
-                              const txt = await imp.text();
-                              throw new Error(txt || 'Import failed');
-                            }
-                            const result = await imp.json();
-                            setImportResult({ imported: result.imported });
-                            alert('Import completed: ' + (result.imported ?? 0));
-                          } catch (err: any) {
-                            setImportResult({ error: err.message || String(err) });
-                            alert('Import error: ' + (err.message || err));
-                          } finally {
-                            setImportLoading(false);
-                          }
-                        }}
-                        className="px-3 py-2 bg-emerald-600 text-white rounded"
-                      >
-                        {importLoading ? 'Importing...' : 'Run Import'}
-                      </button>
-                    </div>
+                            <Button variant="primary" onClick={async () => {
+                                if (!adminPasswordInput) {
+                                  const pw = prompt('Enter admin password to run import');
+                                  if (!pw) return;
+                                  setAdminPasswordInput(pw);
+                                }
+                                setImportLoading(true);
+                                setImportResult(null);
+                                try {
+                                  const login = await fetch('/api/admin-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: adminPasswordInput }) });
+                                  if (!login.ok) throw new Error('Admin login failed');
+                                  const { token } = await login.json();
+                                  const imp = await fetch('/api/import-quizzes', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+                                  if (!imp.ok) {
+                                    const txt = await imp.text();
+                                    throw new Error(txt || 'Import failed');
+                                  }
+                                  const result = await imp.json();
+                                  setImportResult({ imported: result.imported });
+                                  alert('Import completed: ' + (result.imported ?? 0));
+                                } catch (err: any) {
+                                  setImportResult({ error: err.message || String(err) });
+                                  alert('Import error: ' + (err.message || err));
+                                } finally {
+                                  setImportLoading(false);
+                                }
+                              }} className="px-3 py-2">
+                              {importLoading ? 'Importing...' : 'Run Import'}
+                            </Button>
+                          </div>
 
                     <div className="mb-3">
                       <label className="text-xs text-gray-500">Admin password (stored only in this session)</label>
@@ -302,10 +304,10 @@ export function AdminPage() {
                       ) : (
                         <div className="space-y-2 max-h-48 overflow-auto p-2 bg-gray-50 rounded">
                           {previewRows.map((r: any) => (
-                            <div key={r.id} className="text-sm border-b pb-1">
-                              <div className="font-medium">{r.question_text.slice(0, 120)}{r.question_text.length>120?'...':''}</div>
-                              <div className="text-xs text-gray-500">Options: {r.option_a ? 'A,' : ''}{r.option_b ? 'B,' : ''}{r.option_c ? 'C,' : ''}{r.option_d ? 'D' : ''} • Correct: {r.correct_answer}</div>
-                            </div>
+                            <Card key={r.id} className="p-3">
+                              <div className="font-medium text-sm">{r.question_text.slice(0, 120)}{r.question_text.length>120?'...':''}</div>
+                              <div className="text-xs text-gray-500 mt-1">Options: {r.option_a ? 'A,' : ''}{r.option_b ? 'B,' : ''}{r.option_c ? 'C,' : ''}{r.option_d ? 'D' : ''} • Correct: {r.correct_answer}</div>
+                            </Card>
                           ))}
                         </div>
                       )}

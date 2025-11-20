@@ -1,55 +1,55 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { quizService } from '../services/quiz-service';
 import { questionService } from '../services/question-service';
+import { Card } from '../components/ui/Card';
+import { ProgressBar } from '../components/ui/ProgressBar';
+import { OptionButton } from '../components/ui/OptionButton';
+import { Button } from '../components/ui/Button';
 
 interface QuizQuestion {
   id: string;
   text: string;
-  options: { key: 'A'|'B'|'C'|'D'; text: string }[];
-  correct: 'A'|'B'|'C'|'D';
+  options: { key: string; text: string }[];
+  correct?: string;
 }
 
 const sampleQuestions: QuizQuestion[] = new Array(20).fill(null).map((_, i) => ({
-  id: `q${i+1}`,
-  text: `Sample question #${i+1}`,
+  id: `q${i + 1}`,
+  text: `Sample question #${i + 1}`,
   options: [
     { key: 'A', text: 'Option A' },
     { key: 'B', text: 'Option B' },
     { key: 'C', text: 'Option C' },
     { key: 'D', text: 'Option D' },
   ],
-  correct: 'A',
 }));
 
 export function MockExamQuiz() {
-  // 35 minutes in seconds
-  const START_TIME = 35 * 60;
+  const START_TIME = 35 * 60; // seconds
   const [timeLeft, setTimeLeft] = useState(START_TIME);
   const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, 'A'|'B'|'C'|'D'>>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completed, setCompleted] = useState(false);
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
 
   useEffect(() => {
     (async () => {
       try {
         const params = new URLSearchParams(window.location.search);
         const subject = params.get('subject');
-        let qs;
+        let qs: any;
         if (subject) {
           const rows = await questionService.getQuestionsBySubjectSlug(subject, { limit: 50 });
-          qs = rows.map(r => ({ id: r.id, text: r.question_text, options: [
+          qs = rows.map((r: any) => ({ id: r.id, text: r.question_text, options: [
             { key: 'A', text: r.option_a },
             { key: 'B', text: r.option_b },
             { key: 'C', text: r.option_c },
-            { key: 'D', text: r.option_d }
+            { key: 'D', text: r.option_d },
           ], correct: r.correct_answer }));
         } else {
           qs = await quizService.getRandomQuestions(20);
         }
-        // ensure correct keys are present and options exist
-        setQuestions(qs.map(q => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || '').toString() })));
+        setQuestions(qs.map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: q.correct })));
       } catch (e) {
         console.error('Failed to load quiz questions:', e);
       }
@@ -63,9 +63,7 @@ export function MockExamQuiz() {
   }, [completed]);
 
   useEffect(() => {
-    if (timeLeft === 0 && !completed) {
-      setCompleted(true);
-    }
+    if (timeLeft === 0 && !completed) setCompleted(true);
   }, [timeLeft, completed]);
 
   const pool = questions.length > 0 ? questions : sampleQuestions;
@@ -73,61 +71,75 @@ export function MockExamQuiz() {
 
   const score = useMemo(() => {
     if (!completed) return 0;
-    const pool = questions.length > 0 ? questions : sampleQuestions;
-    return pool.reduce((acc, q) => acc + (answers[q.id] === q.correct ? 1 : 0), 0);
-  }, [completed, answers]);
+    return pool.reduce((acc, q) => acc + (answers[q.id] === (q.correct ?? '') ? 1 : 0), 0);
+  }, [completed, answers, pool]);
 
-  const select = (key: string) => {
+  const select = useCallback((key: string) => {
     if (completed) return;
     setAnswers(a => ({ ...a, [current.id]: key }));
-  };
+  }, [completed, current]);
 
   const next = () => setIndex(i => Math.min(pool.length - 1, i + 1));
   const prev = () => setIndex(i => Math.max(0, i - 1));
 
+  // keyboard navigation
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (completed) return;
+      if (e.key === 'ArrowLeft') prev();
+      if (e.key === 'ArrowRight') next();
+      const k = e.key.toUpperCase();
+      if (['A', 'B', 'C', 'D'].includes(k)) select(k);
+      if (e.key === 'Enter') setCompleted(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [completed, select]);
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Mock Exam (Single Subject)</h1>
+      <h1 className="text-3xl font-extrabold mb-6">Mock Exam</h1>
 
       {!completed ? (
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex justify-between mb-4">
-            <div>Question {index + 1} / {sampleQuestions.length}</div>
-            <div className="font-mono">Time Left: {Math.floor(timeLeft/60)}:{String(timeLeft%60).padStart(2,'0')}</div>
+        <Card>
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
+            <div className="text-sm font-mono text-gray-700">Time: {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}</div>
           </div>
-          <p className="text-lg mb-4">{current.text}</p>
-          <div className="grid grid-cols-1 gap-3">
-            {current.options.map((opt: any) => (
-              <button
-                key={opt.key}
-                onClick={() => select(opt.key)}
-                className={`text-left p-4 border rounded ${answers[current.id] === opt.key ? 'border-blue-600' : 'border-gray-300'}`}
-              >
-                <span className="font-semibold mr-2">{opt.key}.</span>
-                {opt.text}
-              </button>
-            ))}
+
+          <ProgressBar value={index + 1} max={pool.length} className="mb-5" />
+
+          <div className="mb-4">
+            <div className="text-lg font-semibold mb-3">{current.text}</div>
+            <div className="grid grid-cols-1 gap-3">
+              {current.options.map((opt: any) => (
+                <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={answers[current.id] === opt.key} onSelect={select} />
+              ))}
+            </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button onClick={prev} className="px-4 py-2 border rounded">Previous</button>
-            <button onClick={next} className="px-4 py-2 border rounded">Next</button>
-            <button onClick={() => setCompleted(true)} className="ml-auto px-4 py-2 bg-blue-600 text-white rounded">Submit</button>
+
+          <div className="mt-6 flex items-center gap-3">
+            <Button variant="ghost" onClick={prev} className="px-3">Previous</Button>
+            <Button variant="ghost" onClick={next}>Next</Button>
+            <div className="ml-auto flex items-center gap-3">
+              <div className="text-sm text-gray-500">Selected: <span className="font-semibold">{answers[current.id] ?? '—'}</span></div>
+              <Button variant="primary" onClick={() => setCompleted(true)}>Submit Exam</Button>
+            </div>
           </div>
-        </div>
+        </Card>
       ) : (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-2">Exam Completed</h2>
-          <p className="mb-4">Score: {score} / {pool.length}</p>
-          <div className="space-y-2">
+        <Card>
+          <h2 className="text-2xl font-bold mb-2">Exam Completed</h2>
+          <p className="mb-4">Score: <span className="font-semibold">{score}</span> / <span className="font-semibold">{pool.length}</span></p>
+          <div className="space-y-3">
             {pool.map((q: any) => (
-              <div key={q.id} className="p-3 border rounded">
-                <div className="font-semibold">{q.text}</div>
-                <div>Your answer: {answers[q.id] ?? '—'}</div>
-                <div>Correct answer: {q.correct || '—'}</div>
+              <div key={q.id} className="p-3 border rounded-lg">
+                <div className="font-medium mb-1">{q.text}</div>
+                <div className="text-sm text-gray-600">Your answer: <span className="font-semibold">{answers[q.id] ?? '—'}</span> • Correct: <span className="font-semibold">{q.correct ?? '—'}</span></div>
               </div>
             ))}
           </div>
-        </div>
+        </Card>
       )}
     </div>
   );
