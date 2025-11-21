@@ -63,3 +63,4 @@ coverage/**/*
 # Optional: ignore lock files if you don't want them in repo
 # Uncomment only if you manage lockfiles elsewhere
 # pnpm-lock.yaml
+.vercel
