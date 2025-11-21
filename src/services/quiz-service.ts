@@ -1,7 +1,5 @@
-import jambData from '../../data/jamb-waec-questions.json';
-import extra from '../../data/extra-quizzes.json';
-
-type RawBank = Record<string, any[]>;
+import { questionService, normalizeQuestions } from './question-service';
+import { supabase } from '../integrations/supabase/client';
 
 export interface QuizQuestion {
   id: string;
@@ -11,121 +9,61 @@ export interface QuizQuestion {
   explanation?: string;
 }
 
-function normalizeEntry(entry: any, idPrefix = ''): QuizQuestion {
-  const id = entry.id || `${idPrefix}${Math.random().toString(36).slice(2, 9)}`;
-  const text = entry.question_text || entry.question || entry.text || '';
-  const explanation = entry.explanation || entry.explain || entry.explanation_text || '';
-  // raw correct value may be an index (1/0), a key (A/B/C/D), or the option text.
-  const rawCorrect = (entry.correct_answer ?? entry.answer ?? entry.correct ?? '').toString();
-  const options = [] as { key: string; text: string }[];
-
-  // Support different field names
-  if (entry.option_a) {
-    options.push({ key: 'A', text: entry.option_a });
-    options.push({ key: 'B', text: entry.option_b });
-    options.push({ key: 'C', text: entry.option_c });
-    options.push({ key: 'D', text: entry.option_d });
-  } else if (entry.options && Array.isArray(entry.options)) {
-    entry.options.forEach((o: any, i: number) => {
-      options.push({ key: String.fromCharCode(65 + i), text: o.text || o });
-    });
-  } else {
-    // Fallback simple split if available
-    if (entry.answers && Array.isArray(entry.answers)) {
-      entry.answers.forEach((a: any, i: number) => options.push({ key: String.fromCharCode(65 + i), text: a }));
-    }
-  }
-
-  // Determine canonical correct key (A/B/C/...)
-  let correct = '';
-  const normalizeToKey = (val: string) => {
-    if (!val) return '';
-    const v = val.trim();
-    // If already a letter key
-    if (/^[A-Za-z]$/.test(v)) return v.toUpperCase();
-    // If a 1-based index
-    if (/^[0-9]+$/.test(v)) {
-      const idx = parseInt(v, 10) - 1;
-      if (idx >= 0 && idx < options.length) return String.fromCharCode(65 + idx);
-    }
-    // If matches option text, find index
-    const found = options.findIndex(o => o.text && o.text.toString().trim().toLowerCase() === v.toLowerCase());
-    if (found >= 0) return String.fromCharCode(65 + found);
-    // If value looks like 'option_a' or ends with a letter
-    const m = v.match(/[A-Za-z]$/);
-    if (m) {
-      const letter = m[0].toUpperCase();
-      const idx = letter.charCodeAt(0) - 65;
-      if (idx >= 0 && idx < options.length) return letter;
-    }
-    return '';
-  };
-
-  try {
-    correct = normalizeToKey(rawCorrect);
-  } catch (e) {
-    correct = '';
-  }
-
-  return { id, text, options, correct, explanation };
-}
+// Removed normalizeEntry - now using normalizeQuestions from question-service
 
 export const quizService = {
-  async getQuestionsForSubject(subjectSlug: string): Promise<QuizQuestion[]> {
-    const url = `/api/questions?subject=${encodeURIComponent(subjectSlug)}&count=200`;
+  /**
+   * Get questions for a specific subject from Supabase
+   * @param subjectSlug - Subject slug (e.g., 'mathematics', 'english-language')
+   * @param limit - Maximum number of questions to return (default: 200)
+   */
+  async getQuestionsForSubject(subjectSlug: string, limit = 200): Promise<QuizQuestion[]> {
     try {
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        // Expecting normalized objects: { id, text, options: [{key,text}], correct, explanation }
-        return (data || []).map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || q.correct_answer || '').toString(), explanation: q.explanation }));
-      }
+      // Fetch questions from Supabase using questionService
+      const questions = await questionService.getQuestionsBySubjectSlug(subjectSlug, { limit });
+
+      // Normalize to QuizQuestion format
+      return normalizeQuestions(questions);
     } catch (err) {
-      // ignore and fallback to local data
-      console.warn('quizService: server fetch failed, falling back to local data', err);
+      console.error('quizService: Failed to fetch questions from Supabase', err);
+      return [];
     }
-
-    // Fallback: read from local bundled JSON
-    const key = subjectSlug.toLowerCase();
-    const result: QuizQuestion[] = [];
-    const jdata: RawBank = (jambData as any) || {};
-    if (jdata[key] && Array.isArray(jdata[key])) {
-      jdata[key].forEach((e: any, i: number) => result.push(normalizeEntry(e, `j-${key}-${i}-`)));
-    }
-    (extra as any[]).forEach((e: any, i: number) => {
-      if ((e.subject || '').toLowerCase() === key) {
-        result.push(normalizeEntry(e, `x-${key}-${i}-`));
-      }
-    });
-
-    return result;
   },
 
+  /**
+   * Get random questions from all subjects
+   * @param count - Number of random questions to return (default: 10)
+   */
   async getRandomQuestions(count = 10): Promise<QuizQuestion[]> {
-    const url = `/api/questions?count=${encodeURIComponent(String(count))}`;
     try {
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        return (data || []).map((q: any) => ({ id: q.id, text: q.text, options: q.options || [], correct: (q.correct || q.correct_answer || '').toString(), explanation: q.explanation }));
+      // Fetch random questions from all active subjects
+      const { data: questions, error } = await supabase
+        .from('questions')
+        .select('*')
+        .eq('is_active', true)
+        .limit(count * 3); // Fetch more to ensure we have enough after filtering
+
+      if (error) {
+        console.error('quizService: Error fetching random questions', error);
+        return [];
       }
+
+      if (!questions || questions.length === 0) {
+        return [];
+      }
+
+      // Shuffle the questions
+      const shuffled = [...questions];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      // Normalize and return the requested count
+      return normalizeQuestions(shuffled.slice(0, count));
     } catch (err) {
-      console.warn('quizService: server fetch failed, falling back to local pool', err);
+      console.error('quizService: Failed to fetch random questions', err);
+      return [];
     }
-
-    const jdata: RawBank = (jambData as any) || {};
-    let pool: QuizQuestion[] = [];
-    Object.keys(jdata).forEach(subject => {
-      jdata[subject].forEach((e: any, i: number) => pool.push(normalizeEntry(e, `j-${subject}-${i}-`)));
-    });
-    (extra as any[]).forEach((e: any, i: number) => pool.push(normalizeEntry(e, `x-${i}-`)));
-
-    // shuffle and slice
-    for (let i = pool.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [pool[i], pool[j]] = [pool[j], pool[i]];
-    }
-
-    return pool.slice(0, count);
   }
 };

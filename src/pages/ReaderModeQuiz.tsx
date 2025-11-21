@@ -1,72 +1,233 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { quizService } from '../services/quiz-service';
+import { questionService, normalizeQuestions } from '../services/question-service';
+import { Card } from '../components/ui/Card';
+import { OptionButton } from '../components/ui/OptionButton';
+import { Button } from '../components/ui/Button';
+import { ProgressBar } from '../components/ui/ProgressBar';
 
 interface QuizQuestion {
   id: string;
   text: string;
-  options: { key: 'A'|'B'|'C'|'D'; text: string }[];
-  correct: 'A'|'B'|'C'|'D';
-  explanation: string;
+  options: { key: string; text: string }[];
+  correct?: string;
+  explanation?: string;
 }
 
-const sampleQuestions: QuizQuestion[] = [
-  {
-    id: 'q1',
-    text: 'Which gas do plants absorb during photosynthesis?',
-    options: [
-      { key: 'A', text: 'Oxygen' },
-      { key: 'B', text: 'Nitrogen' },
-      { key: 'C', text: 'Carbon Dioxide' },
-      { key: 'D', text: 'Hydrogen' },
-    ],
-    correct: 'C',
-    explanation: 'Plants absorb carbon dioxide and release oxygen during photosynthesis.',
-  },
-];
-
 export function ReaderModeQuiz() {
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [index, setIndex] = useState(0);
-  const [selected, setSelected] = useState<'A'|'B'|'C'|'D'|null>(null);
-  const q = sampleQuestions[index];
+  const [selected, setSelected] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [subjectSel, setSubjectSel] = useState<string>('');
+  const [yearSel, setYearSel] = useState<number | 'ALL'>('ALL');
+  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>('ALL');
 
-  const select = (key: 'A'|'B'|'C'|'D') => setSelected(key);
+  // Load questions from Supabase
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      try {
+        let qs: QuizQuestion[] = [];
+        if (subjectSel) {
+          const rows = await questionService.getQuestionsBySubjectSlug(
+            subjectSel,
+            {
+              exam_year: typeof yearSel === 'number' ? yearSel : undefined,
+              exam_type: typeSel === 'ALL' ? undefined : typeSel,
+              limit: 50
+            }
+          );
+          qs = normalizeQuestions(rows, { exam_year: yearSel as any, exam_type: typeSel as any });
+        } else {
+          qs = await quizService.getRandomQuestions(20);
+        }
+        if (qs && qs.length > 0) {
+          setQuestions(qs);
+        }
+      } catch (e) {
+        console.error('Failed to load questions:', e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [subjectSel, yearSel, typeSel]);
+
+  const q = questions[index];
+
+  const select = (key: string) => setSelected(key);
+
   const next = () => {
     setSelected(null);
-    setIndex(i => Math.min(sampleQuestions.length - 1, i + 1));
+    setIndex(i => Math.min(questions.length - 1, i + 1));
   };
+
+  const prev = () => {
+    setSelected(null);
+    setIndex(i => Math.max(0, i - 1));
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6">Reader Mode</h1>
+        <Card>
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading questions...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!q || questions.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-2xl md:text-3xl font-bold mb-6">Reader Mode</h1>
+        <Card>
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">No questions available. Please select a subject or try again.</p>
+            <Button onClick={() => window.location.reload()}>Reload</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  const isCorrect = selected === q.correct;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Reader Mode</h1>
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between mb-4">
-          <div>Question {index + 1} / {sampleQuestions.length}</div>
-        </div>
-        <p className="text-lg mb-4">{q.text}</p>
-        <div className="grid grid-cols-1 gap-3">
-          {q.options.map(opt => (
-            <button
-              key={opt.key}
-              onClick={() => select(opt.key)}
-              className={`text-left p-4 border rounded ${selected === opt.key ? 'border-blue-600' : 'border-gray-300'}`}
+      <h1 className="text-2xl md:text-3xl font-bold mb-6">Reader Mode</h1>
+
+      {/* Filters */}
+      <Card className="mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Subject</label>
+            <select
+              value={subjectSel}
+              onChange={(e) => {
+                setSubjectSel(e.target.value);
+                setIndex(0);
+                setSelected(null);
+              }}
+              className="w-full border rounded px-3 py-2"
             >
-              <span className="font-semibold mr-2">{opt.key}.</span>
-              {opt.text}
-            </button>
-          ))}
+              <option value="">Random Mix</option>
+              <option value="mathematics">Mathematics</option>
+              <option value="english-language">English Language</option>
+              <option value="physics">Physics</option>
+              <option value="chemistry">Chemistry</option>
+              <option value="biology">Biology</option>
+              <option value="economics">Economics</option>
+              <option value="commerce">Commerce</option>
+              <option value="accounting">Accounting</option>
+              <option value="government">Government</option>
+              <option value="geography">Geography</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Year</label>
+            <select
+              value={yearSel}
+              onChange={(e) => {
+                setYearSel(e.target.value === 'ALL' ? 'ALL' : Number(e.target.value));
+                setIndex(0);
+                setSelected(null);
+              }}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="ALL">All Years</option>
+              <option value="2023">2023</option>
+              <option value="2022">2022</option>
+              <option value="2021">2021</option>
+              <option value="2020">2020</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Exam Type</label>
+            <select
+              value={typeSel}
+              onChange={(e) => {
+                setTypeSel(e.target.value as any);
+                setIndex(0);
+                setSelected(null);
+              }}
+              className="w-full border rounded px-3 py-2"
+            >
+              <option value="ALL">All</option>
+              <option value="JAMB">JAMB</option>
+              <option value="WAEC">WAEC</option>
+            </select>
+          </div>
         </div>
+      </Card>
+
+      {/* Quiz Card */}
+      <Card>
+        <div className="flex justify-between items-center mb-4">
+          <div className="text-sm text-gray-600">
+            Question {index + 1} / {questions.length}
+          </div>
+          <div className="text-sm font-medium text-blue-600">
+            Reader Mode
+          </div>
+        </div>
+
+        <ProgressBar value={index + 1} max={questions.length} className="mb-6" />
+
+        <div className="mb-6">
+          <p className="text-base md:text-lg font-semibold mb-4">{q.text}</p>
+          <div className="grid grid-cols-1 gap-3">
+            {q.options.map((opt) => (
+              <OptionButton
+                key={opt.key}
+                optionKey={opt.key}
+                text={opt.text}
+                selected={selected === opt.key}
+                onSelect={select}
+                disabled={!!selected}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Immediate Feedback */}
         {selected && (
-          <div className="mt-6 p-4 rounded border border-green-600">
-            <div className="font-semibold text-green-600">Correct answer: {q.correct}</div>
-            <p className="text-gray-700 mt-2">{q.explanation}</p>
-            <button
-              onClick={next}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              Next Question
-            </button>
+          <div className={`p-4 rounded-lg border-2 ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`}>
+            <div className={`font-semibold mb-2 ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>
+              {isCorrect ? '✓ Correct!' : '✗ Incorrect'}
+            </div>
+            <div className="text-sm text-gray-700 mb-2">
+              <span className="font-medium">Correct answer:</span> {q.correct}
+            </div>
+            {q.explanation && (
+              <div className="text-sm text-gray-700 mt-3 pt-3 border-t border-gray-200">
+                <span className="font-medium">Explanation:</span> {q.explanation}
+              </div>
+            )}
           </div>
         )}
-      </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between mt-6 gap-3">
+          <Button
+            onClick={prev}
+            disabled={index === 0}
+            variant="outline"
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={next}
+            disabled={index === questions.length - 1}
+          >
+            Next Question
+          </Button>
+        </div>
+      </Card>
     </div>
   );
 }

@@ -24,13 +24,28 @@ if (supabaseKey === process.env.VITE_SUPABASE_ANON_KEY) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// Subject name to slug mapping
+// Subject name to slug mapping (updated for fresh schema)
 const subjectSlugs = {
+  // Core subjects from jamb-waec-questions.json
   mathematics: 'mathematics',
   english: 'english-language',
   physics: 'physics',
   chemistry: 'chemistry',
-  biology: 'biology'
+  biology: 'biology',
+  economics: 'economics',
+  commerce: 'commerce',
+  accounting: 'accounting',
+  literature: 'literature-in-english',
+  government: 'government',
+  geography: 'geography',
+  agriculture: 'agriculture',
+  history: 'history',
+
+  // Alternative mappings
+  'english language': 'english-language',
+  'literature in english': 'literature-in-english',
+  'agricultural science': 'agriculture',
+  'civic education': 'civic-education'
 };
 
 async function getSubjectDetails(subjectSlug) {

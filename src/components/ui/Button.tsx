@@ -1,15 +1,16 @@
 import React from 'react';
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'outline';
 };
 
 export function Button({ variant = 'primary', className = '', children, ...rest }: Props) {
-  const base = 'px-4 py-3 md:py-2 rounded-md font-medium focus:outline-none disabled:opacity-60 text-sm md:text-base w-full sm:w-auto';
+  const base = 'px-4 py-3 md:py-2 rounded-md font-medium focus:outline-none disabled:opacity-60 text-sm md:text-base w-full sm:w-auto transition-colors';
   const variants: Record<string, string> = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700',
     secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200',
     ghost: 'bg-transparent text-gray-700 hover:bg-gray-50',
+    outline: 'border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:bg-gray-50',
   };
   return (
     <button className={`${base} ${variants[variant]} ${className}`} {...rest}>
