@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { quizService } from '../services/quiz-service';
 import { questionService, normalizeQuestions } from '../services/question-service';
 import { Card } from '../components/ui/Card';
@@ -13,23 +14,15 @@ interface QuizQuestion {
   correct?: string;
 }
 
-const sampleQuestions: QuizQuestion[] = new Array(20).fill(null).map((_, i) => ({
-  id: `q${i + 1}`,
-  text: `Sample question #${i + 1}`,
-  options: [
-    { key: 'A', text: 'Option A' },
-    { key: 'B', text: 'Option B' },
-    { key: 'C', text: 'Option C' },
-    { key: 'D', text: 'Option D' },
-  ],
-}));
-
 export function MockExamQuiz() {
+  const navigate = useNavigate();
   const START_TIME = 35 * 60; // seconds
+  const [startTime] = useState(Date.now());
   const [timeLeft, setTimeLeft] = useState(START_TIME);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [completed, setCompleted] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const params = new URLSearchParams(window.location.search);
   const initialSubject = params.get('subject') || undefined;
@@ -53,6 +46,7 @@ export function MockExamQuiz() {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       try {
         const subject = subjectSel;
         const exam_year = yearSel;
@@ -65,13 +59,16 @@ export function MockExamQuiz() {
           const local = await quizService.getRandomQuestions(20);
           qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
         }
-        setQuestions(qs as any);
+        setQuestions(qs && qs.length > 0 ? qs : []);
         setIndex(0);
         setAnswers({});
         setCompleted(false);
         setTimeLeft(START_TIME);
       } catch (e) {
         console.error('Failed to load quiz questions:', e);
+        setQuestions([]);
+      } finally {
+        setLoading(false);
       }
     })();
   }, [subjectSel, yearSel, typeSel]);
@@ -86,7 +83,27 @@ export function MockExamQuiz() {
     if (timeLeft === 0 && !completed) setCompleted(true);
   }, [timeLeft, completed]);
 
-  const pool = questions.length > 0 ? questions : sampleQuestions;
+  // Navigate to results when completed
+  useEffect(() => {
+    if (completed && pool.length > 0) {
+      const timeTaken = START_TIME - timeLeft;
+      const calculatedScore = pool.reduce((acc, q) => acc + (answers[q.id] === (q.correct ?? '') ? 1 : 0), 0);
+
+      navigate('/quiz-results', {
+        state: {
+          questions: pool,
+          answers,
+          score: calculatedScore,
+          totalQuestions: pool.length,
+          timeTaken,
+          quizMode: 'mock',
+          subject: subjectSel,
+        },
+      });
+    }
+  }, [completed, pool, answers, navigate, timeLeft, START_TIME, subjectSel]);
+
+  const pool = questions;
   const current = pool[index];
 
   const score = useMemo(() => {
@@ -115,6 +132,36 @@ export function MockExamQuiz() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [completed, select]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+        <Card>
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading exam questions...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!current || pool.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+        <Card>
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">No questions available. Please select a subject or try different filters.</p>
+            <Button onClick={() => window.location.reload()}>Reload</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">

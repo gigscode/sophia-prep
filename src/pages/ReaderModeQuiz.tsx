@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { quizService } from '../services/quiz-service';
 import { questionService, normalizeQuestions } from '../services/question-service';
 import { Card } from '../components/ui/Card';
@@ -15,9 +16,11 @@ interface QuizQuestion {
 }
 
 export function ReaderModeQuiz() {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [subjectSel, setSubjectSel] = useState<string>('');
   const [yearSel, setYearSel] = useState<number | 'ALL'>('ALL');
@@ -55,11 +58,33 @@ export function ReaderModeQuiz() {
 
   const q = questions[index];
 
-  const select = (key: string) => setSelected(key);
+  const select = (key: string) => {
+    setSelected(key);
+    setAnswers(prev => ({ ...prev, [q.id]: key }));
+  };
 
   const next = () => {
     setSelected(null);
-    setIndex(i => Math.min(questions.length - 1, i + 1));
+    if (index < questions.length - 1) {
+      setIndex(i => i + 1);
+    } else {
+      // Quiz completed - navigate to results
+      const score = Object.entries(answers).reduce((acc, [qId, ans]) => {
+        const question = questions.find(q => q.id === qId);
+        return acc + (question && ans === question.correct ? 1 : 0);
+      }, 0);
+
+      navigate('/quiz-results', {
+        state: {
+          questions,
+          answers,
+          score,
+          totalQuestions: questions.length,
+          quizMode: 'reader',
+          subject: subjectSel,
+        },
+      });
+    }
   };
 
   const prev = () => {

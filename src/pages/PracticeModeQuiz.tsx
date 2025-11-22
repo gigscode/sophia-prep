@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { quizService } from '../services/quiz-service';
 import { questionService, normalizeQuestions } from '../services/question-service';
 import { Card } from '../components/ui/Card';
@@ -14,40 +15,15 @@ interface QuizQuestion {
   explanation?: string;
 }
 
-const sampleQuestions: QuizQuestion[] = [
-  {
-    id: 'q1',
-    text: 'What is the capital of Nigeria?',
-    options: [
-      { key: 'A', text: 'Lagos' },
-      { key: 'B', text: 'Abuja' },
-      { key: 'C', text: 'Port Harcourt' },
-      { key: 'D', text: 'Ibadan' },
-    ],
-    correct: 'B',
-    explanation: 'Abuja is the capital city of Nigeria.',
-  },
-  {
-    id: 'q2',
-    text: 'What is 2 + 2?',
-    options: [
-      { key: 'A', text: '3' },
-      { key: 'B', text: '4' },
-      { key: 'C', text: '5' },
-      { key: 'D', text: '6' },
-    ],
-    correct: 'B',
-    explanation: 'Basic arithmetic: 2 + 2 = 4.',
-  },
-];
-
 export function PracticeModeQuiz() {
+  const navigate = useNavigate();
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [score, setScore] = useState(0);
-
-  const [questions, setQuestions] = useState<QuizQuestion[]>(sampleQuestions);
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(true);
+  const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const params = new URLSearchParams(window.location.search);
   const initialSubject = params.get('subject') || undefined;
   const initialYearParam = params.get('year');
@@ -70,6 +46,7 @@ export function PracticeModeQuiz() {
 
   useEffect(() => {
     (async () => {
+      setLoading(true);
       try {
         const subject = subjectSel;
         const exam_year = yearSel;
@@ -82,8 +59,12 @@ export function PracticeModeQuiz() {
           const local = await quizService.getRandomQuestions(10);
           qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
         }
-        if (qs && qs.length > 0) setQuestions(qs as any);
+        setQuestions(qs && qs.length > 0 ? qs : []);
       } catch (e) {
+        console.error('Failed to load questions:', e);
+        setQuestions([]);
+      } finally {
+        setLoading(false);
       }
     })();
   }, [subjectSel, yearSel, typeSel]);
@@ -95,6 +76,7 @@ export function PracticeModeQuiz() {
     if (showFeedback || !q) return;
     setSelected(key);
     setShowFeedback(true);
+    setAnswers(prev => ({ ...prev, [q.id]: key }));
     if (key === (q.correct || '')) setScore(s => s + 1);
   }, [q, showFeedback]);
 
@@ -103,6 +85,18 @@ export function PracticeModeQuiz() {
     setShowFeedback(false);
     if (index < pool.length - 1) {
       setIndex(i => i + 1);
+    } else {
+      // Quiz completed - navigate to results
+      navigate('/quiz-results', {
+        state: {
+          questions: pool,
+          answers,
+          score,
+          totalQuestions: pool.length,
+          quizMode: 'practice',
+          subject: subjectSel,
+        },
+      });
     }
   };
 
@@ -123,6 +117,36 @@ export function PracticeModeQuiz() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onSelect, pool.length, showFeedback]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
+        <Card>
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading questions...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!q || pool.length === 0) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
+        <Card>
+          <div className="text-center py-8">
+            <p className="text-gray-600 mb-4">No questions available. Please select a subject or try different filters.</p>
+            <Button onClick={() => window.location.reload()}>Reload</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
