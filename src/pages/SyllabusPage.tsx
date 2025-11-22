@@ -78,7 +78,7 @@ export function SyllabusPage() {
       <PageHeader
         title="Official Syllabus"
         description="Access official JAMB and WAEC syllabi for all subjects"
-        icon={BookOpen}
+        icon={<BookOpen className="w-8 h-8" />}
       />
 
       <div className="container mx-auto px-4 py-8">

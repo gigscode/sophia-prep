@@ -83,6 +83,9 @@ export function MockExamQuiz() {
     if (timeLeft === 0 && !completed) setCompleted(true);
   }, [timeLeft, completed]);
 
+  const pool = questions;
+  const current = pool[index];
+
   // Navigate to results when completed
   useEffect(() => {
     if (completed && pool.length > 0) {
@@ -102,9 +105,6 @@ export function MockExamQuiz() {
       });
     }
   }, [completed, pool, answers, navigate, timeLeft, START_TIME, subjectSel]);
-
-  const pool = questions;
-  const current = pool[index];
 
   const score = useMemo(() => {
     if (!completed) return 0;
@@ -148,26 +148,18 @@ export function MockExamQuiz() {
     );
   }
 
-  // Empty state
-  if (!current || pool.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+  return (
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+
+      {(!current || pool.length === 0) ? (
         <Card>
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">No questions available. Please select a subject or try different filters.</p>
             <Button onClick={() => window.location.reload()}>Reload</Button>
           </div>
         </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-6 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
-
-      {!completed ? (
+      ) : !completed ? (
         <Card>
           <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
             <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
@@ -208,6 +200,7 @@ export function MockExamQuiz() {
           </div>
         </Card>
       )}
+
       <div className="mt-4 md:mt-6 flex items-center gap-3 flex-wrap">
         <label className="text-xs text-gray-600">Subject</label>
         <select className="border rounded px-3 py-2" value={subjectSel || ''} onChange={e => { const v = e.target.value || undefined; setSubjectSel(v); applyParams(v, undefined as any, undefined as any); }}>

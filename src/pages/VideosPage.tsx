@@ -95,7 +95,7 @@ export function VideosPage() {
       <PageHeader
         title="Video Lessons"
         description="Learn with curated video lessons organized by subject and topic"
-        icon={Film}
+        icon={<Film className="w-8 h-8" />}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -103,31 +103,28 @@ export function VideosPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto">
           <button
             onClick={() => setSelectedExamType('ALL')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'ALL'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'ALL'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             All Subjects
           </button>
           <button
             onClick={() => setSelectedExamType('JAMB')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'JAMB'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'JAMB'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             JAMB
           </button>
           <button
             onClick={() => setSelectedExamType('WAEC')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'WAEC'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'WAEC'
+              ? 'bg-blue-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
           >
             WAEC
           </button>
@@ -143,11 +140,10 @@ export function VideosPage() {
                   <button
                     key={subject.id}
                     onClick={() => setSelectedSubject(subject)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedSubject?.id === subject.id
-                        ? 'bg-red-100 text-red-700 font-medium'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedSubject?.id === subject.id
+                      ? 'bg-red-100 text-red-700 font-medium'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     {subject.name}
                   </button>
@@ -187,14 +183,13 @@ export function VideosPage() {
 
                       <h3 className="font-semibold text-gray-800 mb-2">{video.title}</h3>
                       <p className="text-sm text-gray-600 mb-3">{video.description}</p>
-                      
+
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                           {video.topic}
                         </span>
                         <Button
                           variant="primary"
-                          size="sm"
                           onClick={() => window.open(video.url, '_blank')}
                         >
                           <ExternalLink className="w-4 h-4 mr-1" />

@@ -16,6 +16,13 @@ export function AdminPage() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<AdminTab>('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
+
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     if (!loading && (!user || !user.isAdmin)) {
@@ -61,7 +68,7 @@ export function AdminPage() {
 
       {/* Sidebar Overlay (Mobile) */}
       <AnimatePresence>
-        {sidebarOpen && (
+        {sidebarOpen && !isDesktop && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -77,51 +84,51 @@ export function AdminPage() {
         <motion.div
           initial={false}
           animate={{
-            x: sidebarOpen ? 0 : '-100%',
+            x: isDesktop ? 0 : (sidebarOpen ? 0 : '-100%'),
           }}
-          className="lg:translate-x-0 h-full transition-transform duration-300 ease-in-out"
+          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+          className="h-full"
         >
-        <div className="flex flex-col h-full">
-          {/* Sidebar Header */}
-          <div className="p-6 border-b border-gray-200">
-            <h2 className="text-xl font-bold text-gray-800">Admin Panel</h2>
-            <p className="text-sm text-gray-500 mt-1">Sophia Prep</p>
-          </div>
+          <div className="flex flex-col h-full">
+            {/* Sidebar Header */}
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-800">Admin Panel</h2>
+              <p className="text-sm text-gray-500 mt-1">Sophia Prep</p>
+            </div>
 
-          {/* Navigation Menu */}
-          <nav className="flex-1 overflow-y-auto py-4">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = tab === item.id;
+            {/* Navigation Menu */}
+            <nav className="flex-1 overflow-y-auto py-4">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = tab === item.id;
 
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setTab(item.id);
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full flex items-center gap-3 px-6 py-3 transition-all duration-200 ${
-                    isActive
-                      ? `${item.bgColor} ${item.color} border-r-4 border-current font-semibold`
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
-                >
-                  <Icon className={`w-5 h-5 ${isActive ? item.color : 'text-gray-400'}`} />
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => {
+                      setTab(item.id);
+                      if (!isDesktop) setSidebarOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-6 py-3 transition-all duration-200 ${isActive
+                        ? `${item.bgColor} ${item.color} border-r-4 border-current font-semibold`
+                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                  >
+                    <Icon className={`w-5 h-5 ${isActive ? item.color : 'text-gray-400'}`} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </nav>
 
-          {/* Sidebar Footer */}
-          <div className="p-6 border-t border-gray-200">
-            <div className="text-xs text-gray-500">
-              <p className="font-medium text-gray-700 mb-1">Logged in as:</p>
-              <p className="truncate">{user.email}</p>
+            {/* Sidebar Footer */}
+            <div className="p-6 border-t border-gray-200">
+              <div className="text-xs text-gray-500">
+                <p className="font-medium text-gray-700 mb-1">Logged in as:</p>
+                <p className="truncate">{user.email}</p>
+              </div>
             </div>
           </div>
-        </div>
         </motion.div>
       </aside>
 

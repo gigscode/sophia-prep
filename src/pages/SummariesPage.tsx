@@ -89,7 +89,7 @@ export function SummariesPage() {
       <PageHeader
         title="Topic Summaries"
         description="Comprehensive summaries with key concepts for each subject"
-        icon={FileText}
+        icon={<FileText className="w-8 h-8" />}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -97,31 +97,28 @@ export function SummariesPage() {
         <div className="flex gap-2 mb-6 overflow-x-auto">
           <button
             onClick={() => setSelectedExamType('ALL')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'ALL'
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'ALL'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             All Subjects
           </button>
           <button
             onClick={() => setSelectedExamType('JAMB')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'JAMB'
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'JAMB'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             JAMB
           </button>
           <button
             onClick={() => setSelectedExamType('WAEC')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'WAEC'
+            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'WAEC'
                 ? 'bg-blue-600 text-white'
                 : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
+              }`}
           >
             WAEC
           </button>
@@ -137,11 +134,10 @@ export function SummariesPage() {
                   <button
                     key={subject.id}
                     onClick={() => setSelectedSubject(subject)}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedSubject?.id === subject.id
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedSubject?.id === subject.id
                         ? 'bg-blue-100 text-blue-700 font-medium'
                         : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {subject.name}
                   </button>

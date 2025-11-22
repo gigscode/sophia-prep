@@ -133,79 +133,78 @@ export function PracticeModeQuiz() {
     );
   }
 
-  // Empty state
-  if (!q || pool.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
+  return (
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
+
+      <div className="mb-6">
+        <Card>
+          <div className="flex items-center gap-3 flex-wrap">
+            <label className="text-xs text-gray-600">Subject</label>
+            <select className="border rounded px-3 py-2" value={subjectSel || ''} onChange={e => { const v = e.target.value || undefined; setSubjectSel(v); setIndex(0); setSelected(null); setShowFeedback(false); setScore(0); applyParams(v, undefined as any, undefined as any); }}>
+              <option value="">Any</option>
+              <option value="mathematics">Mathematics</option>
+              <option value="english-language">English</option>
+              <option value="physics">Physics</option>
+              <option value="chemistry">Chemistry</option>
+              <option value="biology">Biology</option>
+            </select>
+            <label className="text-xs text-gray-600">Year</label>
+            <select className="border rounded px-3 py-2" value={yearSel === 'ALL' ? 'ALL' : String(yearSel)} onChange={e => { const v = e.target.value; const next = v === 'ALL' ? 'ALL' : Number(v); setYearSel(next as any); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, next as any, undefined as any); }}>
+              <option value="ALL">All</option>
+              <option value="2019">2019</option>
+              <option value="2020">2020</option>
+              <option value="2021">2021</option>
+              <option value="2022">2022</option>
+              <option value="2023">2023</option>
+              <option value="2024">2024</option>
+            </select>
+            <label className="text-xs text-gray-600">Type</label>
+            <select className="border rounded px-3 py-2" value={typeSel} onChange={e => { const v = e.target.value as any; setTypeSel(v); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, undefined as any, v); }}>
+              <option value="ALL">All</option>
+              <option value="JAMB">JAMB</option>
+              <option value="WAEC">WAEC</option>
+            </select>
+          </div>
+        </Card>
+      </div>
+
+      {(!q || pool.length === 0) ? (
         <Card>
           <div className="text-center py-8">
             <p className="text-gray-600 mb-4">No questions available. Please select a subject or try different filters.</p>
             <Button onClick={() => window.location.reload()}>Reload</Button>
           </div>
         </Card>
-      </div>
-    );
-  }
-
-  return (
-    <div className="container mx-auto px-4 py-6 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
-
-      <Card>
-        <div className="flex items-center gap-3 flex-wrap mb-4">
-          <label className="text-xs text-gray-600">Subject</label>
-          <select className="border rounded px-3 py-2" value={subjectSel || ''} onChange={e => { const v = e.target.value || undefined; setSubjectSel(v); setIndex(0); setSelected(null); setShowFeedback(false); setScore(0); applyParams(v, undefined as any, undefined as any); }}>
-            <option value="">Any</option>
-            <option value="mathematics">Mathematics</option>
-            <option value="english-language">English</option>
-            <option value="physics">Physics</option>
-            <option value="chemistry">Chemistry</option>
-            <option value="biology">Biology</option>
-          </select>
-          <label className="text-xs text-gray-600">Year</label>
-          <select className="border rounded px-3 py-2" value={yearSel === 'ALL' ? 'ALL' : String(yearSel)} onChange={e => { const v = e.target.value; const next = v === 'ALL' ? 'ALL' : Number(v); setYearSel(next as any); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, next as any, undefined as any); }}>
-            <option value="ALL">All</option>
-            <option value="2019">2019</option>
-            <option value="2020">2020</option>
-            <option value="2021">2021</option>
-            <option value="2022">2022</option>
-            <option value="2023">2023</option>
-            <option value="2024">2024</option>
-          </select>
-          <label className="text-xs text-gray-600">Type</label>
-          <select className="border rounded px-3 py-2" value={typeSel} onChange={e => { const v = e.target.value as any; setTypeSel(v); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, undefined as any, v); }}>
-            <option value="ALL">All</option>
-            <option value="JAMB">JAMB</option>
-            <option value="WAEC">WAEC</option>
-          </select>
-        </div>
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
-          <div className="text-sm text-gray-600">Score: <span className="font-semibold">{score}</span></div>
-        </div>
-
-        <ProgressBar value={index + 1} max={pool.length} className="mb-4" />
-
-        <div className="mb-4">
-          <div className="text-base md:text-lg font-semibold mb-3">{q.text}</div>
-          <div className="grid grid-cols-1 gap-3">
-            {q.options.map((opt: any) => (
-              <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={selected === opt.key} onSelect={onSelect} disabled={!!showFeedback} />
-            ))}
+      ) : (
+        <Card>
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div className="text-sm text-gray-600">Question <span className="font-semibold">{index + 1}</span> of <span className="font-semibold">{pool.length}</span></div>
+            <div className="text-sm text-gray-600">Score: <span className="font-semibold">{score}</span></div>
           </div>
-        </div>
 
-        {showFeedback && (
-          <div className={`mt-6 p-4 rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
-            <div className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>{isCorrect ? 'Correct!' : 'Incorrect'}</div>
-            <p className="text-gray-700 mt-2">{q.explanation}</p>
-            <div className="mt-4">
-              <Button variant="primary" onClick={next}>Next Question</Button>
+          <ProgressBar value={index + 1} max={pool.length} className="mb-4" />
+
+          <div className="mb-4">
+            <div className="text-base md:text-lg font-semibold mb-3">{q.text}</div>
+            <div className="grid grid-cols-1 gap-3">
+              {q.options.map((opt: any) => (
+                <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={selected === opt.key} onSelect={onSelect} disabled={!!showFeedback} />
+              ))}
             </div>
           </div>
-        )}
-      </Card>
+
+          {showFeedback && (
+            <div className={`mt-6 p-4 rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+              <div className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'}`}>{isCorrect ? 'Correct!' : 'Incorrect'}</div>
+              <p className="text-gray-700 mt-2">{q.explanation}</p>
+              <div className="mt-4">
+                <Button variant="primary" onClick={next}>Next Question</Button>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }

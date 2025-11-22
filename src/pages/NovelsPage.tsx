@@ -117,7 +117,7 @@ export function NovelsPage() {
       <PageHeader
         title="Prescribed Novels"
         description="Summaries, themes, characters, and analyses of prescribed literature texts"
-        icon={Library}
+        icon={<Library className="w-8 h-8" />}
       />
 
       <div className="container mx-auto px-4 py-8">
@@ -134,11 +134,10 @@ export function NovelsPage() {
                       setSelectedNovel(novel);
                       setActiveTab('summary');
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                      selectedNovel?.id === novel.id
+                    className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${selectedNovel?.id === novel.id
                         ? 'bg-purple-100 text-purple-700 font-medium'
                         : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     <div className="text-sm font-medium">{novel.title}</div>
                     <div className="text-xs text-gray-500">{novel.author}</div>
@@ -182,44 +181,40 @@ export function NovelsPage() {
                 <div className="flex gap-2 overflow-x-auto">
                   <button
                     onClick={() => setActiveTab('summary')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
-                      activeTab === 'summary'
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'summary'
                         ? 'bg-purple-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <BookOpen className="w-4 h-4" />
                     Summary
                   </button>
                   <button
                     onClick={() => setActiveTab('themes')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
-                      activeTab === 'themes'
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'themes'
                         ? 'bg-purple-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Lightbulb className="w-4 h-4" />
                     Themes
                   </button>
                   <button
                     onClick={() => setActiveTab('characters')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
-                      activeTab === 'characters'
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'characters'
                         ? 'bg-purple-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Users className="w-4 h-4" />
                     Characters
                   </button>
                   <button
                     onClick={() => setActiveTab('quotes')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${
-                      activeTab === 'quotes'
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'quotes'
                         ? 'bg-purple-600 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Quote className="w-4 h-4" />
                     Key Quotes

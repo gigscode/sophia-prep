@@ -68,7 +68,7 @@ export type QuizQuestion = {
 };
 
 export function normalizeQuestions(rows: any[], filters?: { exam_year?: number | 'ALL'; exam_type?: 'JAMB' | 'WAEC' | 'ALL' }): QuizQuestion[] {
-  const list: QuizQuestion[] = (rows || []).map((r: any) => {
+  const list: QuizQuestion[] = (rows || []).filter(r => !!r).map((r: any) => {
     const opts = [
       { key: 'A', text: r.option_a },
       { key: 'B', text: r.option_b },
@@ -76,13 +76,13 @@ export function normalizeQuestions(rows: any[], filters?: { exam_year?: number |
       { key: 'D', text: r.option_d },
     ].filter(o => !!o.text && String(o.text).trim().length > 0);
     let correct = r.correct_answer;
-    if (correct && !['A','B','C','D'].includes(String(correct))) {
+    if (correct && !['A', 'B', 'C', 'D'].includes(String(correct))) {
       const m = opts.find(o => String(o.text).trim().toLowerCase() === String(correct).trim().toLowerCase());
       correct = m?.key;
     }
     return {
       id: r.id,
-      text: r.question_text || r.text,
+      text: r.question_text || r.text || 'Question text missing',
       options: opts,
       correct: correct || undefined,
       explanation: r.explanation || undefined,
