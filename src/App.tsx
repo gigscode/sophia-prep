@@ -10,6 +10,10 @@ import { ReaderModeQuiz } from './pages/ReaderModeQuiz.tsx';
 import { PastQuestionsQuiz } from './pages/PastQuestionsQuiz.tsx';
 import { QuizResultsPage } from './pages/QuizResultsPage.tsx';
 import { StudyHub } from './pages/StudyHub.tsx';
+import { SyllabusPage } from './pages/SyllabusPage.tsx';
+import { SummariesPage } from './pages/SummariesPage.tsx';
+import { NovelsPage } from './pages/NovelsPage.tsx';
+import { VideosPage } from './pages/VideosPage.tsx';
 import { HelpCenter } from './pages/HelpCenter.tsx';
 import { AboutPage } from './pages/AboutPage.tsx';
 import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage.tsx';
@@ -50,6 +54,10 @@ export function App() {
 
       {/* Study & Help */}
       <Route path="/study" element={<Layout><StudyHub /></Layout>} />
+      <Route path="/syllabus" element={<Layout><SyllabusPage /></Layout>} />
+      <Route path="/summaries" element={<Layout><SummariesPage /></Layout>} />
+      <Route path="/novels" element={<Layout><NovelsPage /></Layout>} />
+      <Route path="/videos" element={<Layout><VideosPage /></Layout>} />
       <Route path="/help" element={<Layout><HelpCenter /></Layout>} />
       <Route path="/about" element={<Layout><AboutPage /></Layout>} />
       <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />

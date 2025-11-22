@@ -73,13 +73,14 @@ export function AdminPage() {
       </AnimatePresence>
 
       {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        animate={{
-          x: sidebarOpen ? 0 : '-100%',
-        }}
-        className="lg:translate-x-0 fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-40 lg:z-0 transition-transform duration-300 ease-in-out"
-      >
+      <aside className="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-40 lg:z-0">
+        <motion.div
+          initial={false}
+          animate={{
+            x: sidebarOpen ? 0 : '-100%',
+          }}
+          className="lg:translate-x-0 h-full transition-transform duration-300 ease-in-out"
+        >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="p-6 border-b border-gray-200">
@@ -121,7 +122,8 @@ export function AdminPage() {
             </div>
           </div>
         </div>
-      </motion.aside>
+        </motion.div>
+      </aside>
 
       {/* Main Content */}
       <div className="lg:ml-64 min-h-screen">
