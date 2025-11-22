@@ -23,6 +23,7 @@ import { AuthProvider } from './hooks/useAuth';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
 import PWAInstall from './components/PWAInstall';
+import { ToastContainer } from './components/ui/Toast';
 
 export function App() {
   return (
@@ -30,6 +31,7 @@ export function App() {
       <ScrollToTop />
       <WhatsAppButton />
       <PWAInstall />
+      <ToastContainer />
       <Routes>
       {/* HomePage without Layout - it has its own design */}
       <Route path="/" element={<HomePage />} />
