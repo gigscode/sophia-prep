@@ -184,7 +184,6 @@ export function SubjectsPage() {
               <div className="flex items-center gap-2">
                 <Link to={`/practice?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-blue-600 text-white rounded text-xs">Practice</Link>
                 <Link to={`/mock-exams?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-yellow-400 text-blue-900 rounded text-xs">Mock</Link>
-                <Link to={`/past-questions?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-gray-100 text-gray-800 rounded text-xs">Past</Link>
               </div>
             </div>
           </div>

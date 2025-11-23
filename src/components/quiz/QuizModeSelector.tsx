@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Clock, BookOpen, Eye, History } from 'lucide-react';
+import { Clock, BookOpen, Eye } from 'lucide-react';
 
 export function QuizModeSelector() {
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h2 className="text-xl font-bold mb-4">Choose a Quiz Mode</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link to="/practice" className="sophia-card p-4 hover:shadow-md">
           <div className="flex items-center gap-3 mb-1">
             <BookOpen className="w-6 h-6 text-blue-600" />
@@ -28,14 +28,6 @@ export function QuizModeSelector() {
             <h3 className="font-semibold">Reader Mode</h3>
           </div>
           <p className="text-gray-600 text-sm">See the correct answer immediately after selecting.</p>
-        </Link>
-
-        <Link to="/past-questions" className="sophia-card p-4 hover:shadow-md">
-          <div className="flex items-center gap-3 mb-1">
-            <History className="w-6 h-6 text-purple-600" />
-            <h3 className="font-semibold">Past Questions</h3>
-          </div>
-          <p className="text-gray-600 text-sm">Filter questions by year and practice historically.</p>
         </Link>
       </div>
     </div>

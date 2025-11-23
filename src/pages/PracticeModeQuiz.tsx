@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
 import { quizService } from '../services/quiz-service';
 import { questionService, normalizeQuestions } from '../services/question-service';
+import { subjectService } from '../services/subject-service';
 import { Card } from '../components/ui/Card';
 import { OptionButton } from '../components/ui/OptionButton';
 import { Button } from '../components/ui/Button';
 import { ProgressBar } from '../components/ui/ProgressBar';
+import type { Subject } from '../integrations/supabase/types';
 
 interface QuizQuestion {
   id: string;
@@ -24,6 +27,8 @@ export function PracticeModeQuiz() {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+  const [availableSubjects, setAvailableSubjects] = useState<Subject[]>([]);
+  const [loadingSubjects, setLoadingSubjects] = useState(false);
   const params = new URLSearchParams(window.location.search);
   const initialSubject = params.get('subject') || undefined;
   const initialYearParam = params.get('year');
@@ -31,6 +36,7 @@ export function PracticeModeQuiz() {
   const [subjectSel, setSubjectSel] = useState<string | undefined>(initialSubject);
   const [yearSel, setYearSel] = useState<'ALL' | number>(initialYearParam === 'ALL' ? 'ALL' : (initialYearParam ? Number(initialYearParam) : 'ALL'));
   const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' ? (initialTypeParam as any) : 'ALL');
+  const [showSelectionPage, setShowSelectionPage] = useState(!initialSubject);
 
   const applyParams = (sub?: string | undefined, yr?: 'ALL' | number, typ?: 'ALL' | 'JAMB' | 'WAEC') => {
     const sp = new URLSearchParams();
@@ -44,17 +50,41 @@ export function PracticeModeQuiz() {
     window.history.replaceState({}, '', url);
   };
 
+  // Load subjects when exam type is selected
+  useEffect(() => {
+    if (typeSel !== 'ALL') {
+      (async () => {
+        setLoadingSubjects(true);
+        try {
+          const subjects = await subjectService.getSubjectsByExamType(typeSel);
+          setAvailableSubjects(subjects);
+        } catch (e) {
+          console.error('Failed to load subjects:', e);
+          setAvailableSubjects([]);
+        } finally {
+          setLoadingSubjects(false);
+        }
+      })();
+    }
+  }, [typeSel]);
+
   useEffect(() => {
     (async () => {
+      // Don't load questions if type is not selected yet
+      if (typeSel === 'ALL') {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
         const subject = subjectSel;
         const exam_year = yearSel;
-        const exam_type = typeSel;
+        const exam_type = typeSel; // At this point, exam_type is 'JAMB' | 'WAEC', never 'ALL'
         let qs: any[] = [];
         if (subject) {
-          const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type === 'ALL' ? undefined : (exam_type as any), limit: 50 });
-          qs = normalizeQuestions(rows, { exam_year: exam_year as any, exam_type: exam_type as any });
+          const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type, limit: 50 });
+          qs = normalizeQuestions(rows, { exam_year: exam_year as any, exam_type: exam_type });
         } else {
           const local = await quizService.getRandomQuestions(10);
           qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
@@ -118,6 +148,178 @@ export function PracticeModeQuiz() {
     return () => window.removeEventListener('keydown', onKey);
   }, [onSelect, pool.length, showFeedback]);
 
+  // Exam Type Selection Screen
+  if (typeSel === 'ALL') {
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold text-center mb-8">Select Exam Type</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
+          <button
+            onClick={() => {
+              setTypeSel('WAEC');
+              applyParams(undefined, undefined, 'WAEC');
+            }}
+            className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-green-500 text-left"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-4 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
+                <BookOpen className="w-8 h-8 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">WAEC</h2>
+            </div>
+            <p className="text-gray-600 text-lg">
+              Practice with past questions and mock exams specifically designed for the West African Senior School Certificate Examination.
+            </p>
+          </button>
+
+          <button
+            onClick={() => {
+              setTypeSel('JAMB');
+              applyParams(undefined, undefined, 'JAMB');
+            }}
+            className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-500 text-left"
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-4 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
+                <GraduationCap className="w-8 h-8 text-blue-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800">JAMB</h2>
+            </div>
+            <p className="text-gray-600 text-lg">
+              Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
+            </p>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Subject and Year Selection Screen
+  if (showSelectionPage && typeSel !== 'ALL') {
+    const examTypeColor = typeSel === 'WAEC' ? 'green' : 'blue';
+    const examTypeBg = typeSel === 'WAEC' ? 'bg-green-50' : 'bg-blue-50';
+    const examTypeBorder = typeSel === 'WAEC' ? 'border-green-500' : 'border-blue-500';
+    const examTypeText = typeSel === 'WAEC' ? 'text-green-700' : 'text-blue-700';
+
+    return (
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className={`inline-flex items-center gap-2 px-4 py-2 ${examTypeBg} ${examTypeBorder} border-2 rounded-full mb-4`}>
+              {typeSel === 'WAEC' ? (
+                <BookOpen className={`w-5 h-5 ${examTypeText}`} />
+              ) : (
+                <GraduationCap className={`w-5 h-5 ${examTypeText}`} />
+              )}
+              <span className={`font-semibold ${examTypeText}`}>{typeSel} Practice</span>
+            </div>
+            <h1 className="text-3xl font-bold mb-2">Practice Mode</h1>
+            <p className="text-gray-600">Select your subject and exam year to begin</p>
+          </div>
+
+          {/* Selection Form */}
+          <Card>
+            <div className="space-y-6">
+              {/* Subject Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Subject <span className="text-red-500">*</span>
+                </label>
+                {loadingSubjects ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-2 text-sm text-gray-600">Loading subjects...</p>
+                  </div>
+                ) : (
+                  <select
+                    value={subjectSel || ''}
+                    onChange={(e) => setSubjectSel(e.target.value || undefined)}
+                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${
+                      typeSel === 'WAEC'
+                        ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                        : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                    }`}
+                  >
+                    <option value="">Select a subject</option>
+                    {availableSubjects.map((subject) => (
+                      <option key={subject.id} value={subject.slug}>
+                        {subject.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
+              {/* Year Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Exam Year
+                </label>
+                <select
+                  value={yearSel === 'ALL' ? 'ALL' : String(yearSel)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setYearSel(value === 'ALL' ? 'ALL' : Number(value));
+                  }}
+                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${
+                    typeSel === 'WAEC'
+                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                  }`}
+                >
+                  <option value="ALL">All Years</option>
+                  <option value="2024">2024</option>
+                  <option value="2023">2023</option>
+                  <option value="2022">2022</option>
+                  <option value="2021">2021</option>
+                  <option value="2020">2020</option>
+                  <option value="2019">2019</option>
+                </select>
+              </div>
+
+              {/* Start Button */}
+              <div className="pt-4">
+                <Button
+                  variant="primary"
+                  onClick={() => {
+                    if (subjectSel) {
+                      setShowSelectionPage(false);
+                      applyParams(subjectSel, yearSel, typeSel);
+                    }
+                  }}
+                  disabled={!subjectSel}
+                  className="w-full py-4 text-lg font-semibold flex items-center justify-center gap-2"
+                >
+                  Start Practice
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+                {!subjectSel && (
+                  <p className="text-sm text-red-500 mt-2 text-center">Please select a subject to continue</p>
+                )}
+              </div>
+
+              {/* Back Button */}
+              <div className="text-center">
+                <button
+                  onClick={() => {
+                    setTypeSel('ALL');
+                    setSubjectSel(undefined);
+                    setYearSel('ALL');
+                    applyParams(undefined, 'ALL', 'ALL');
+                  }}
+                  className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                >
+                  ← Change Exam Type
+                </button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   // Loading state
   if (loading) {
     return (
@@ -136,38 +338,6 @@ export function PracticeModeQuiz() {
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
       <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Practice Mode</h1>
-
-      <div className="mb-6">
-        <Card>
-          <div className="flex items-center gap-3 flex-wrap">
-            <label className="text-xs text-gray-600">Subject</label>
-            <select className="border rounded px-3 py-2" value={subjectSel || ''} onChange={e => { const v = e.target.value || undefined; setSubjectSel(v); setIndex(0); setSelected(null); setShowFeedback(false); setScore(0); applyParams(v, undefined as any, undefined as any); }}>
-              <option value="">Any</option>
-              <option value="mathematics">Mathematics</option>
-              <option value="english-language">English</option>
-              <option value="physics">Physics</option>
-              <option value="chemistry">Chemistry</option>
-              <option value="biology">Biology</option>
-            </select>
-            <label className="text-xs text-gray-600">Year</label>
-            <select className="border rounded px-3 py-2" value={yearSel === 'ALL' ? 'ALL' : String(yearSel)} onChange={e => { const v = e.target.value; const next = v === 'ALL' ? 'ALL' : Number(v); setYearSel(next as any); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, next as any, undefined as any); }}>
-              <option value="ALL">All</option>
-              <option value="2019">2019</option>
-              <option value="2020">2020</option>
-              <option value="2021">2021</option>
-              <option value="2022">2022</option>
-              <option value="2023">2023</option>
-              <option value="2024">2024</option>
-            </select>
-            <label className="text-xs text-gray-600">Type</label>
-            <select className="border rounded px-3 py-2" value={typeSel} onChange={e => { const v = e.target.value as any; setTypeSel(v); setIndex(0); setSelected(null); setShowFeedback(false); applyParams(undefined, undefined as any, v); }}>
-              <option value="ALL">All</option>
-              <option value="JAMB">JAMB</option>
-              <option value="WAEC">WAEC</option>
-            </select>
-          </div>
-        </Card>
-      </div>
 
       {(!q || pool.length === 0) ? (
         <Card>

@@ -7,7 +7,6 @@ import { QuizModeSelectorPage } from './pages/QuizModeSelectorPage.tsx';
 import { PracticeModeQuiz } from './pages/PracticeModeQuiz.tsx';
 import { MockExamQuiz } from './pages/MockExamQuiz.tsx';
 import { ReaderModeQuiz } from './pages/ReaderModeQuiz.tsx';
-import { PastQuestionsQuiz } from './pages/PastQuestionsQuiz.tsx';
 import { QuizResultsPage } from './pages/QuizResultsPage.tsx';
 import { StudyHub } from './pages/StudyHub.tsx';
 import { SyllabusPage } from './pages/SyllabusPage.tsx';
@@ -49,7 +48,6 @@ export function App() {
       <Route path="/practice" element={<Layout><PracticeModeQuiz /></Layout>} />
       <Route path="/mock-exams" element={<Layout><MockExamQuiz /></Layout>} />
       <Route path="/reader" element={<Layout><ReaderModeQuiz /></Layout>} />
-      <Route path="/past-questions" element={<Layout><PastQuestionsQuiz /></Layout>} />
       <Route path="/quiz-results" element={<Layout><QuizResultsPage /></Layout>} />
 
       {/* Study & Help */}

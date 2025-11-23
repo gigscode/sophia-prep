@@ -60,7 +60,7 @@ export function ContactPage() {
             <div className="text-xl font-semibold mb-4">Other Channels</div>
             <div className="space-y-3">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-indigo-50"><Mail className="w-5 h-5 text-indigo-600" /><a href="mailto:support@sophiaprep.app" className="text-indigo-700">support@sophiaprep.app</a></div>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50"><Phone className="w-5 h-5 text-emerald-600" /><a href="tel:+2348012345678" className="text-emerald-700">+234 801 234 5678</a></div>
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50"><Phone className="w-5 h-5 text-emerald-600" /><a href="tel:+2347061735358" className="text-emerald-700">+234 706 173 5358</a></div>
               <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50"><MapPin className="w-5 h-5 text-amber-600" /><div className="text-amber-700">Lagos, Nigeria</div></div>
             </div>
           </motion.div>
