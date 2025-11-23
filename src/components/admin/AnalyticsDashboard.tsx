@@ -153,9 +153,9 @@ export function AnalyticsDashboard() {
               <div className="text-sm text-gray-600">Easy</div>
               <div className="text-xl font-bold text-green-600">{contentAnalytics?.questionsByDifficulty?.EASY || 0}</div>
             </div>
-            <div className="p-3 border rounded bg-yellow-50">
+            <div className="p-3 border rounded" style={{ backgroundColor: '#FDF6E8' }}>
               <div className="text-sm text-gray-600">Medium</div>
-              <div className="text-xl font-bold text-yellow-600">{contentAnalytics?.questionsByDifficulty?.MEDIUM || 0}</div>
+              <div className="text-xl font-bold" style={{ color: '#B78628' }}>{contentAnalytics?.questionsByDifficulty?.MEDIUM || 0}</div>
             </div>
             <div className="p-3 border rounded bg-red-50">
               <div className="text-sm text-gray-600">Hard</div>
@@ -168,7 +168,7 @@ export function AnalyticsDashboard() {
       {/* Subscription Analytics */}
       <div>
         <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-yellow-600" />
+          <BookOpen className="w-5 h-5" style={{ color: '#B78628' }} />
           Subscription Analytics
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

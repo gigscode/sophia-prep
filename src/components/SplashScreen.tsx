@@ -49,8 +49,8 @@ export const SplashScreen = ({ onComplete, duration = 2500 }: SplashScreenProps)
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
-            className="text-5xl md:text-6xl font-bold text-yellow-400 mb-4"
-            style={{ fontFamily: 'Poppins, sans-serif' }}
+            className="text-5xl md:text-6xl font-bold mb-4"
+            style={{ fontFamily: 'Poppins, sans-serif', color: '#B78628' }}
           >
             Sophia Prep
           </motion.h1>
@@ -71,8 +71,8 @@ export const SplashScreen = ({ onComplete, duration = 2500 }: SplashScreenProps)
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.9, duration: 0.5 }}
-            className="text-lg md:text-xl text-yellow-300 mt-4"
-            style={{ fontFamily: 'Poppins, sans-serif' }}
+            className="text-lg md:text-xl mt-4"
+            style={{ fontFamily: 'Poppins, sans-serif', color: '#D4A855' }}
           >
             JAMB • WAEC Exam Preparation
           </motion.p>
@@ -88,17 +88,20 @@ export const SplashScreen = ({ onComplete, duration = 2500 }: SplashScreenProps)
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 1, delay: 0 }}
-                className="w-3 h-3 bg-yellow-400 rounded-full"
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: '#B78628' }}
               />
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                className="w-3 h-3 bg-yellow-400 rounded-full"
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: '#B78628' }}
               />
               <motion.div
                 animate={{ scale: [1, 1.2, 1] }}
                 transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                className="w-3 h-3 bg-yellow-400 rounded-full"
+                className="w-3 h-3 rounded-full"
+                style={{ backgroundColor: '#B78628' }}
               />
             </div>
           </motion.div>

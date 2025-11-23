@@ -86,15 +86,18 @@ export function QuestionManagement() {
     {
       key: 'difficulty_level',
       label: 'Difficulty',
-      render: (q: Question) => (
-        <span className={`px-2 py-1 rounded text-xs ${
-          q.difficulty_level === 'EASY' ? 'bg-green-100 text-green-800' :
-          q.difficulty_level === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-red-100 text-red-800'
-        }`}>
-          {q.difficulty_level || 'N/A'}
-        </span>
-      ),
+      render: (q: Question) => {
+        const getDifficultyStyle = () => {
+          if (q.difficulty_level === 'EASY') return { backgroundColor: '#D1FAE5', color: '#065F46' };
+          if (q.difficulty_level === 'MEDIUM') return { backgroundColor: '#FDF6E8', color: '#92400E' };
+          return { backgroundColor: '#FEE2E2', color: '#991B1B' };
+        };
+        return (
+          <span className="px-2 py-1 rounded text-xs" style={getDifficultyStyle()}>
+            {q.difficulty_level || 'N/A'}
+          </span>
+        );
+      },
     },
     {
       key: 'exam_type',

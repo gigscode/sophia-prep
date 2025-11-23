@@ -16,7 +16,7 @@ export function QuizModeSelector() {
 
         <Link to="/mock-exams" className="sophia-card p-4 hover:shadow-md">
           <div className="flex items-center gap-3 mb-1">
-            <Clock className="w-6 h-6 text-yellow-600" />
+            <Clock className="w-6 h-6" style={{ color: '#B78628' }} />
             <h3 className="font-semibold">Mock Exam</h3>
           </div>
           <p className="text-gray-600 text-sm">Timed exam with results shown at completion.</p>

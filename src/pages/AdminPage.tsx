@@ -46,7 +46,7 @@ export function AdminPage() {
     { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3, color: 'text-blue-600', bgColor: 'bg-blue-50' },
     { id: 'users' as AdminTab, label: 'Users', icon: Users, color: 'text-green-600', bgColor: 'bg-green-50' },
     { id: 'subjects' as AdminTab, label: 'Subjects', icon: BookOpen, color: 'text-purple-600', bgColor: 'bg-purple-50' },
-    { id: 'topics' as AdminTab, label: 'Topics', icon: FolderTree, color: 'text-yellow-600', bgColor: 'bg-yellow-50' },
+    { id: 'topics' as AdminTab, label: 'Topics', icon: FolderTree, color: '#B78628', bgColor: '#FDF6E8' },
     { id: 'questions' as AdminTab, label: 'Questions', icon: FileQuestion, color: 'text-red-600', bgColor: 'bg-red-50' },
   ];
 

@@ -26,7 +26,7 @@ export function HomePage() {
               <div className="flex-1 text-white space-y-6 text-center md:text-left">
                 <div className="flex flex-col md:flex-row items-center md:items-start gap-3 mb-4">
                   <div>
-                    <h1 className="text-4xl md:text-6xl font-bold text-yellow-400">
+                    <h1 className="text-4xl md:text-6xl font-bold" style={{ color: '#B78628' }}>
                       Sophia Prep
                     </h1>
                   </div>
@@ -45,8 +45,9 @@ export function HomePage() {
                 <div className="flex flex-col sm:flex-row gap-4 pt-4 justify-center items-center md:justify-start md:items-start">
                   <Link
                     to="/subjects"
-                    className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold 
-               hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
+                    className="px-8 py-4 text-blue-900 rounded-lg font-semibold
+               hover:opacity-90 transition-all transform hover:scale-105 shadow-lg"
+                    style={{ backgroundColor: '#B78628' }}
                   >
                     Start Practicing
                   </Link>
@@ -100,8 +101,8 @@ export function HomePage() {
               className="sophia-card p-6 hover:shadow-xl transition-all transform hover:-translate-y-2 group"
             >
               <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-yellow-100 rounded-lg group-hover:bg-yellow-200 transition-colors">
-                  <Target className="w-8 h-8 text-yellow-600" />
+                <div className="p-3 rounded-lg transition-colors" style={{ backgroundColor: '#F5EBCF' }}>
+                  <Target className="w-8 h-8" style={{ color: '#B78628' }} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-800">Mock Exams</h3>
               </div>
@@ -173,8 +174,8 @@ export function HomePage() {
 
               {/* Feature 2 */}
               <div className="text-center p-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-yellow-100 rounded-full mb-4">
-                  <Clock className="w-8 h-8 text-yellow-600" />
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ backgroundColor: '#F5EBCF' }}>
+                  <Clock className="w-8 h-8" style={{ color: '#B78628' }} />
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 mb-3">
                   Multiple Practice Modes
@@ -302,8 +303,8 @@ export function HomePage() {
               </div>
 
               {/* Tier 2: Online Tutor */}
-              <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-1 transition-all duration-300 border-2 border-yellow-400 relative">
-                <div className="absolute top-0 right-0 bg-yellow-400 text-blue-900 text-xs font-bold px-3 py-1 rounded-bl-lg">
+              <div className="bg-white rounded-2xl shadow-xl overflow-hidden transform hover:-translate-y-1 transition-all duration-300 border-2 relative" style={{ borderColor: '#B78628' }}>
+                <div className="absolute top-0 right-0 text-blue-900 text-xs font-bold px-3 py-1 rounded-bl-lg" style={{ backgroundColor: '#B78628' }}>
                   PREMIUM SUPPORT
                 </div>
                 <div className="p-8">
@@ -314,26 +315,26 @@ export function HomePage() {
                   </div>
                   <ul className="space-y-4 mb-8">
                     <li className="flex items-center text-gray-600">
-                      <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#F5EBCF' }}>
+                        <svg className="w-4 h-4" style={{ color: '#B78628' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                       </div>
                       One-on-One Sessions
                     </li>
                     <li className="flex items-center text-gray-600">
-                      <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#F5EBCF' }}>
+                        <svg className="w-4 h-4" style={{ color: '#B78628' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                       </div>
                       Customized Study Plans
                     </li>
                     <li className="flex items-center text-gray-600">
-                      <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#F5EBCF' }}>
+                        <svg className="w-4 h-4" style={{ color: '#B78628' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                       </div>
                       Topic Explanations
                     </li>
                     <li className="flex items-center text-gray-600">
-                      <div className="w-6 h-6 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                        <svg className="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: '#F5EBCF' }}>
+                        <svg className="w-4 h-4" style={{ color: '#B78628' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
                       </div>
                       Exam Strategy Tips
                     </li>
@@ -342,7 +343,8 @@ export function HomePage() {
                     href="https://wa.me/2347061735358?text=Hello,%20I%20would%20like%20to%20request%20an%20online%20tutor."
                     target="_blank"
                     rel="noreferrer"
-                    className="block w-full py-4 px-6 bg-yellow-400 text-blue-900 text-center font-bold rounded-xl hover:bg-yellow-300 transition-colors shadow-lg hover:shadow-xl"
+                    className="block w-full py-4 px-6 text-blue-900 text-center font-bold rounded-xl hover:opacity-90 transition-colors shadow-lg hover:shadow-xl"
+                    style={{ backgroundColor: '#B78628' }}
                   >
                     Chat on WhatsApp
                   </a>
@@ -367,8 +369,9 @@ export function HomePage() {
             <div className="flex flex-wrap justify-center md:justify-start gap-4">
               <Link
                 to="/signup"
-                className="px-8 py-4 bg-yellow-400 text-blue-900 rounded-lg font-semibold
-        hover:bg-yellow-300 transition-all transform hover:scale-105 shadow-lg"
+                className="px-8 py-4 text-blue-900 rounded-lg font-semibold
+        hover:opacity-90 transition-all transform hover:scale-105 shadow-lg"
+                style={{ backgroundColor: '#B78628' }}
               >
                 Get Started Free
               </Link>

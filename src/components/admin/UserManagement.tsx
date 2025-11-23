@@ -135,7 +135,7 @@ export function UserManagement() {
             className="p-1 hover:bg-gray-100 rounded"
             title={user.is_active ? 'Suspend' : 'Activate'}
           >
-            {user.is_active ? <Ban className="w-4 h-4 text-yellow-600" /> : <CheckCircle className="w-4 h-4 text-green-600" />}
+            {user.is_active ? <Ban className="w-4 h-4" style={{ color: '#B78628' }} /> : <CheckCircle className="w-4 h-4 text-green-600" />}
           </button>
           <button
             onClick={() => {

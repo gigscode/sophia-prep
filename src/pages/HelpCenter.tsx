@@ -43,7 +43,7 @@ export function HelpCenter() {
 
           <Link to="/booking" className="sophia-card p-6 hover:shadow-lg">
             <div className="flex items-center gap-4 mb-3">
-              <Calendar className="w-8 h-8 text-yellow-600" />
+              <Calendar className="w-8 h-8" style={{ color: '#B78628' }} />
               <h3 className="text-xl font-semibold">One-on-one Sessions</h3>
             </div>
             <p className="text-gray-600">Book time with tutors</p>

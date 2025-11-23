@@ -22,9 +22,9 @@ export function PageHeader({ title, description, breadcrumbs, actions, icon }: P
         {/* Breadcrumbs */}
         {breadcrumbs && breadcrumbs.length > 0 && (
           <nav className="flex items-center gap-2 text-sm mb-4" aria-label="Breadcrumb">
-            <Link 
-              to="/" 
-              className="flex items-center gap-1 text-blue-200 hover:text-yellow-400 transition-colors"
+            <Link
+              to="/"
+              className="flex items-center gap-1 text-blue-200 transition-colors footer-link"
             >
               <Home className="w-4 h-4" />
               <span>Home</span>
@@ -33,9 +33,9 @@ export function PageHeader({ title, description, breadcrumbs, actions, icon }: P
               <div key={index} className="flex items-center gap-2">
                 <ChevronRight className="w-4 h-4 text-blue-400" />
                 {crumb.to ? (
-                  <Link 
-                    to={crumb.to} 
-                    className="text-blue-200 hover:text-yellow-400 transition-colors"
+                  <Link
+                    to={crumb.to}
+                    className="text-blue-200 transition-colors footer-link"
                   >
                     {crumb.label}
                   </Link>
@@ -51,7 +51,7 @@ export function PageHeader({ title, description, breadcrumbs, actions, icon }: P
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div className="flex items-start gap-4">
             {icon && (
-              <div className="flex-shrink-0 w-16 h-16 bg-yellow-400 text-blue-900 rounded-xl flex items-center justify-center">
+              <div className="flex-shrink-0 w-16 h-16 text-blue-900 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#B78628' }}>
                 {icon}
               </div>
             )}

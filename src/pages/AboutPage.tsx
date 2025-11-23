@@ -23,8 +23,8 @@ export function AboutPage() {
                 <div className="font-semibold">Focused Practice</div>
                 <div className="text-sm text-gray-600">Practice by subject, topic, year, and exam type.</div>
               </div>
-              <div className="p-4 rounded-lg bg-yellow-50">
-                <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center mb-2"><Trophy className="w-6 h-6 text-yellow-600" /></div>
+              <div className="p-4 rounded-lg" style={{ backgroundColor: '#FDF6E8' }}>
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-2" style={{ backgroundColor: '#F5EBCF' }}><Trophy className="w-6 h-6" style={{ color: '#B78628' }} /></div>
                 <div className="font-semibold">Real Mock Exams</div>
                 <div className="text-sm text-gray-600">Timed sessions with instant feedback and scoring.</div>
               </div>

@@ -38,22 +38,24 @@ export function Navbar() {
               className="w-12 h-12 md:w-12 md:h-12 object-contain drop-shadow-lg"
             />
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-yellow-400 tracking-tight">Sophia Prep</h1>
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight" style={{ color: '#B78628' }}>Sophia Prep</h1>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
             {navLinks.map((link) => {
+              const active = isActive(link.to);
               return (
                 <Link
                   key={link.to}
                   to={link.to}
                   className={`px-4 py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                    isActive(link.to)
-                      ? 'bg-yellow-400 text-blue-900 font-semibold shadow-lg'
+                    active
+                      ? 'text-blue-900 font-semibold shadow-lg'
                       : 'text-white hover:bg-blue-700 hover:shadow-md'
                   }`}
+                  style={active ? { backgroundColor: '#B78628' } : undefined}
                 >
                   <span className="font-medium">{link.label}</span>
                 </Link>
@@ -64,8 +66,9 @@ export function Navbar() {
             <Link
               to={user ? '/profile' : '/login'}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                isActive('/profile') ? 'bg-yellow-400 text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
+                isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
               }`}
+              style={isActive('/profile') ? { backgroundColor: '#B78628' } : undefined}
             >
               {user ? (
                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-700 font-medium">
@@ -97,17 +100,18 @@ export function Navbar() {
             <div className="flex flex-col gap-2">
               {navLinks.map((link, index) => {
                 const Icon = link.icon;
+                const active = isActive(link.to);
                 return (
                   <Link
                     key={link.to}
                     to={link.to}
                     onClick={() => setIsMenuOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                      isActive(link.to)
-                        ? 'bg-yellow-400 text-blue-900 font-semibold shadow-lg'
+                      active
+                        ? 'text-blue-900 font-semibold shadow-lg'
                         : 'text-white hover:bg-blue-700'
                     }`}
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    style={active ? { backgroundColor: '#B78628', animationDelay: `${index * 50}ms` } : { animationDelay: `${index * 50}ms` }}
                   >
                     <Icon className="w-5 h-5" />
                     <span className="font-medium">{link.label}</span>
@@ -119,8 +123,9 @@ export function Navbar() {
                 to={user ? '/profile' : '/login'}
                 onClick={() => setIsMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                  isActive('/profile') ? 'bg-yellow-400 text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
+                  isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
                 }`}
+                style={isActive('/profile') ? { backgroundColor: '#B78628' } : undefined}
               >
                 <User className="w-5 h-5" />
                 <span className="font-medium">{user ? 'Profile' : 'Login'}</span>

@@ -4,22 +4,30 @@ import { BookOpen } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { PageHeader } from '../components/layout';
 import { subjectService } from '../services/subject-service';
-import type { Subject, ExamType } from '../integrations/supabase/types';
+import type { Subject, ExamType, SubjectCategory } from '../integrations/supabase/types';
+
+type CategoryFilter = SubjectCategory | 'ALL';
 
 export function SubjectsPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
   const [selectedExamType, setSelectedExamType] = useState<ExamType | 'ALL'>('ALL');
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadSubjects();
+    // Load saved category preference from session storage
+    const savedCategory = sessionStorage.getItem('preferredCategory') as CategoryFilter;
+    if (savedCategory) {
+      setSelectedCategory(savedCategory);
+    }
   }, []);
 
   useEffect(() => {
     filterSubjects();
-  }, [subjects, selectedExamType]);
+  }, [subjects, selectedExamType, selectedCategory]);
 
   const loadSubjects = async () => {
     try {
@@ -35,15 +43,40 @@ export function SubjectsPage() {
   };
 
   const filterSubjects = () => {
-    if (selectedExamType === 'ALL') {
-      setFilteredSubjects(subjects);
-    } else {
-      setFilteredSubjects(
-        subjects.filter(
-          s => s.exam_type === selectedExamType || s.exam_type === 'BOTH'
-        )
+    let filtered = subjects;
+
+    // Filter by exam type
+    if (selectedExamType !== 'ALL') {
+      filtered = filtered.filter(
+        s => s.exam_type === selectedExamType || s.exam_type === 'BOTH'
       );
     }
+
+    // Filter by category (always show GENERAL and LANGUAGE subjects)
+    if (selectedCategory !== 'ALL') {
+      filtered = filtered.filter(
+        s => s.subject_category === selectedCategory ||
+             s.subject_category === 'GENERAL' ||
+             s.subject_category === 'LANGUAGE'
+      );
+    }
+
+    setFilteredSubjects(filtered);
+  };
+
+  const handleCategoryChange = (category: CategoryFilter) => {
+    setSelectedCategory(category);
+    // Save to session storage
+    sessionStorage.setItem('preferredCategory', category);
+  };
+
+  const getCategoryCount = (category: CategoryFilter): number => {
+    if (category === 'ALL') return subjects.length;
+    return subjects.filter(
+      s => s.subject_category === category ||
+           s.subject_category === 'GENERAL' ||
+           s.subject_category === 'LANGUAGE'
+    ).length;
   };
 
   const getExamTypeBadgeColor = (examType: ExamType): string => {
@@ -84,41 +117,106 @@ export function SubjectsPage() {
 
       <div className="container mx-auto px-4 py-8">
 
-      {/* Exam Type Filter */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Filter by Exam Type</label>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setSelectedExamType('ALL')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              selectedExamType === 'ALL'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            All Subjects
-          </button>
-          <button
-            onClick={() => setSelectedExamType('JAMB')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              selectedExamType === 'JAMB'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            JAMB
-          </button>
-          <button
-            onClick={() => setSelectedExamType('WAEC')}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              selectedExamType === 'WAEC'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            WAEC
-          </button>
+      {/* Filters Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        {/* Exam Type Filter */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium mb-3 text-gray-700">Filter by Exam Type</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setSelectedExamType('ALL')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedExamType === 'ALL'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Exams
+            </button>
+            <button
+              onClick={() => setSelectedExamType('JAMB')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedExamType === 'JAMB'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              JAMB
+            </button>
+            <button
+              onClick={() => setSelectedExamType('WAEC')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedExamType === 'WAEC'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              WAEC
+            </button>
+          </div>
         </div>
+
+        {/* Category Filter */}
+        <div>
+          <label className="block text-sm font-medium mb-3 text-gray-700">Filter by Subject Category</label>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleCategoryChange('ALL')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedCategory === 'ALL'
+                  ? 'bg-purple-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Subjects
+              <span className="ml-2 text-xs opacity-75">({getCategoryCount('ALL')})</span>
+            </button>
+            <button
+              onClick={() => handleCategoryChange('SCIENCE')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedCategory === 'SCIENCE'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Science
+              <span className="ml-2 text-xs opacity-75">({getCategoryCount('SCIENCE')})</span>
+            </button>
+            <button
+              onClick={() => handleCategoryChange('ARTS')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedCategory === 'ARTS'
+                  ? 'bg-orange-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Arts
+              <span className="ml-2 text-xs opacity-75">({getCategoryCount('ARTS')})</span>
+            </button>
+            <button
+              onClick={() => handleCategoryChange('COMMERCIAL')}
+              className={`px-4 py-2 rounded-lg transition-all font-medium ${
+                selectedCategory === 'COMMERCIAL'
+                  ? 'bg-green-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Commercial
+              <span className="ml-2 text-xs opacity-75">({getCategoryCount('COMMERCIAL')})</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Active Filters Info */}
+        {(selectedExamType !== 'ALL' || selectedCategory !== 'ALL') && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-600">
+              Showing <span className="font-semibold text-gray-900">{filteredSubjects.length}</span> subject{filteredSubjects.length !== 1 ? 's' : ''}
+              {selectedExamType !== 'ALL' && <span> for <span className="font-semibold">{selectedExamType}</span></span>}
+              {selectedCategory !== 'ALL' && <span> in <span className="font-semibold">{selectedCategory}</span> category</span>}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Subjects Grid */}
@@ -183,7 +281,7 @@ export function SubjectsPage() {
               </span>
               <div className="flex items-center gap-2">
                 <Link to={`/practice?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-blue-600 text-white rounded text-xs">Practice</Link>
-                <Link to={`/mock-exams?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-yellow-400 text-blue-900 rounded text-xs">Mock</Link>
+                <Link to={`/mock-exams?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 text-blue-900 rounded text-xs" style={{ backgroundColor: '#B78628' }}>Mock</Link>
               </div>
             </div>
           </div>

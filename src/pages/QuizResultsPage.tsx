@@ -247,13 +247,16 @@ export function QuizResultsPage() {
                   </span>
                 )}
                 {currentQuestion.difficulty_level && (
-                  <span className={`px-2 py-1 rounded ${
-                    currentQuestion.difficulty_level === 'EASY'
-                      ? 'bg-green-100 text-green-700'
-                      : currentQuestion.difficulty_level === 'MEDIUM'
-                      ? 'bg-yellow-100 text-yellow-700'
-                      : 'bg-red-100 text-red-700'
-                  }`}>
+                  <span
+                    className="px-2 py-1 rounded"
+                    style={
+                      currentQuestion.difficulty_level === 'EASY'
+                        ? { backgroundColor: '#D1FAE5', color: '#065F46' }
+                        : currentQuestion.difficulty_level === 'MEDIUM'
+                        ? { backgroundColor: '#FDF6E8', color: '#92400E' }
+                        : { backgroundColor: '#FEE2E2', color: '#991B1B' }
+                    }
+                  >
                     {currentQuestion.difficulty_level}
                   </span>
                 )}

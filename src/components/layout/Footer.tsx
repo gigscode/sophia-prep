@@ -18,7 +18,7 @@ export function Footer() {
                 className="w-12 h-12 object-contain"
               />
               <div>
-                <h3 className="text-xl font-bold text-yellow-400">Sophia Prep</h3>
+                <h3 className="text-xl font-bold" style={{ color: '#B78628' }}>Sophia Prep</h3>
                 <p className="text-sm text-blue-300">Divinely Inspired to Reign in Knowledge</p>
               </div>
             </div>
@@ -32,7 +32,10 @@ export function Footer() {
                 href="https://facebook.com/sophiaprep"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-blue-800 hover:bg-yellow-400 hover:text-blue-900 rounded-full flex items-center justify-center transition-all"
+                className="w-10 h-10 bg-blue-800 hover:text-blue-900 rounded-full flex items-center justify-center transition-all"
+                style={{ '&:hover': { backgroundColor: '#B78628' } } as any}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B78628'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                 aria-label="Facebook"
               >
                 <Facebook className="w-5 h-5" />
@@ -41,7 +44,9 @@ export function Footer() {
                 href="https://twitter.com/sophiaprep"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-blue-800 hover:bg-yellow-400 hover:text-blue-900 rounded-full flex items-center justify-center transition-all"
+                className="w-10 h-10 bg-blue-800 hover:text-blue-900 rounded-full flex items-center justify-center transition-all"
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B78628'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                 aria-label="Twitter"
               >
                 <Twitter className="w-5 h-5" />
@@ -50,7 +55,9 @@ export function Footer() {
                 href="https://instagram.com/sophiaprep"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-10 h-10 bg-blue-800 hover:bg-yellow-400 hover:text-blue-900 rounded-full flex items-center justify-center transition-all"
+                className="w-10 h-10 bg-blue-800 hover:text-blue-900 rounded-full flex items-center justify-center transition-all"
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#B78628'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
                 aria-label="Instagram"
               >
                 <Instagram className="w-5 h-5" />
@@ -60,30 +67,30 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-lg font-semibold text-yellow-400 mb-4">Quick Links</h4>
+            <h4 className="text-lg font-semibold mb-4" style={{ color: '#B78628' }}>Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/" className="text-blue-200 transition-colors footer-link">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/subjects" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/subjects" className="text-blue-200 transition-colors footer-link">
                   Subjects
                 </Link>
               </li>
               <li>
-                <Link to="/practice" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/practice" className="text-blue-200 transition-colors footer-link">
                   Practice Mode
                 </Link>
               </li>
               <li>
-                <Link to="/mock-exams" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/mock-exams" className="text-blue-200 transition-colors footer-link">
                   Mock Exams
                 </Link>
               </li>
               <li>
-                <Link to="/study" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/study" className="text-blue-200 transition-colors footer-link">
                   Study Hub
                 </Link>
               </li>
@@ -92,30 +99,30 @@ export function Footer() {
 
           {/* Resources */}
           <div>
-            <h4 className="text-lg font-semibold text-yellow-400 mb-4">Resources</h4>
+            <h4 className="text-lg font-semibold mb-4" style={{ color: '#B78628' }}>Resources</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/help" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/help" className="text-blue-200 transition-colors footer-link">
                   Help Center
                 </Link>
               </li>
               <li>
-                <Link to="/about" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/about" className="text-blue-200 transition-colors footer-link">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/privacy" className="text-blue-200 transition-colors footer-link">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/terms" className="text-blue-200 transition-colors footer-link">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-blue-200 hover:text-yellow-400 transition-colors">
+                <Link to="/contact" className="text-blue-200 transition-colors footer-link">
                   Contact Us
                 </Link>
               </li>
@@ -124,18 +131,18 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-lg font-semibold text-yellow-400 mb-4">Contact Us</h4>
+            <h4 className="text-lg font-semibold mb-4" style={{ color: '#B78628' }}>Contact Us</h4>
             <ul className="space-y-3">
               <li className="flex items-center md:items-start justify-center md:justify-start gap-2 text-blue-200 text-center md:text-left">
                 <Mail className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <a href="mailto:support@sophiaprep.app" className="hover:text-yellow-400 transition-colors">
+                <a href="mailto:support@sophiaprep.app" className="transition-colors footer-link">
                   support@sophiaprep.app
                 </a>
               </li>
 
               <li className="flex items-center md:items-start justify-center md:justify-start gap-2 text-blue-200 text-center md:text-left">
                 <Phone className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                <a href="tel:+2347061735358" className="hover:text-yellow-400 transition-colors">
+                <a href="tel:+2347061735358" className="transition-colors footer-link">
                   +234 706 173 5358
                 </a>
               </li>

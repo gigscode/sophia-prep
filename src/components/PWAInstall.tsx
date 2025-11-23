@@ -45,7 +45,8 @@ export default function PWAInstall() {
     <div className="fixed bottom-6 right-6 z-50">
       <button
         onClick={handleInstall}
-        className="px-4 py-2 bg-yellow-400 text-blue-900 rounded-lg shadow-lg font-semibold"
+        className="px-4 py-2 text-blue-900 rounded-lg shadow-lg font-semibold"
+        style={{ backgroundColor: '#B78628' }}
         aria-label="Install Sophia Prep"
       >
         Install App

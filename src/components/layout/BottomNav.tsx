@@ -35,7 +35,10 @@ export function BottomNav() {
             >
               <div className={`relative transition-all duration-300 ${active ? 'transform -translate-y-1' : ''}`}>
                 {active && (
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full shadow-lg animate-in slide-in-from-top duration-300" />
+                  <div
+                    className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-10 h-1 rounded-full shadow-lg animate-in slide-in-from-top duration-300"
+                    style={{ background: 'linear-gradient(to right, #B78628, #D4A855)' }}
+                  />
                 )}
                 <div className={`p-2 rounded-xl transition-all duration-300 ${
                   active ? 'bg-blue-50 shadow-md' : ''

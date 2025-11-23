@@ -152,11 +152,16 @@
 
   .sophia-glow::after {
     content: '';
-    @apply absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-yellow-500 rounded-xl blur opacity-30 -z-10 transition-all duration-300;
+    @apply absolute -inset-0.5 rounded-xl blur opacity-30 -z-10 transition-all duration-300;
+    background: linear-gradient(to right, #2563EB, #B78628);
   }
 
   .sophia-glow:hover::after {
     @apply opacity-60;
+  }
+
+  .footer-link:hover {
+    color: #B78628;
   }
 
   /* Premium button hover effect */

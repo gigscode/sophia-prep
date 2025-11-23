@@ -25,7 +25,7 @@ export function ProfilePage() {
             <h2 className="text-2xl font-bold">{user.name || user.email}</h2>
             <p className="text-sm text-gray-600">{user.email}</p>
             {user.isAdmin && (
-              <div className="mt-2 inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 text-xs">
+              <div className="mt-2 inline-block px-2 py-1 rounded text-xs" style={{ backgroundColor: '#F5EBCF', color: '#92400E' }}>
                 Admin
               </div>
             )}
