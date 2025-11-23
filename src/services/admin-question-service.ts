@@ -5,7 +5,6 @@ export type QuestionFilters = {
   search?: string;
   subjectId?: string;
   topicId?: string;
-  difficulty?: 'EASY' | 'MEDIUM' | 'HARD' | 'all';
   examType?: 'JAMB' | 'WAEC' | 'all';
   year?: number | 'all';
   status?: 'active' | 'inactive' | 'all';
@@ -19,10 +18,10 @@ export type QuestionInput = {
   option_c: string;
   option_d: string;
   correct_answer: 'A' | 'B' | 'C' | 'D';
-  explanation?: string;
-  difficulty_level?: 'EASY' | 'MEDIUM' | 'HARD';
-  exam_year?: number;
-  exam_type?: 'JAMB' | 'WAEC';
+  explanation?: string | null;
+  exam_year?: number | null;
+  exam_type?: 'JAMB' | 'WAEC' | null;
+  question_number?: number | null;
   is_active?: boolean;
 };
 
@@ -45,9 +44,6 @@ export class AdminQuestionService {
         query = query.eq('topic_id', filters.topicId);
       }
 
-      if (filters?.difficulty && filters.difficulty !== 'all') {
-        query = query.eq('difficulty_level', filters.difficulty);
-      }
 
       if (filters?.examType && filters.examType !== 'all') {
         query = query.eq('exam_type', filters.examType);
@@ -185,7 +181,7 @@ export class AdminQuestionService {
       try {
         // Validate required fields
         if (!question.topic_id || !question.question_text || !question.option_a ||
-            !question.option_b || !question.option_c || !question.option_d || !question.correct_answer) {
+          !question.option_b || !question.option_c || !question.option_d || !question.correct_answer) {
           result.failed++;
           result.errors.push(`Missing required fields for question: ${question.question_text?.substring(0, 50)}...`);
           continue;
@@ -210,7 +206,6 @@ export class AdminQuestionService {
   async getQuestionStatistics(): Promise<{
     total: number;
     bySubject: Record<string, number>;
-    byDifficulty: Record<string, number>;
     byExamType: Record<string, number>;
     byYear: Record<number, number>;
   }> {
@@ -223,14 +218,12 @@ export class AdminQuestionService {
       // Get all questions for statistics
       const { data: questions } = await supabase
         .from('questions')
-        .select('topic_id, difficulty_level, exam_type, exam_year');
+        .select('topic_id, exam_type, exam_year');
 
-      const byDifficulty: Record<string, number> = { EASY: 0, MEDIUM: 0, HARD: 0 };
       const byExamType: Record<string, number> = { JAMB: 0, WAEC: 0 };
       const byYear: Record<number, number> = {};
 
       questions?.forEach((q: any) => {
-        if (q.difficulty_level) byDifficulty[q.difficulty_level]++;
         if (q.exam_type) byExamType[q.exam_type]++;
         if (q.exam_year) byYear[q.exam_year] = (byYear[q.exam_year] || 0) + 1;
       });
@@ -238,7 +231,6 @@ export class AdminQuestionService {
       return {
         total: total || 0,
         bySubject: {}, // Would need to join with topics and subjects
-        byDifficulty,
         byExamType,
         byYear,
       };
@@ -247,7 +239,6 @@ export class AdminQuestionService {
       return {
         total: 0,
         bySubject: {},
-        byDifficulty: {},
         byExamType: {},
         byYear: {},
       };

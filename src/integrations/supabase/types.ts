@@ -38,7 +38,6 @@ export interface Topic {
   updated_at: string;
 }
 
-export type DifficultyLevel = 'EASY' | 'MEDIUM' | 'HARD';
 export type CorrectAnswer = 'A' | 'B' | 'C' | 'D';
 
 export interface Question {
@@ -51,7 +50,6 @@ export interface Question {
   option_d: string;
   correct_answer: CorrectAnswer;
   explanation: string | null;
-  difficulty_level: DifficultyLevel;
   exam_year: number | null;
   exam_type: 'JAMB' | 'WAEC' | null;
   question_number: number | null;

@@ -12,7 +12,6 @@ interface QuizQuestion {
   explanation?: string;
   exam_year?: number | null;
   exam_type?: 'JAMB' | 'WAEC' | null;
-  difficulty_level?: 'EASY' | 'MEDIUM' | 'HARD' | null;
   topic?: string;
 }
 
@@ -198,17 +197,15 @@ export function QuizResultsPage() {
               <button
                 key={q.id}
                 onClick={() => setCurrentReviewIndex(idx)}
-                className={`min-w-[40px] h-10 rounded-lg font-semibold text-sm transition-all ${
-                  idx === currentReviewIndex
+                className={`min-w-[40px] h-10 rounded-lg font-semibold text-sm transition-all ${idx === currentReviewIndex
                     ? 'ring-2 ring-blue-500 scale-110'
                     : ''
-                } ${
-                  isQuestionCorrect
+                  } ${isQuestionCorrect
                     ? 'bg-green-100 text-green-700 hover:bg-green-200'
                     : isAnswered
-                    ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+                      ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
               >
                 {idx + 1}
               </button>
@@ -246,20 +243,6 @@ export function QuizResultsPage() {
                     {currentQuestion.exam_year}
                   </span>
                 )}
-                {currentQuestion.difficulty_level && (
-                  <span
-                    className="px-2 py-1 rounded"
-                    style={
-                      currentQuestion.difficulty_level === 'EASY'
-                        ? { backgroundColor: '#D1FAE5', color: '#065F46' }
-                        : currentQuestion.difficulty_level === 'MEDIUM'
-                        ? { backgroundColor: '#FDF6E8', color: '#92400E' }
-                        : { backgroundColor: '#FEE2E2', color: '#991B1B' }
-                    }
-                  >
-                    {currentQuestion.difficulty_level}
-                  </span>
-                )}
                 {currentQuestion.topic && (
                   <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded">
                     {currentQuestion.topic}
@@ -277,13 +260,12 @@ export function QuizResultsPage() {
                 return (
                   <div
                     key={opt.key}
-                    className={`p-3 rounded-lg border-2 ${
-                      isCorrectAnswer
+                    className={`p-3 rounded-lg border-2 ${isCorrectAnswer
                         ? 'border-green-500 bg-green-50'
                         : isUserAnswer && !isCorrect
-                        ? 'border-red-500 bg-red-50'
-                        : 'border-gray-200 bg-white'
-                    }`}
+                          ? 'border-red-500 bg-red-50'
+                          : 'border-gray-200 bg-white'
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-gray-700">{opt.key}.</span>

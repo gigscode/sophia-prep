@@ -23,7 +23,6 @@ export type ContentAnalytics = {
   totalSubjects: number;
   totalTopics: number;
   questionsBySubject: Record<string, number>;
-  questionsByDifficulty: Record<string, number>;
   questionsByExamType: Record<string, number>;
 };
 
@@ -178,13 +177,11 @@ export class AdminAnalyticsService {
       // Questions by difficulty
       const { data: questions } = await supabase
         .from('questions')
-        .select('difficulty_level, exam_type, topic_id');
+        .select('exam_type, topic_id');
 
-      const questionsByDifficulty: Record<string, number> = { EASY: 0, MEDIUM: 0, HARD: 0 };
       const questionsByExamType: Record<string, number> = { JAMB: 0, WAEC: 0 };
 
       questions?.forEach((q: any) => {
-        if (q.difficulty_level) questionsByDifficulty[q.difficulty_level]++;
         if (q.exam_type) questionsByExamType[q.exam_type]++;
       });
 
@@ -193,7 +190,6 @@ export class AdminAnalyticsService {
         totalSubjects: totalSubjects || 0,
         totalTopics: totalTopics || 0,
         questionsBySubject: {}, // Would need join with topics
-        questionsByDifficulty,
         questionsByExamType,
       };
     } catch (err) {
@@ -203,7 +199,6 @@ export class AdminAnalyticsService {
         totalSubjects: 0,
         totalTopics: 0,
         questionsBySubject: {},
-        questionsByDifficulty: {},
         questionsByExamType: {},
       };
     }

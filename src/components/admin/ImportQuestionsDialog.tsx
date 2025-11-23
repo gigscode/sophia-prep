@@ -25,7 +25,6 @@ interface ParsedQuestion {
   option_d: string;
   correct_answer: 'A' | 'B' | 'C' | 'D';
   explanation?: string;
-  difficulty_level?: 'EASY' | 'MEDIUM' | 'HARD';
   exam_year?: number;
   exam_type?: 'JAMB' | 'WAEC';
   topic?: string;
@@ -97,7 +96,6 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
         option_d: question.option_d,
         correct_answer: (question.correct_answer || 'A').toUpperCase() as 'A' | 'B' | 'C' | 'D',
         explanation: question.explanation,
-        difficulty_level: question.difficulty_level?.toUpperCase() as 'EASY' | 'MEDIUM' | 'HARD' | undefined,
         exam_year: question.exam_year ? parseInt(question.exam_year) : undefined,
         exam_type: question.exam_type?.toUpperCase() as 'JAMB' | 'WAEC' | undefined,
         topic: question.topic,
@@ -110,7 +108,7 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
 
   const parseJSON = (text: string): ParsedQuestion[] => {
     const data = JSON.parse(text);
-    
+
     // Handle different JSON formats
     if (Array.isArray(data)) {
       return data;
@@ -129,7 +127,7 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
       });
       return allQuestions;
     }
-    
+
     throw new Error('Invalid JSON format');
   };
 
@@ -199,7 +197,6 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
           option_d: pq.option_d,
           correct_answer: pq.correct_answer,
           explanation: pq.explanation,
-          difficulty_level: pq.difficulty_level || 'MEDIUM',
           exam_year: pq.exam_year,
           exam_type: pq.exam_type,
           is_active: true,
@@ -231,9 +228,9 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
     let filename = '';
 
     if (templateFormat === 'csv') {
-      content = `question_text,option_a,option_b,option_c,option_d,correct_answer,explanation,difficulty_level,exam_year,exam_type,topic,subject
-"What is 2 + 2?","2","3","4","5","C","Addition of two numbers","EASY","2023","JAMB","Arithmetic","Mathematics"
-"Solve: x + 5 = 10","3","4","5","6","C","Subtract 5 from both sides: x = 10 - 5 = 5","MEDIUM","2023","WAEC","Algebra","Mathematics"`;
+      content = `question_text,option_a,option_b,option_c,option_d,correct_answer,explanation,exam_year,exam_type,topic,subject
+"What is 2 + 2?","2","3","4","5","C","Addition of two numbers","2023","JAMB","Arithmetic","Mathematics"
+"Solve: x + 5 = 10","3","4","5","6","C","Subtract 5 from both sides: x = 10 - 5 = 5","2023","WAEC","Algebra","Mathematics"`;
       filename = 'questions_template.csv';
     } else {
       const template = [
@@ -245,7 +242,6 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
           option_d: "5",
           correct_answer: "C",
           explanation: "Addition of two numbers",
-          difficulty_level: "EASY",
           exam_year: 2023,
           exam_type: "JAMB",
           topic: "Arithmetic",
@@ -259,7 +255,6 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
           option_d: "6",
           correct_answer: "C",
           explanation: "Subtract 5 from both sides: x = 10 - 5 = 5",
-          difficulty_level: "MEDIUM",
           exam_year: 2023,
           exam_type: "WAEC",
           topic: "Algebra",
@@ -307,18 +302,16 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
             <div className="flex gap-4">
               <button
                 onClick={() => setFormat('json')}
-                className={`flex-1 p-4 border-2 rounded-lg flex items-center justify-center gap-2 ${
-                  format === 'json' ? 'border-[#B78628] bg-[#FDF6E8]' : 'border-gray-300'
-                }`}
+                className={`flex-1 p-4 border-2 rounded-lg flex items-center justify-center gap-2 ${format === 'json' ? 'border-[#B78628] bg-[#FDF6E8]' : 'border-gray-300'
+                  }`}
               >
                 <FileText className="w-5 h-5" />
                 <span className="font-medium">JSON</span>
               </button>
               <button
                 onClick={() => setFormat('csv')}
-                className={`flex-1 p-4 border-2 rounded-lg flex items-center justify-center gap-2 ${
-                  format === 'csv' ? 'border-[#B78628] bg-[#FDF6E8]' : 'border-gray-300'
-                }`}
+                className={`flex-1 p-4 border-2 rounded-lg flex items-center justify-center gap-2 ${format === 'csv' ? 'border-[#B78628] bg-[#FDF6E8]' : 'border-gray-300'
+                  }`}
               >
                 <FileText className="w-5 h-5" />
                 <span className="font-medium">CSV</span>
@@ -411,9 +404,8 @@ export function ImportQuestionsDialog({ isOpen, onClose, onSuccess }: ImportQues
 
           {/* Import Result */}
           {importResult && (
-            <div className={`mb-6 p-4 rounded-lg ${
-              importResult.success > 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
-            }`}>
+            <div className={`mb-6 p-4 rounded-lg ${importResult.success > 0 ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+              }`}>
               <div className="flex items-start gap-3">
                 {importResult.success > 0 ? (
                   <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />

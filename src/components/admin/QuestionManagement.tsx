@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { adminQuestionService, type QuestionFilters } from '../../services/admin-question-service';
 import type { Question } from '../../integrations/supabase/types';
 import { Table } from '../ui/Table';
@@ -9,9 +10,9 @@ import { Button } from '../ui/Button';
 import { Dialog } from '../ui/Dialog';
 import { showToast } from '../ui/Toast';
 import { Upload, Trash2, BarChart3 } from 'lucide-react';
-import { ImportQuestionsDialog } from './ImportQuestionsDialog';
 
 export function QuestionManagement() {
+  const navigate = useNavigate();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -20,7 +21,6 @@ export function QuestionManagement() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
-  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const itemsPerPage = 50;
 
@@ -72,12 +72,7 @@ export function QuestionManagement() {
   };
 
   const handleImport = () => {
-    setShowImportDialog(true);
-  };
-
-  const handleImportSuccess = () => {
-    fetchQuestions();
-    fetchStats();
+    navigate('/admin/import-questions');
   };
 
   const columns = [
@@ -89,22 +84,6 @@ export function QuestionManagement() {
           {q.question_text}
         </div>
       ),
-    },
-    {
-      key: 'difficulty_level',
-      label: 'Difficulty',
-      render: (q: Question) => {
-        const getDifficultyStyle = () => {
-          if (q.difficulty_level === 'EASY') return { backgroundColor: '#D1FAE5', color: '#065F46' };
-          if (q.difficulty_level === 'MEDIUM') return { backgroundColor: '#FDF6E8', color: '#92400E' };
-          return { backgroundColor: '#FEE2E2', color: '#991B1B' };
-        };
-        return (
-          <span className="px-2 py-1 rounded text-xs" style={getDifficultyStyle()}>
-            {q.difficulty_level || 'N/A'}
-          </span>
-        );
-      },
     },
     {
       key: 'exam_type',
@@ -169,26 +148,12 @@ export function QuestionManagement() {
             <div className="text-sm text-gray-600">WAEC Questions</div>
             <div className="text-2xl font-bold">{stats.byExamType.WAEC || 0}</div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="text-sm text-gray-600">Easy Questions</div>
-            <div className="text-2xl font-bold">{stats.byDifficulty.EASY || 0}</div>
-          </div>
         </div>
       )}
 
       {/* Filters */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <SearchBar value={filters.search || ''} onChange={handleSearch} placeholder="Search questions..." className="md:col-span-2" />
-        <Select
-          value={filters.difficulty || 'all'}
-          onChange={(e) => handleFilterChange('difficulty', e.target.value)}
-          options={[
-            { value: 'all', label: 'All Difficulties' },
-            { value: 'EASY', label: 'Easy' },
-            { value: 'MEDIUM', label: 'Medium' },
-            { value: 'HARD', label: 'Hard' },
-          ]}
-        />
         <Select
           value={filters.examType || 'all'}
           onChange={(e) => handleFilterChange('examType', e.target.value)}
@@ -232,13 +197,6 @@ export function QuestionManagement() {
         confirmText="Delete"
       />
 
-      {/* Import Questions Dialog */}
-      <ImportQuestionsDialog
-        isOpen={showImportDialog}
-        onClose={() => setShowImportDialog(false)}
-        onSuccess={handleImportSuccess}
-      />
     </div>
   );
 }
-

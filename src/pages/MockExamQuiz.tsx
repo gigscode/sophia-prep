@@ -80,7 +80,7 @@ export function MockExamQuiz() {
       try {
         const subject = subjectSel;
         const exam_year = yearSel;
-        const exam_type = typeSel; // At this point, exam_type is 'JAMB' | 'WAEC', never 'ALL'
+        const exam_type = typeSel as 'JAMB' | 'WAEC'; // At this point, exam_type is 'JAMB' | 'WAEC', never 'ALL' (guarded by check above)
         let qs: any[] = [];
         if (subject) {
           const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type, limit: 60 });
