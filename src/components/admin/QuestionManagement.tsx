@@ -9,6 +9,7 @@ import { Button } from '../ui/Button';
 import { Dialog } from '../ui/Dialog';
 import { showToast } from '../ui/Toast';
 import { Upload, Trash2, BarChart3 } from 'lucide-react';
+import { ImportQuestionsDialog } from './ImportQuestionsDialog';
 
 export function QuestionManagement() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -19,6 +20,7 @@ export function QuestionManagement() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
   const [stats, setStats] = useState<any>(null);
+  const [showImportDialog, setShowImportDialog] = useState(false);
 
   const itemsPerPage = 50;
 
@@ -70,7 +72,12 @@ export function QuestionManagement() {
   };
 
   const handleImport = () => {
-    showToast('Import functionality coming soon. Use server-side import for now.', 'info');
+    setShowImportDialog(true);
+  };
+
+  const handleImportSuccess = () => {
+    fetchQuestions();
+    fetchStats();
   };
 
   const columns = [
@@ -223,6 +230,13 @@ export function QuestionManagement() {
         message="Are you sure you want to delete this question? This action cannot be undone."
         type="warning"
         confirmText="Delete"
+      />
+
+      {/* Import Questions Dialog */}
+      <ImportQuestionsDialog
+        isOpen={showImportDialog}
+        onClose={() => setShowImportDialog(false)}
+        onSuccess={handleImportSuccess}
       />
     </div>
   );

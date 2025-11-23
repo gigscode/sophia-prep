@@ -1,6 +1,6 @@
 // Sophia Prep Service Worker
-const CACHE_NAME = 'sophia-prep-v1';
-const RUNTIME_CACHE = 'sophia-prep-runtime-v1';
+const CACHE_NAME = 'sophia-prep-v2';
+const RUNTIME_CACHE = 'sophia-prep-runtime-v2';
 
 // Assets to cache on install
 const PRECACHE_URLS = [
