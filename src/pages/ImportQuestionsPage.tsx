@@ -141,11 +141,6 @@ export function ImportQuestionsPage() {
             return;
         }
 
-        if (!selectedTopic && !selectedSubject) {
-            showToast('Please select a subject or topic', 'error');
-            return;
-        }
-
         setImporting(true);
         setImportResult(null);
 
@@ -159,49 +154,70 @@ export function ImportQuestionsPage() {
                 parsedQuestions = parseJSON(text);
             }
 
+            // Fetch all topics grouped by subject for global lookup
+            const groupedTopics = await adminTopicService.getTopicsGroupedBySubject();
+
             // Convert to QuestionInput format
             const questionsToImport: QuestionInput[] = [];
+            const errors: string[] = [];
 
             for (const pq of parsedQuestions) {
                 let topicId = selectedTopic;
+                let subjectId = selectedSubject;
 
-                // If no topic selected, try to find or create topic from question data
-                if (!topicId && pq.topic) {
-                    const subjectId = selectedSubject || subjects.find(s =>
-                        s.name.toLowerCase() === pq.subject?.toLowerCase() ||
-                        s.slug.toLowerCase() === pq.subject?.toLowerCase()
-                    )?.id;
-
-                    if (subjectId) {
-                        let topic = topics.find(t => t.name.toLowerCase() === pq.topic?.toLowerCase() && t.subject_id === subjectId);
-                        // If topic not found in current list, try fetching all topics for subject (if not already fetched)
-                        if (!topic) {
-                            // This logic assumes topics are already loaded for the subject. 
-                            // If we are auto-detecting subject from CSV, we might not have loaded topics yet.
-                            // For simplicity, we'll rely on what we have or create new.
-                            // Ideally we should fetch topics if subjectId is found but topics are empty.
+                // 1. Resolve Subject
+                if (!subjectId) {
+                    if (pq.subject) {
+                        const foundSubject = subjects.find(s =>
+                            s.name.toLowerCase() === pq.subject?.toLowerCase() ||
+                            s.slug.toLowerCase() === pq.subject?.toLowerCase()
+                        );
+                        if (foundSubject) {
+                            subjectId = foundSubject.id;
                         }
+                    }
+                }
 
-                        if (!topic) {
+                if (!subjectId) {
+                    errors.push(`Could not resolve subject for question: "${pq.question_text.substring(0, 30)}..."`);
+                    continue;
+                }
+
+                // 2. Resolve Topic
+                if (!topicId) {
+                    if (pq.topic) {
+                        // Look up in groupedTopics
+                        const subjectTopics = groupedTopics[subjectId] || [];
+                        let foundTopic = subjectTopics.find(t => t.name.toLowerCase() === pq.topic?.toLowerCase());
+
+                        if (!foundTopic) {
                             // Create new topic
                             try {
-                                topic = await adminTopicService.createTopic({
+                                const newTopic = await adminTopicService.createTopic({
                                     subject_id: subjectId,
                                     name: pq.topic,
                                     description: `Auto-created from import`,
                                     order_index: 0,
                                     is_active: true,
-                                }) || undefined;
+                                });
+
+                                if (newTopic) {
+                                    foundTopic = newTopic;
+                                    // Update local cache
+                                    if (!groupedTopics[subjectId]) groupedTopics[subjectId] = [];
+                                    groupedTopics[subjectId].push(newTopic);
+                                }
                             } catch (e) {
                                 console.error('Failed to create topic', e);
                             }
                         }
-                        topicId = topic?.id || '';
+                        topicId = foundTopic?.id || '';
                     }
                 }
 
                 if (!topicId) {
-                    continue; // Skip questions without valid topic
+                    errors.push(`Could not resolve topic for question: "${pq.question_text.substring(0, 30)}..."`);
+                    continue;
                 }
 
                 questionsToImport.push({
@@ -220,7 +236,17 @@ export function ImportQuestionsPage() {
             }
 
             // Import questions
-            const result = await adminQuestionService.importQuestions(questionsToImport);
+            let result = { success: 0, failed: 0, errors: [...errors] };
+
+            if (questionsToImport.length > 0) {
+                const importRes = await adminQuestionService.importQuestions(questionsToImport);
+                result.success = importRes.success;
+                result.failed = importRes.failed + errors.length;
+                result.errors = [...result.errors, ...importRes.errors];
+            } else {
+                result.failed = errors.length;
+            }
+
             setImportResult(result);
 
             if (result.success > 0) {
@@ -310,8 +336,8 @@ export function ImportQuestionsPage() {
                                 <button
                                     onClick={() => setFormat('json')}
                                     className={`flex-1 p-6 border-2 rounded-xl flex items-center justify-center gap-3 transition-all ${format === 'json'
-                                            ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
-                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <FileText className="w-6 h-6" />
@@ -320,8 +346,8 @@ export function ImportQuestionsPage() {
                                 <button
                                     onClick={() => setFormat('csv')}
                                     className={`flex-1 p-6 border-2 rounded-xl flex items-center justify-center gap-3 transition-all ${format === 'csv'
-                                            ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
-                                            : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <FileText className="w-6 h-6" />
