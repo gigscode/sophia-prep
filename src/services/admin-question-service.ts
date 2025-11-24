@@ -99,28 +99,28 @@ export class AdminQuestionService {
 
   async createQuestion(input: QuestionInput): Promise<Question | null> {
     try {
-      const { data, error } = await supabase
-        .from('questions')
+      const { data, error } = await (supabase
+        .from('questions') as any)
         .insert([input])
         .select()
         .single();
 
       if (error) {
         console.error('Error creating question:', error);
-        return null;
+        throw error;
       }
 
       return (data as Question) || null;
     } catch (err) {
       console.error('Failed to create question:', err);
-      return null;
+      throw err;
     }
   }
 
   async updateQuestion(id: string, updates: Partial<QuestionInput>): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('questions')
+      const { error } = await (supabase
+        .from('questions') as any)
         .update(updates)
         .eq('id', id);
 
@@ -187,16 +187,11 @@ export class AdminQuestionService {
           continue;
         }
 
-        const created = await this.createQuestion(question);
-        if (created) {
-          result.success++;
-        } else {
-          result.failed++;
-          result.errors.push(`Failed to import question: ${question.question_text.substring(0, 50)}...`);
-        }
-      } catch (err) {
+        await this.createQuestion(question);
+        result.success++;
+      } catch (err: any) {
         result.failed++;
-        result.errors.push(`Error importing question: ${err}`);
+        result.errors.push(`Failed to import question: "${question.question_text.substring(0, 30)}...". Error: ${err.message || JSON.stringify(err)}`);
       }
     }
 

@@ -54,7 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // For now, we'll keep the hardcoded admin check for simplicity, 
     // but ideally this should be a database role or claim.
     const adminEmails = new Set(['admin@example.com', 'gigsdev007@gmail.com']);
-    const isAdmin = adminEmails.has(supabaseUser.email || '');
+    const email = (supabaseUser.email || '').toLowerCase().trim();
+    const isAdmin = adminEmails.has(email);
 
     return {
       id: supabaseUser.id,

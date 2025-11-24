@@ -10,7 +10,7 @@ import { Upload, FileText, Download, AlertCircle, CheckCircle, ArrowLeft } from 
 import type { Subject, Topic } from '../integrations/supabase/types';
 import { Card } from '../components/ui/Card';
 
-type ImportFormat = 'json' | 'csv';
+type ImportFormat = 'json' | 'csv' | 'simple';
 
 interface ParsedQuestion {
     question_text: string;
@@ -26,6 +26,33 @@ interface ParsedQuestion {
     subject?: string;
 }
 
+// Validation helper
+const validateQuestion = (q: any, index: number): { valid: boolean; errors: string[] } => {
+    const errors: string[] = [];
+    const prefix = `Question ${index + 1}`;
+
+    if (!q.question_text || typeof q.question_text !== 'string' || !q.question_text.trim()) {
+        errors.push(`${prefix}: Missing or invalid question_text`);
+    }
+    if (!q.option_a || typeof q.option_a !== 'string' || !q.option_a.trim()) {
+        errors.push(`${prefix}: Missing or invalid option_a`);
+    }
+    if (!q.option_b || typeof q.option_b !== 'string' || !q.option_b.trim()) {
+        errors.push(`${prefix}: Missing or invalid option_b`);
+    }
+    if (!q.option_c || typeof q.option_c !== 'string' || !q.option_c.trim()) {
+        errors.push(`${prefix}: Missing or invalid option_c`);
+    }
+    if (!q.option_d || typeof q.option_d !== 'string' || !q.option_d.trim()) {
+        errors.push(`${prefix}: Missing or invalid option_d`);
+    }
+    if (!q.correct_answer || !['A', 'B', 'C', 'D'].includes(q.correct_answer.toUpperCase())) {
+        errors.push(`${prefix}: Missing or invalid correct_answer (must be A, B, C, or D)`);
+    }
+
+    return { valid: errors.length === 0, errors };
+};
+
 export function ImportQuestionsPage() {
     const navigate = useNavigate();
     const [format, setFormat] = useState<ImportFormat>('json');
@@ -35,6 +62,8 @@ export function ImportQuestionsPage() {
     const [topics, setTopics] = useState<Topic[]>([]);
     const [selectedSubject, setSelectedSubject] = useState<string>('');
     const [selectedTopic, setSelectedTopic] = useState<string>('');
+    const [selectedExamType, setSelectedExamType] = useState<'JAMB' | 'WAEC' | ''>('');
+    const [selectedExamYear, setSelectedExamYear] = useState<string>('');
     const [importResult, setImportResult] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,28 +143,149 @@ export function ImportQuestionsPage() {
     };
 
     const parseJSON = (text: string): ParsedQuestion[] => {
-        const data = JSON.parse(text);
+        try {
+            const data = JSON.parse(text);
+            const questions: ParsedQuestion[] = [];
+            const validationErrors: string[] = [];
 
-        // Handle different JSON formats
-        if (Array.isArray(data)) {
-            return data;
-        } else if (typeof data === 'object') {
-            // Handle format like { "mathematics": [...], "english": [...] }
-            const allQuestions: ParsedQuestion[] = [];
-            Object.keys(data).forEach(key => {
-                if (Array.isArray(data[key])) {
-                    data[key].forEach((q: any) => {
-                        allQuestions.push({
-                            ...q,
-                            subject: q.subject || key,
+            // Handle different JSON formats
+            if (Array.isArray(data)) {
+                data.forEach((q, index) => {
+                    const validation = validateQuestion(q, index);
+                    if (validation.valid) {
+                        questions.push({
+                            question_text: q.question_text.trim(),
+                            option_a: q.option_a.trim(),
+                            option_b: q.option_b.trim(),
+                            option_c: q.option_c.trim(),
+                            option_d: q.option_d.trim(),
+                            correct_answer: q.correct_answer.toUpperCase() as 'A' | 'B' | 'C' | 'D',
+                            explanation: q.explanation?.trim(),
+                            exam_year: q.exam_year ? parseInt(String(q.exam_year)) : undefined,
+                            exam_type: q.exam_type?.toUpperCase() as 'JAMB' | 'WAEC' | undefined,
+                            topic: q.topic?.trim(),
+                            subject: q.subject?.trim(),
                         });
+                    } else {
+                        validationErrors.push(...validation.errors);
+                    }
+                });
+            } else if (typeof data === 'object') {
+                // Handle format like { "mathematics": [...], "english": [...] }
+                let questionIndex = 0;
+                Object.keys(data).forEach(key => {
+                    if (Array.isArray(data[key])) {
+                        data[key].forEach((q: any) => {
+                            const validation = validateQuestion(q, questionIndex++);
+                            if (validation.valid) {
+                                questions.push({
+                                    question_text: q.question_text.trim(),
+                                    option_a: q.option_a.trim(),
+                                    option_b: q.option_b.trim(),
+                                    option_c: q.option_c.trim(),
+                                    option_d: q.option_d.trim(),
+                                    correct_answer: q.correct_answer.toUpperCase() as 'A' | 'B' | 'C' | 'D',
+                                    explanation: q.explanation?.trim(),
+                                    exam_year: q.exam_year ? parseInt(String(q.exam_year)) : undefined,
+                                    exam_type: q.exam_type?.toUpperCase() as 'JAMB' | 'WAEC' | undefined,
+                                    topic: q.topic?.trim(),
+                                    subject: q.subject?.trim() || key.trim(),
+                                });
+                            } else {
+                                validationErrors.push(...validation.errors);
+                            }
+                        });
+                    }
+                });
+            } else {
+                throw new Error('Invalid JSON format. Expected an array of questions or an object with subject keys.');
+            }
+
+            if (validationErrors.length > 0) {
+                throw new Error(`JSON validation failed:\n${validationErrors.join('\n')}`);
+            }
+
+            if (questions.length === 0) {
+                throw new Error('No valid questions found in JSON file');
+            }
+
+            return questions;
+        } catch (error: any) {
+            if (error instanceof SyntaxError) {
+                throw new Error(`Invalid JSON syntax: ${error.message}`);
+            }
+            throw error;
+        }
+    };
+
+    const parseSimpleText = (text: string): ParsedQuestion[] => {
+        const questions: ParsedQuestion[] = [];
+        const blocks = text.split(/---+/).filter(b => b.trim());
+
+        blocks.forEach((block, blockIndex) => {
+            try {
+                const lines = block.split('\n').map(l => l.trim()).filter(l => l);
+                const question: any = {};
+
+                lines.forEach(line => {
+                    const colonIndex = line.indexOf(':');
+                    if (colonIndex === -1) return;
+
+                    const key = line.substring(0, colonIndex).trim().toUpperCase();
+                    const value = line.substring(colonIndex + 1).trim();
+
+                    switch (key) {
+                        case 'Q':
+                        case 'QUESTION':
+                            question.question_text = value;
+                            break;
+                        case 'A':
+                            question.option_a = value;
+                            break;
+                        case 'B':
+                            question.option_b = value;
+                            break;
+                        case 'C':
+                            question.option_c = value;
+                            break;
+                        case 'D':
+                            question.option_d = value;
+                            break;
+                        case 'ANSWER':
+                        case 'CORRECT':
+                            question.correct_answer = value.toUpperCase();
+                            break;
+                        case 'EXPLANATION':
+                        case 'EXPLAIN':
+                            question.explanation = value;
+                            break;
+                    }
+                });
+
+                const validation = validateQuestion(question, blockIndex);
+                if (validation.valid) {
+                    questions.push({
+                        question_text: question.question_text,
+                        option_a: question.option_a,
+                        option_b: question.option_b,
+                        option_c: question.option_c,
+                        option_d: question.option_d,
+                        correct_answer: question.correct_answer as 'A' | 'B' | 'C' | 'D',
+                        explanation: question.explanation,
                     });
+                } else {
+                    throw new Error(`Block ${blockIndex + 1} validation failed:\n${validation.errors.join('\n')}`);
                 }
-            });
-            return allQuestions;
+            } catch (error: any) {
+                throw new Error(`Error parsing block ${blockIndex + 1}: ${error.message}`);
+            }
+        });
+
+        if (questions.length === 0) {
+            throw new Error('No valid questions found in text. Make sure to separate questions with "---"');
         }
 
-        throw new Error('Invalid JSON format');
+        return questions;
     };
 
     const handleImport = async () => {
@@ -146,6 +296,18 @@ export function ImportQuestionsPage() {
         if (importMode === 'text' && !textInput.trim()) {
             showToast('Please enter text to import', 'error');
             return;
+        }
+
+        // Validate required fields for simple text mode
+        if (format === 'simple') {
+            if (!selectedSubject) {
+                showToast('Please select a Subject', 'error');
+                return;
+            }
+            if (!selectedTopic) {
+                showToast('Please select a Topic', 'error');
+                return;
+            }
         }
 
         setImporting(true);
@@ -163,6 +325,8 @@ export function ImportQuestionsPage() {
 
             if (format === 'csv') {
                 parsedQuestions = parseCSV(text);
+            } else if (format === 'simple') {
+                parsedQuestions = parseSimpleText(text);
             } else {
                 parsedQuestions = parseJSON(text);
             }
@@ -178,7 +342,7 @@ export function ImportQuestionsPage() {
                 let topicId = selectedTopic;
                 let subjectId = selectedSubject;
 
-                // 1. Resolve Subject
+                // 1. Resolve Subject (if not already selected)
                 if (!subjectId) {
                     if (pq.subject) {
                         const foundSubject = subjects.find(s =>
@@ -196,7 +360,7 @@ export function ImportQuestionsPage() {
                     continue;
                 }
 
-                // 2. Resolve Topic
+                // 2. Resolve Topic (if not already selected)
                 if (!topicId) {
                     if (pq.topic) {
                         // Look up in groupedTopics
@@ -251,8 +415,8 @@ export function ImportQuestionsPage() {
                     option_d: pq.option_d,
                     correct_answer: pq.correct_answer,
                     explanation: pq.explanation,
-                    exam_year: pq.exam_year,
-                    exam_type: pq.exam_type,
+                    exam_year: selectedExamYear ? parseInt(selectedExamYear) : pq.exam_year,
+                    exam_type: selectedExamType || pq.exam_type,
                     is_active: true,
                 });
             }
@@ -295,6 +459,24 @@ export function ImportQuestionsPage() {
 "What is 2 + 2?","2","3","4","5","C","Addition of two numbers","2023","JAMB","Arithmetic","Mathematics"
 "Solve: x + 5 = 10","3","4","5","6","C","Subtract 5 from both sides: x = 10 - 5 = 5","2023","WAEC","Algebra","Mathematics"`;
             filename = 'questions_template.csv';
+        } else if (templateFormat === 'simple') {
+            content = `Q: What is 2 + 2?
+A: 2
+B: 3
+C: 4
+D: 5
+ANSWER: C
+EXPLANATION: Addition of two numbers
+---
+Q: Solve: x + 5 = 10
+A: 3
+B: 4
+C: 5
+D: 6
+ANSWER: C
+EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
+---`;
+            filename = 'questions_template.txt';
         } else {
             const template = [
                 {
@@ -356,17 +538,20 @@ export function ImportQuestionsPage() {
                             <button
                                 onClick={() => setImportMode('file')}
                                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${importMode === 'file'
-                                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 File Upload
                             </button>
                             <button
-                                onClick={() => setImportMode('text')}
+                                onClick={() => {
+                                    setImportMode('text');
+                                    setFormat('simple');
+                                }}
                                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${importMode === 'text'
-                                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
                                     }`}
                             >
                                 Copy & Paste Text
@@ -376,26 +561,39 @@ export function ImportQuestionsPage() {
                         {/* Format Selection */}
                         <div>
                             <label className="block text-sm font-medium mb-3">Import Format</label>
-                            <div className="flex gap-4">
+                            <div className="grid grid-cols-3 gap-4">
                                 <button
                                     onClick={() => setFormat('json')}
-                                    className={`flex-1 p-6 border-2 rounded-xl flex items-center justify-center gap-3 transition-all ${format === 'json'
+                                    className={`p-6 border-2 rounded-xl flex flex-col items-center justify-center gap-3 transition-all ${format === 'json'
                                         ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
                                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <FileText className="w-6 h-6" />
                                     <span className="font-semibold text-lg">JSON</span>
+                                    <span className="text-xs text-gray-500">Structured data</span>
                                 </button>
                                 <button
                                     onClick={() => setFormat('csv')}
-                                    className={`flex-1 p-6 border-2 rounded-xl flex items-center justify-center gap-3 transition-all ${format === 'csv'
+                                    className={`p-6 border-2 rounded-xl flex flex-col items-center justify-center gap-3 transition-all ${format === 'csv'
                                         ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
                                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                         }`}
                                 >
                                     <FileText className="w-6 h-6" />
                                     <span className="font-semibold text-lg">CSV</span>
+                                    <span className="text-xs text-gray-500">Spreadsheet</span>
+                                </button>
+                                <button
+                                    onClick={() => setFormat('simple')}
+                                    className={`p-6 border-2 rounded-xl flex flex-col items-center justify-center gap-3 transition-all ${format === 'simple'
+                                        ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
+                                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    <FileText className="w-6 h-6" />
+                                    <span className="font-semibold text-lg">Simple Text</span>
+                                    <span className="text-xs text-gray-500">Easy format</span>
                                 </button>
                             </div>
                         </div>
@@ -407,17 +605,36 @@ export function ImportQuestionsPage() {
                                     <AlertCircle className="w-6 h-6 text-blue-600" />
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-semibold text-blue-900 mb-1">Download Template</h3>
-                                    <p className="text-blue-700 mb-4">
-                                        Download a template file to see the expected format for importing questions.
-                                    </p>
+                                    <h3 className="font-semibold text-blue-900 mb-1">
+                                        {format === 'simple' ? 'Simple Text Format Guide' : 'Download Template'}
+                                    </h3>
+                                    {format === 'simple' ? (
+                                        <div className="text-blue-700 mb-4">
+                                            <p className="mb-2">Use this easy format to add questions. Separate each question with "---":</p>
+                                            <div className="bg-white p-3 rounded border border-blue-200 font-mono text-xs">
+                                                <div>Q: Your question here?</div>
+                                                <div>A: First option</div>
+                                                <div>B: Second option</div>
+                                                <div>C: Third option</div>
+                                                <div>D: Fourth option</div>
+                                                <div>ANSWER: C</div>
+                                                <div>EXPLANATION: Why C is correct</div>
+                                                <div className="mt-2">---</div>
+                                            </div>
+                                            <p className="mt-2 text-xs font-semibold">Note: Select Subject, Topic, Exam, and Year from the dropdowns below.</p>
+                                        </div>
+                                    ) : (
+                                        <p className="text-blue-700 mb-4">
+                                            Download a template file to see the expected format for importing questions.
+                                        </p>
+                                    )}
                                     <Button
                                         onClick={() => downloadTemplate(format)}
                                         variant="outline"
                                         className="bg-white hover:bg-blue-50 border-blue-200 text-blue-700"
                                     >
                                         <Download className="w-4 h-4 mr-2" />
-                                        Download {format.toUpperCase()} Template
+                                        Download {format === 'simple' ? 'Text' : format.toUpperCase()} Template
                                     </Button>
                                 </div>
                             </div>
@@ -426,7 +643,7 @@ export function ImportQuestionsPage() {
                         {/* Subject and Topic Selection */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-medium mb-2">Subject (Optional)</label>
+                                <label className="block text-sm font-medium mb-2">Subject (Required)</label>
                                 <Select
                                     value={selectedSubject}
                                     onChange={(e) => handleSubjectChange(e.target.value)}
@@ -435,12 +652,9 @@ export function ImportQuestionsPage() {
                                         ...subjects.map(s => ({ value: s.id, label: s.name }))
                                     ]}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Leave empty if questions include subject/topic info
-                                </p>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-2">Topic (Optional)</label>
+                                <label className="block text-sm font-medium mb-2">Topic (Required)</label>
                                 <Select
                                     value={selectedTopic}
                                     onChange={(e) => setSelectedTopic(e.target.value)}
@@ -450,9 +664,28 @@ export function ImportQuestionsPage() {
                                     ]}
                                     disabled={!selectedSubject}
                                 />
-                                <p className="text-xs text-gray-500 mt-2">
-                                    Select a default topic for all questions
-                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Exam Type (Optional)</label>
+                                <Select
+                                    value={selectedExamType}
+                                    onChange={(e) => setSelectedExamType(e.target.value as 'JAMB' | 'WAEC' | '')}
+                                    options={[
+                                        { value: '', label: 'Select Exam Type' },
+                                        { value: 'JAMB', label: 'JAMB' },
+                                        { value: 'WAEC', label: 'WAEC' },
+                                    ]}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Exam Year (Optional)</label>
+                                <input
+                                    type="number"
+                                    value={selectedExamYear}
+                                    onChange={(e) => setSelectedExamYear(e.target.value)}
+                                    placeholder="e.g. 2023"
+                                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#B78628] focus:border-transparent"
+                                />
                             </div>
                         </div>
 
@@ -486,7 +719,7 @@ export function ImportQuestionsPage() {
                                     <input
                                         ref={fileInputRef}
                                         type="file"
-                                        accept={format === 'json' ? '.json' : '.csv'}
+                                        accept={format === 'json' ? '.json' : format === 'csv' ? '.csv' : '.txt'}
                                         onChange={handleFileChange}
                                         className="hidden"
                                     />
@@ -495,7 +728,9 @@ export function ImportQuestionsPage() {
                                 <textarea
                                     value={textInput}
                                     onChange={(e) => setTextInput(e.target.value)}
-                                    placeholder={`Paste your ${format.toUpperCase()} content here...`}
+                                    placeholder={format === 'simple'
+                                        ? `Q: Your question here?\nA: First option\nB: Second option\nC: Third option\nD: Fourth option\nANSWER: C\nEXPLANATION: Why C is correct\n---\n(Add more questions separated by ---)`
+                                        : `Paste your ${format.toUpperCase()} content here...`}
                                     className="w-full h-64 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#B78628] focus:border-transparent font-mono text-sm"
                                 />
                             )}

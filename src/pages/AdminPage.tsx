@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { BookOpen, Users, FileQuestion, BarChart3, FolderTree, Menu, X } from 'lucide-react';
+import { BookOpen, Users, FileQuestion, BarChart3, FolderTree, Menu, X, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserManagement } from '../components/admin/UserManagement';
 import { SubjectManagement } from '../components/admin/SubjectManagement';
@@ -19,9 +19,15 @@ export function AdminPage() {
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);
 
   useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const mediaQuery = window.matchMedia('(min-width: 1024px)');
+    const handleResize = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+
+    // Set initial value
+    setIsDesktop(mediaQuery.matches);
+
+    // Add listener
+    mediaQuery.addEventListener('change', handleResize);
+    return () => mediaQuery.removeEventListener('change', handleResize);
   }, []);
 
   useEffect(() => {
@@ -38,8 +44,32 @@ export function AdminPage() {
     );
   }
 
-  if (!user || !user.isAdmin) {
-    return null;
+  if (!user) {
+    return null; // Will redirect in useEffect
+  }
+
+  if (!user.isAdmin) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
+        <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <X className="w-8 h-8 text-red-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
+          <p className="text-gray-600 mb-6">
+            You do not have permission to access the admin panel.
+            <br />
+            Current user: <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{user.email}</span>
+          </p>
+          <button
+            onClick={() => navigate('/')}
+            className="w-full py-2 px-4 bg-gray-900 text-white rounded hover:bg-gray-800 transition-colors"
+          >
+            Go to Home
+          </button>
+        </div>
+      </div>
+    );
   }
 
   const menuItems = [
@@ -52,19 +82,17 @@ export function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Menu Button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
-        >
-          {sidebarOpen ? (
-            <X className="w-6 h-6 text-gray-700" />
-          ) : (
+      {/* Mobile Menu Button - Only show when sidebar is CLOSED */}
+      {!sidebarOpen && (
+        <div className="lg:hidden fixed top-4 left-4 z-40">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
+          >
             <Menu className="w-6 h-6 text-gray-700" />
-          )}
-        </button>
-      </div>
+          </button>
+        </div>
+      )}
 
       {/* Sidebar Overlay (Mobile) */}
       <AnimatePresence>
@@ -74,63 +102,82 @@ export function AdminPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden fixed inset-0 bg-black/50 z-40"
+            className="lg:hidden fixed inset-0 bg-black/50 z-50"
           />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-40 lg:z-0">
-        <motion.div
-          initial={false}
-          animate={{
-            x: isDesktop ? 0 : (sidebarOpen ? 0 : '-100%'),
-          }}
-          transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-          className="h-full"
-        >
-          <div className="flex flex-col h-full">
-            {/* Sidebar Header */}
-            <div className="p-6 border-b border-gray-200">
+      <motion.aside
+        initial={false}
+        animate={{
+          x: isDesktop ? 0 : (sidebarOpen ? 0 : '-100%'),
+        }}
+        transition={{ type: "spring", bounce: 0, duration: 0.3 }}
+        className="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-[60] lg:z-0"
+      >
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <div>
               <h2 className="text-xl font-bold text-gray-800">Admin Panel</h2>
               <p className="text-sm text-gray-500 mt-1">Sophia Prep</p>
             </div>
+            {/* Close button for mobile inside sidebar */}
+            {!isDesktop && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 rounded-md hover:bg-gray-100 lg:hidden"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            )}
+          </div>
 
-            {/* Navigation Menu */}
-            <nav className="flex-1 overflow-y-auto py-4">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = tab === item.id;
+          {/* Navigation Menu */}
+          <nav className="flex-1 overflow-y-auto py-4">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = tab === item.id;
 
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setTab(item.id);
-                      if (!isDesktop) setSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-6 py-3 transition-all duration-200 ${isActive
-                        ? `${item.bgColor} ${item.color} border-r-4 border-current font-semibold`
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                      }`}
-                  >
-                    <Icon className={`w-5 h-5 ${isActive ? item.color : 'text-gray-400'}`} />
-                    <span>{item.label}</span>
-                  </button>
-                );
-              })}
-            </nav>
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setTab(item.id);
+                    if (!isDesktop) setSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-6 py-3 transition-all duration-200 ${isActive
+                    ? `${item.bgColor} ${item.color} border-r-4 border-current font-semibold`
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive ? item.color : 'text-gray-400'}`} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
 
-            {/* Sidebar Footer */}
-            <div className="p-6 border-t border-gray-200">
-              <div className="text-xs text-gray-500">
-                <p className="font-medium text-gray-700 mb-1">Logged in as:</p>
-                <p className="truncate">{user.email}</p>
-              </div>
+            <div className="my-2 border-t border-gray-100 mx-6"></div>
+
+            <button
+              onClick={() => navigate('/')}
+              className="w-full flex items-center gap-3 px-6 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200"
+            >
+              <Home className="w-5 h-5 text-gray-400" />
+              <span>Back to Home</span>
+            </button>
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="p-6 border-t border-gray-200">
+            <div className="text-xs text-gray-500">
+              <p className="font-medium text-gray-700 mb-1">Logged in as:</p>
+              <p className="truncate">{user.email}</p>
             </div>
           </div>
-        </motion.div>
-      </aside>
+        </div>
+      </motion.aside>
 
       {/* Main Content */}
       <div className="lg:ml-64 min-h-screen">

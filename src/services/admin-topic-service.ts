@@ -56,9 +56,9 @@ export class AdminTopicService {
 
   async createTopic(input: TopicInput): Promise<Topic | null> {
     try {
-      const { data, error } = await supabase
-        .from('topics')
-        .insert([input as any])
+      const { data, error } = await (supabase
+        .from('topics') as any)
+        .insert([input])
         .select()
         .single();
 
@@ -76,8 +76,8 @@ export class AdminTopicService {
 
   async updateTopic(id: string, updates: Partial<TopicInput>): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('topics')
+      const { error } = await (supabase
+        .from('topics') as any)
         .update(updates)
         .eq('id', id);
 
@@ -126,7 +126,7 @@ export class AdminTopicService {
     try {
       // Update order_index for each topic
       const updates = topicIds.map((id, index) =>
-        supabase.from('topics').update({ order_index: index }).eq('id', id)
+        (supabase.from('topics') as any).update({ order_index: index }).eq('id', id)
       );
 
       await Promise.all(updates);
