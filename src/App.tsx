@@ -67,8 +67,8 @@ export function App() {
         <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
         <Route path="/login" element={<Layout><LoginPage /></Layout>} />
         <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
-        <Route path="/7351/admin" element={<Layout><AdminPage /></Layout>} />
-        <Route path="/admin/import-questions" element={<Layout><ImportQuestionsPage /></Layout>} />
+        <Route path="/7351/admin" element={<AdminPage />} />
+        <Route path="/admin/import-questions" element={<ImportQuestionsPage />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />

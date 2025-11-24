@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
+import { supabase } from '../integrations/supabase/client';
+import { showToast } from '../components/ui/Toast';
 
 type User = {
   id: string;
@@ -19,62 +21,96 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = 'sophia_auth_user';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw) as User;
-        setUser(parsed);
-      } catch {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
+    // Check active session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        mapUser(session.user).then(setUser);
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        mapUser(session.user).then(setUser);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const persist = (u: User | null) => {
-    if (u) localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(u));
-    else localStorage.removeItem(AUTH_STORAGE_KEY);
-    setUser(u);
+  const mapUser = async (supabaseUser: any): Promise<User> => {
+    // Check if user is admin based on email (or you could check a public.users table)
+    // For now, we'll keep the hardcoded admin check for simplicity, 
+    // but ideally this should be a database role or claim.
+    const adminEmails = new Set(['admin@example.com', 'gigsdev007@gmail.com']);
+    const isAdmin = adminEmails.has(supabaseUser.email || '');
+
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || '',
+      name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
+      avatarUrl: supabaseUser.user_metadata?.avatar_url,
+      isAdmin,
+    };
   };
 
   const login = async (email: string, password: string) => {
-    // Minimal mock authentication: accept any password, mark specific emails as admin
-    const adminEmails = new Set(['admin@example.com', 'gigsdev007@gmail.com']);
-    const isAdmin = adminEmails.has(email);
-    const u: User = {
-      id: email,
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      name: email.split('@')[0],
-      avatarUrl: null,
-      isAdmin,
-    };
-    persist(u);
-    return u;
+      password,
+    });
+
+    if (error) {
+      showToast(error.message, 'error');
+      throw error;
+    }
+
+    if (data.user) {
+      const u = await mapUser(data.user);
+      return u;
+    }
+
+    throw new Error('Login failed');
   };
 
   const signup = async (email: string, password: string, name?: string) => {
-    const adminEmails = new Set(['admin@example.com', 'gigsdev007@gmail.com']);
-    const isAdmin = adminEmails.has(email);
-    const u: User = {
-      id: email,
+    const { data, error } = await supabase.auth.signUp({
       email,
-      name: name || email.split('@')[0],
-      avatarUrl: null,
-      isAdmin,
-    };
-    persist(u);
-    return u;
+      password,
+      options: {
+        data: {
+          full_name: name,
+        },
+      },
+    });
+
+    if (error) {
+      showToast(error.message, 'error');
+      throw error;
+    }
+
+    if (data.user) {
+      const u = await mapUser(data.user);
+      return u;
+    }
+
+    throw new Error('Signup failed');
   };
 
-  const logout = () => {
-    persist(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   return (

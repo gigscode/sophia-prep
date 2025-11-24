@@ -38,6 +38,9 @@ export function ImportQuestionsPage() {
     const [importResult, setImportResult] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [textInput, setTextInput] = useState('');
+    const [importMode, setImportMode] = useState<'file' | 'text'>('file');
+
     useEffect(() => {
         loadSubjects();
     }, []);
@@ -136,8 +139,12 @@ export function ImportQuestionsPage() {
     };
 
     const handleImport = async () => {
-        if (!file) {
+        if (importMode === 'file' && !file) {
             showToast('Please select a file to import', 'error');
+            return;
+        }
+        if (importMode === 'text' && !textInput.trim()) {
+            showToast('Please enter text to import', 'error');
             return;
         }
 
@@ -145,7 +152,13 @@ export function ImportQuestionsPage() {
         setImportResult(null);
 
         try {
-            const text = await file.text();
+            let text = '';
+            if (importMode === 'file' && file) {
+                text = await file.text();
+            } else {
+                text = textInput;
+            }
+
             let parsedQuestions: ParsedQuestion[];
 
             if (format === 'csv') {
@@ -169,8 +182,8 @@ export function ImportQuestionsPage() {
                 if (!subjectId) {
                     if (pq.subject) {
                         const foundSubject = subjects.find(s =>
-                            s.name.toLowerCase() === pq.subject?.toLowerCase() ||
-                            s.slug.toLowerCase() === pq.subject?.toLowerCase()
+                            s.name.toLowerCase().trim() === pq.subject?.toLowerCase().trim() ||
+                            s.slug.toLowerCase().trim() === pq.subject?.toLowerCase().trim()
                         );
                         if (foundSubject) {
                             subjectId = foundSubject.id;
@@ -179,7 +192,7 @@ export function ImportQuestionsPage() {
                 }
 
                 if (!subjectId) {
-                    errors.push(`Could not resolve subject for question: "${pq.question_text.substring(0, 30)}..."`);
+                    errors.push(`Could not resolve subject for question: "${pq.question_text.substring(0, 30)}..." (Subject: ${pq.subject})`);
                     continue;
                 }
 
@@ -188,14 +201,15 @@ export function ImportQuestionsPage() {
                     if (pq.topic) {
                         // Look up in groupedTopics
                         const subjectTopics = groupedTopics[subjectId] || [];
-                        let foundTopic = subjectTopics.find(t => t.name.toLowerCase() === pq.topic?.toLowerCase());
+                        let foundTopic = subjectTopics.find(t => t.name.toLowerCase().trim() === pq.topic?.toLowerCase().trim());
 
                         if (!foundTopic) {
                             // Create new topic
                             try {
+                                console.log(`Creating new topic: ${pq.topic} for subject: ${subjectId}`);
                                 const newTopic = await adminTopicService.createTopic({
                                     subject_id: subjectId,
-                                    name: pq.topic,
+                                    name: pq.topic.trim(),
                                     description: `Auto-created from import`,
                                     order_index: 0,
                                     is_active: true,
@@ -206,12 +220,20 @@ export function ImportQuestionsPage() {
                                     // Update local cache
                                     if (!groupedTopics[subjectId]) groupedTopics[subjectId] = [];
                                     groupedTopics[subjectId].push(newTopic);
+                                } else {
+                                    errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}..."`);
+                                    continue;
                                 }
-                            } catch (e) {
+                            } catch (e: any) {
                                 console.error('Failed to create topic', e);
+                                errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}...". Error: ${e.message || JSON.stringify(e)}`);
+                                continue;
                             }
                         }
                         topicId = foundTopic?.id || '';
+                    } else {
+                        errors.push(`Topic missing for question: "${pq.question_text.substring(0, 30)}..."`);
+                        continue;
                     }
                 }
 
@@ -329,6 +351,28 @@ export function ImportQuestionsPage() {
 
                 <Card>
                     <div className="space-y-8">
+                        {/* Import Mode Selection */}
+                        <div className="flex gap-4 mb-6">
+                            <button
+                                onClick={() => setImportMode('file')}
+                                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${importMode === 'file'
+                                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    }`}
+                            >
+                                File Upload
+                            </button>
+                            <button
+                                onClick={() => setImportMode('text')}
+                                className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${importMode === 'text'
+                                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
+                                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                                    }`}
+                            >
+                                Copy & Paste Text
+                            </button>
+                        </div>
+
                         {/* Format Selection */}
                         <div>
                             <label className="block text-sm font-medium mb-3">Import Format</label>
@@ -412,35 +456,49 @@ export function ImportQuestionsPage() {
                             </div>
                         </div>
 
-                        {/* File Upload */}
+                        {/* Input Area (File or Text) */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Upload File</label>
-                            <div
-                                onClick={() => fileInputRef.current?.click()}
-                                className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-[#B78628] hover:bg-[#FDF6E8] transition-all group"
-                            >
-                                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#FDF6E8] transition-colors">
-                                    <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#B78628] transition-colors" />
-                                </div>
-                                {file ? (
-                                    <div>
-                                        <p className="font-semibold text-gray-900 text-lg mb-1">{file.name}</p>
-                                        <p className="text-sm text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+                            <label className="block text-sm font-medium mb-2">
+                                {importMode === 'file' ? 'Upload File' : 'Paste Text'}
+                            </label>
+
+                            {importMode === 'file' ? (
+                                <>
+                                    <div
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="border-2 border-dashed border-gray-300 rounded-xl p-12 text-center cursor-pointer hover:border-[#B78628] hover:bg-[#FDF6E8] transition-all group"
+                                    >
+                                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-[#FDF6E8] transition-colors">
+                                            <Upload className="w-8 h-8 text-gray-400 group-hover:text-[#B78628] transition-colors" />
+                                        </div>
+                                        {file ? (
+                                            <div>
+                                                <p className="font-semibold text-gray-900 text-lg mb-1">{file.name}</p>
+                                                <p className="text-sm text-gray-500">{(file.size / 1024).toFixed(2)} KB</p>
+                                            </div>
+                                        ) : (
+                                            <div>
+                                                <p className="font-semibold text-gray-700 text-lg mb-1">Click to upload {format.toUpperCase()} file</p>
+                                                <p className="text-sm text-gray-500">or drag and drop</p>
+                                            </div>
+                                        )}
                                     </div>
-                                ) : (
-                                    <div>
-                                        <p className="font-semibold text-gray-700 text-lg mb-1">Click to upload {format.toUpperCase()} file</p>
-                                        <p className="text-sm text-gray-500">or drag and drop</p>
-                                    </div>
-                                )}
-                            </div>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept={format === 'json' ? '.json' : '.csv'}
-                                onChange={handleFileChange}
-                                className="hidden"
-                            />
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept={format === 'json' ? '.json' : '.csv'}
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </>
+                            ) : (
+                                <textarea
+                                    value={textInput}
+                                    onChange={(e) => setTextInput(e.target.value)}
+                                    placeholder={`Paste your ${format.toUpperCase()} content here...`}
+                                    className="w-full h-64 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#B78628] focus:border-transparent font-mono text-sm"
+                                />
+                            )}
                         </div>
 
                         {/* Import Result */}
@@ -490,7 +548,7 @@ export function ImportQuestionsPage() {
                         <div className="flex justify-end pt-4 border-t">
                             <Button
                                 onClick={handleImport}
-                                disabled={!file || importing}
+                                disabled={(importMode === 'file' && !file) || (importMode === 'text' && !textInput) || importing}
                                 style={{ backgroundColor: '#B78628', color: 'white' }}
                                 className="px-8 py-3 text-lg h-auto"
                             >

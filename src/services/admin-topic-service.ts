@@ -4,9 +4,9 @@ import type { Topic } from '../integrations/supabase/types';
 export type TopicInput = {
   subject_id: string;
   name: string;
-  description?: string;
-  order_index?: number;
-  is_active?: boolean;
+  description: string;
+  order_index: number;
+  is_active: boolean;
 };
 
 export class AdminTopicService {
@@ -58,19 +58,19 @@ export class AdminTopicService {
     try {
       const { data, error } = await supabase
         .from('topics')
-        .insert([input])
+        .insert([input as any])
         .select()
         .single();
 
       if (error) {
         console.error('Error creating topic:', error);
-        return null;
+        throw error; // Throw the error so it can be caught by the caller
       }
 
       return (data as Topic) || null;
     } catch (err) {
       console.error('Failed to create topic:', err);
-      return null;
+      throw err; // Re-throw
     }
   }
 
@@ -125,7 +125,7 @@ export class AdminTopicService {
   async reorderTopics(topicIds: string[]): Promise<boolean> {
     try {
       // Update order_index for each topic
-      const updates = topicIds.map((id, index) => 
+      const updates = topicIds.map((id, index) =>
         supabase.from('topics').update({ order_index: index }).eq('id', id)
       );
 
