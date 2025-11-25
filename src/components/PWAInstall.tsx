@@ -85,7 +85,7 @@ export default function PWAInstall() {
   // Android/Chrome install prompt
   if (showPrompt && !dismissed) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-auto md:right-6 md:max-w-sm z-50 animate-slide-up">
+      <div className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-auto md:right-6 md:max-w-sm z-[60] animate-slide-up">
         <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border-t-4 md:border-t-0 md:border-l-4 p-6" style={{ borderColor: '#B78628' }}>
           <button
             onClick={handleDismiss}
@@ -132,7 +132,7 @@ export default function PWAInstall() {
   // iOS install instructions
   if (showIOSInstructions && !dismissed) {
     return (
-      <div className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-auto md:right-6 md:max-w-sm z-50 animate-slide-up">
+      <div className="fixed bottom-0 left-0 right-0 md:bottom-6 md:left-auto md:right-6 md:max-w-sm z-[60] animate-slide-up">
         <div className="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl border-t-4 md:border-t-0 md:border-l-4 p-6" style={{ borderColor: '#B78628' }}>
           <button
             onClick={handleDismiss}

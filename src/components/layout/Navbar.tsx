@@ -50,11 +50,10 @@ export function Navbar() {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className={`px-4 py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                    active
-                      ? 'text-blue-900 font-semibold shadow-lg'
-                      : 'text-white hover:bg-blue-700 hover:shadow-md'
-                  }`}
+                  className={`px-4 py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 ${active
+                    ? 'text-white font-semibold shadow-lg'
+                    : 'text-white hover:bg-blue-700 hover:shadow-md'
+                    }`}
                   style={active ? { backgroundColor: '#B78628' } : undefined}
                 >
                   <span className="font-medium">{link.label}</span>
@@ -65,9 +64,8 @@ export function Navbar() {
             {/* Profile / avatar */}
             <Link
               to={user ? '/profile' : '/login'}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
-              }`}
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
+                }`}
               style={isActive('/profile') ? { backgroundColor: '#B78628' } : undefined}
             >
               {user ? (
@@ -106,11 +104,10 @@ export function Navbar() {
                     key={link.to}
                     to={link.to}
                     onClick={() => setIsMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                      active
-                        ? 'text-blue-900 font-semibold shadow-lg'
-                        : 'text-white hover:bg-blue-700'
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${active
+                      ? 'text-white font-semibold shadow-lg'
+                      : 'text-white hover:bg-blue-700'
+                      }`}
                     style={active ? { backgroundColor: '#B78628', animationDelay: `${index * 50}ms` } : { animationDelay: `${index * 50}ms` }}
                   >
                     <Icon className="w-5 h-5" />
@@ -122,9 +119,8 @@ export function Navbar() {
               <Link
                 to={user ? '/profile' : '/login'}
                 onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${
-                  isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
-                }`}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
+                  }`}
                 style={isActive('/profile') ? { backgroundColor: '#B78628' } : undefined}
               >
                 <User className="w-5 h-5" />
