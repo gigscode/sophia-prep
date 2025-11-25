@@ -422,7 +422,7 @@ export function ImportQuestionsPage() {
             }
 
             // Import questions
-            let result = { success: 0, failed: 0, errors: [...errors] };
+            const result = { success: 0, failed: 0, errors: [...errors] };
 
             if (questionsToImport.length > 0) {
                 const importRes = await adminQuestionService.importQuestions(questionsToImport);

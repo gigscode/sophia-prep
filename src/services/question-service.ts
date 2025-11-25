@@ -1,5 +1,5 @@
 import { supabase } from '../integrations/supabase/client';
-import type { Question, Subject, Topic } from '../integrations/supabase/types';
+import type { Question, Subject } from '../integrations/supabase/types';
 
 export class QuestionService {
   async getQuestionsBySubjectSlug(slug: string, filters?: { exam_year?: number; exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<Question[]> {

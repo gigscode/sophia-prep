@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Target, Trophy, GraduationCap, Clock, Users, Menu } from 'lucide-react';
+import { BookOpen, Target, Trophy, GraduationCap, Clock, Users } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Layout } from '../components/layout';
 

@@ -5,7 +5,6 @@ import { Pagination } from '../ui/Pagination';
 import { SearchBar } from '../ui/SearchBar';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
-import { Modal } from '../ui/Modal';
 import { Dialog } from '../ui/Dialog';
 import { showToast } from '../ui/Toast';
 import { Download, Edit, Ban, CheckCircle, Trash2 } from 'lucide-react';

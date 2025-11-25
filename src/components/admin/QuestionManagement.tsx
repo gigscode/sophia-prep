@@ -9,7 +9,7 @@ import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
 import { Dialog } from '../ui/Dialog';
 import { showToast } from '../ui/Toast';
-import { Upload, Trash2, BarChart3 } from 'lucide-react';
+import { Upload, Trash2 } from 'lucide-react';
 
 export function QuestionManagement() {
   const navigate = useNavigate();

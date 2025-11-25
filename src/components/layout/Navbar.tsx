@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, BookOpen, Target, Trophy, GraduationCap, HelpCircle, User, ServerCog } from 'lucide-react';
+import { Menu, X, Home, BookOpen, Target, GraduationCap, HelpCircle, User, ServerCog } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navbar() {

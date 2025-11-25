@@ -9,7 +9,7 @@ import { Dialog } from '../ui/Dialog';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { showToast } from '../ui/Toast';
-import { Plus, Edit, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 
 export function TopicManagement() {
   const [topics, setTopics] = useState<Topic[]>([]);
