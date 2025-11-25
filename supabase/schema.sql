@@ -95,6 +95,7 @@ CREATE INDEX idx_questions_active ON questions(is_active);
 -- Extended user information beyond auth.users
 CREATE TABLE IF NOT EXISTS user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT,
   full_name TEXT,
   phone_number TEXT,
   exam_type TEXT CHECK (exam_type IN ('JAMB', 'WAEC', 'BOTH')),
@@ -102,6 +103,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   preferred_subjects TEXT[],
   avatar_url TEXT,
   bio TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -579,6 +581,29 @@ CREATE POLICY "Authenticated users can view active coupon codes"
 -- ============================================================================
 -- HELPER FUNCTIONS
 -- ============================================================================
+
+-- Function to handle new user creation (auto-create user_profiles)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.user_profiles (id, full_name, email, is_active, created_at, updated_at)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    NEW.email,
+    true,
+    NOW(),
+    NOW()
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to automatically create user profile on signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Function to check if user has active subscription
 CREATE OR REPLACE FUNCTION has_active_subscription(user_uuid UUID)

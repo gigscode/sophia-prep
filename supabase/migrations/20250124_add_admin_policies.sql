@@ -51,3 +51,19 @@ CREATE POLICY "Admins can delete questions"
 ON questions FOR DELETE
 TO authenticated
 USING (auth.jwt() ->> 'email' IN ('reubensunday1220@gmail.com', 'gigsdev007@gmail.com'));
+
+-- 4. USER_PROFILES (Admin access for user management)
+CREATE POLICY "Admins can view all user profiles"
+ON user_profiles FOR SELECT
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('reubensunday1220@gmail.com', 'gigsdev007@gmail.com'));
+
+CREATE POLICY "Admins can update user profiles"
+ON user_profiles FOR UPDATE
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('reubensunday1220@gmail.com', 'gigsdev007@gmail.com'));
+
+CREATE POLICY "Admins can delete user profiles"
+ON user_profiles FOR DELETE
+TO authenticated
+USING (auth.jwt() ->> 'email' IN ('reubensunday1220@gmail.com', 'gigsdev007@gmail.com'));
