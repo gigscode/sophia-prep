@@ -145,24 +145,7 @@ export function AnalyticsDashboard() {
           </div>
         </div>
 
-        {/* Questions by Difficulty */}
-        <div className="mt-4 bg-white p-4 rounded-lg shadow">
-          <h4 className="font-medium mb-3">Questions by Difficulty</h4>
-          <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 border rounded bg-green-50">
-              <div className="text-sm text-gray-600">Easy</div>
-              <div className="text-xl font-bold text-green-600">{contentAnalytics?.questionsByDifficulty?.EASY || 0}</div>
-            </div>
-            <div className="p-3 border rounded" style={{ backgroundColor: '#FDF6E8' }}>
-              <div className="text-sm text-gray-600">Medium</div>
-              <div className="text-xl font-bold" style={{ color: '#B78628' }}>{contentAnalytics?.questionsByDifficulty?.MEDIUM || 0}</div>
-            </div>
-            <div className="p-3 border rounded bg-red-50">
-              <div className="text-sm text-gray-600">Hard</div>
-              <div className="text-xl font-bold text-red-600">{contentAnalytics?.questionsByDifficulty?.HARD || 0}</div>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       {/* Subscription Analytics */}
