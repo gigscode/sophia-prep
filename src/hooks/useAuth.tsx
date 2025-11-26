@@ -53,7 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check if user is admin based on email (or you could check a public.users table)
     // For now, we'll keep the hardcoded admin check for simplicity, 
     // but ideally this should be a database role or claim.
-    const adminEmails = new Set(['admin@example.com', 'gigsdev007@gmail.com']);
+    const adminEmails = new Set(['admin@example.com', 'gigsdev007@gmail.com', 'reubensunday1220@gmail.com']);
     const email = (supabaseUser.email || '').toLowerCase().trim();
     const isAdmin = adminEmails.has(email);
 
