@@ -57,6 +57,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const email = (supabaseUser.email || '').toLowerCase().trim();
     const isAdmin = adminEmails.has(email);
 
+    // Update last_login timestamp in user_profiles
+    try {
+      // Use type assertion since the column exists but may not be in generated types yet
+      const { error: updateError } = await (supabase
+        .from('user_profiles')
+        .update as any)({ last_login: new Date().toISOString() })
+        .eq('id', supabaseUser.id);
+
+      if (updateError) throw updateError;
+    } catch (error) {
+      console.error('Failed to update last_login:', error);
+      // Don't block login if this fails
+    }
+
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
