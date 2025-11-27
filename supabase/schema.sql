@@ -104,12 +104,16 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   avatar_url TEXT,
   bio TEXT,
   is_active BOOLEAN DEFAULT TRUE,
+  last_login TIMESTAMPTZ,
+  subscription_plan TEXT DEFAULT 'Free',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX idx_user_profiles_exam_type ON user_profiles(exam_type);
 CREATE INDEX idx_user_profiles_target_date ON user_profiles(target_exam_date);
+CREATE INDEX idx_user_profiles_last_login ON user_profiles(last_login);
+CREATE INDEX idx_user_profiles_subscription_plan ON user_profiles(subscription_plan);
 
 -- ============================================================================
 -- 5. SUBJECT COMBINATIONS TABLE

@@ -111,18 +111,18 @@ export class AdminAnalyticsService {
       // Get all attempts for calculations
       const { data: attempts } = await supabase
         .from('quiz_attempts')
-        .select('score, subject_id, topic_id');
+        .select('score_percentage, subject_id, topic_id');
 
       let totalScore = 0;
       const attemptsBySubject: Record<string, number> = {};
       const scoresBySubject: Record<string, number[]> = {};
 
       attempts?.forEach((attempt: any) => {
-        totalScore += attempt.score || 0;
+        totalScore += attempt.score_percentage || 0;
         const subject = attempt.subject_id || 'Unknown';
         attemptsBySubject[subject] = (attemptsBySubject[subject] || 0) + 1;
         if (!scoresBySubject[subject]) scoresBySubject[subject] = [];
-        scoresBySubject[subject].push(attempt.score || 0);
+        scoresBySubject[subject].push(attempt.score_percentage || 0);
       });
 
       const averageScore = attempts && attempts.length > 0 ? totalScore / attempts.length : 0;
