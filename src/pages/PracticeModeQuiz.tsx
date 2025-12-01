@@ -36,7 +36,11 @@ export function PracticeModeQuiz() {
   const initialTypeParam = params.get('type');
   const [subjectSel, setSubjectSel] = useState<string | undefined>(initialSubject);
   const [yearSel, setYearSel] = useState<'ALL' | number>(initialYearParam === 'ALL' ? 'ALL' : (initialYearParam ? Number(initialYearParam) : 'ALL'));
-  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' ? (initialTypeParam as any) : 'ALL');
+  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(
+    initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' || initialTypeParam === 'ALL' 
+      ? (initialTypeParam as 'ALL' | 'JAMB' | 'WAEC') 
+      : 'ALL'
+  );
   const [showSelectionPage, setShowSelectionPage] = useState(!initialSubject);
 
   const applyParams = (sub?: string | undefined, yr?: 'ALL' | number, typ?: 'ALL' | 'JAMB' | 'WAEC') => {
@@ -227,7 +231,7 @@ Prepare for the Joint Admissions and Matriculation Board examination with our co
   }
 
   // Subject and Year Selection Screen
-  if (showSelectionPage && typeSel !== 'ALL') {
+  if (showSelectionPage && (typeSel === 'JAMB' || typeSel === 'WAEC')) {
     const examTypeColor = typeSel === 'WAEC' ? 'green' : 'blue';
     const examTypeBg = typeSel === 'WAEC' ? 'bg-green-50' : 'bg-blue-50';
     const examTypeBorder = typeSel === 'WAEC' ? 'border-green-500' : 'border-blue-500';
