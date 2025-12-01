@@ -12,7 +12,7 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null);
 
   if (user) {
-    navigate('/profile');
+    navigate('/');
     return null;
   }
 
@@ -20,7 +20,7 @@ export function LoginPage() {
     e.preventDefault();
     try {
       await login(email, password);
-      navigate('/profile');
+      navigate('/');
     } catch (err) {
       setError('Failed to log in');
     }

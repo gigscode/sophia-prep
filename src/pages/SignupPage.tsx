@@ -16,7 +16,7 @@ export function SignupPage() {
     e.preventDefault();
     try {
       await signup(email, password, name);
-      navigate('/profile');
+      navigate('/');
     } catch (err) {
       setError('Failed to sign up');
     }
