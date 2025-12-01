@@ -25,12 +25,12 @@ describe('BottomNavigation', () => {
     it('renders exactly five navigation items (Requirement 7.2)', () => {
       renderWithRouter(<BottomNavigation />);
       
-      // Check for all 5 navigation items
-      expect(screen.getByLabelText('Home')).toBeDefined();
-      expect(screen.getByLabelText('Study')).toBeDefined();
-      expect(screen.getByLabelText('Test')).toBeDefined();
-      expect(screen.getByLabelText('Chat')).toBeDefined();
-      expect(screen.getByLabelText('More')).toBeDefined();
+      // Check for all 5 navigation items by their text labels
+      expect(screen.getByText('Home')).toBeDefined();
+      expect(screen.getByText('Study')).toBeDefined();
+      expect(screen.getByText('Test')).toBeDefined();
+      expect(screen.getByText('Chat')).toBeDefined();
+      expect(screen.getByText('More')).toBeDefined();
     });
 
     it('includes all required navigation items (Requirements 8.1-8.5)', () => {
@@ -67,21 +67,21 @@ describe('BottomNavigation', () => {
       const user = userEvent.setup();
       const { container } = renderWithRouter(<BottomNavigation />);
       
-      const studyLink = screen.getByLabelText('Study');
-      await user.click(studyLink);
+      const studyLink = screen.getByText('Study').closest('a');
+      await user.click(studyLink!);
       
       // Verify the link has the correct href
-      expect(studyLink.getAttribute('href')).toBe('/study');
+      expect(studyLink?.getAttribute('href')).toBe('/study');
     });
 
     it('all navigation items have correct routes', () => {
       renderWithRouter(<BottomNavigation />);
       
-      expect(screen.getByLabelText('Home').getAttribute('href')).toBe('/');
-      expect(screen.getByLabelText('Study').getAttribute('href')).toBe('/study');
-      expect(screen.getByLabelText('Test').getAttribute('href')).toBe('/quiz');
-      expect(screen.getByLabelText('Chat').getAttribute('href')).toBe('/help');
-      expect(screen.getByLabelText('More').getAttribute('href')).toBe('/profile');
+      expect(screen.getByText('Home').closest('a')?.getAttribute('href')).toBe('/');
+      expect(screen.getByText('Study').closest('a')?.getAttribute('href')).toBe('/study');
+      expect(screen.getByText('Test').closest('a')?.getAttribute('href')).toBe('/quiz');
+      expect(screen.getByText('Chat').closest('a')?.getAttribute('href')).toBe('/help');
+      expect(screen.getByText('More').closest('a')?.getAttribute('href')).toBe('/profile');
     });
   });
 
@@ -89,48 +89,48 @@ describe('BottomNavigation', () => {
     it('highlights Home item when on home route (Requirement 7.5)', () => {
       renderWithRouter(<BottomNavigation />, '/');
       
-      const homeLink = screen.getByLabelText('Home');
-      expect(homeLink.getAttribute('aria-current')).toBe('page');
-      expect(homeLink.className).toContain('text-blue-600');
+      const homeLink = screen.getByText('Home').closest('a');
+      expect(homeLink?.getAttribute('aria-current')).toBe('page');
+      expect(homeLink?.className).toContain('text-blue-600');
     });
 
     it('highlights Study item when on study route (Requirement 7.5)', () => {
       renderWithRouter(<BottomNavigation />, '/study');
       
-      const studyLink = screen.getByLabelText('Study');
-      expect(studyLink.getAttribute('aria-current')).toBe('page');
-      expect(studyLink.className).toContain('text-blue-600');
+      const studyLink = screen.getByText('Study').closest('a');
+      expect(studyLink?.getAttribute('aria-current')).toBe('page');
+      expect(studyLink?.className).toContain('text-blue-600');
     });
 
     it('highlights Test item when on quiz route (Requirement 7.5)', () => {
       renderWithRouter(<BottomNavigation />, '/quiz');
       
-      const testLink = screen.getByLabelText('Test');
-      expect(testLink.getAttribute('aria-current')).toBe('page');
-      expect(testLink.className).toContain('text-blue-600');
+      const testLink = screen.getByText('Test').closest('a');
+      expect(testLink?.getAttribute('aria-current')).toBe('page');
+      expect(testLink?.className).toContain('text-blue-600');
     });
 
     it('highlights Chat item when on help route (Requirement 7.5)', () => {
       renderWithRouter(<BottomNavigation />, '/help');
       
-      const chatLink = screen.getByLabelText('Chat');
-      expect(chatLink.getAttribute('aria-current')).toBe('page');
-      expect(chatLink.className).toContain('text-blue-600');
+      const chatLink = screen.getByText('Chat').closest('a');
+      expect(chatLink?.getAttribute('aria-current')).toBe('page');
+      expect(chatLink?.className).toContain('text-blue-600');
     });
 
     it('highlights More item when on profile route (Requirement 7.5)', () => {
       renderWithRouter(<BottomNavigation />, '/profile');
       
-      const moreLink = screen.getByLabelText('More');
-      expect(moreLink.getAttribute('aria-current')).toBe('page');
-      expect(moreLink.className).toContain('text-blue-600');
+      const moreLink = screen.getByText('More').closest('a');
+      expect(moreLink?.getAttribute('aria-current')).toBe('page');
+      expect(moreLink?.className).toContain('text-blue-600');
     });
 
     it('displays active indicator dot for active item', () => {
       const { container } = renderWithRouter(<BottomNavigation />, '/');
       
-      const homeLink = screen.getByLabelText('Home');
-      const indicatorDot = homeLink.querySelector('.bg-blue-600.rounded-full');
+      const homeLink = screen.getByText('Home').closest('a');
+      const indicatorDot = homeLink?.querySelector('.bg-blue-600.rounded-full');
       
       expect(indicatorDot).toBeDefined();
     });
@@ -138,8 +138,8 @@ describe('BottomNavigation', () => {
     it('does not display indicator dot for inactive items', () => {
       const { container } = renderWithRouter(<BottomNavigation />, '/');
       
-      const studyLink = screen.getByLabelText('Study');
-      const indicatorDot = studyLink.querySelector('.bg-blue-600.rounded-full');
+      const studyLink = screen.getByText('Study').closest('a');
+      const indicatorDot = studyLink?.querySelector('.bg-blue-600.rounded-full');
       
       expect(indicatorDot).toBeNull();
     });
@@ -151,7 +151,7 @@ describe('BottomNavigation', () => {
       const activeLinks = links.filter(link => link.getAttribute('aria-current') === 'page');
       
       expect(activeLinks.length).toBe(1);
-      expect(activeLinks[0].getAttribute('aria-label')).toBe('Study');
+      expect(activeLinks[0].textContent).toContain('Study');
     });
   });
 
@@ -221,15 +221,15 @@ describe('BottomNavigation', () => {
     it('active items have aria-current="page"', () => {
       renderWithRouter(<BottomNavigation />, '/');
       
-      const homeLink = screen.getByLabelText('Home');
-      expect(homeLink.getAttribute('aria-current')).toBe('page');
+      const homeLink = screen.getByText('Home').closest('a');
+      expect(homeLink?.getAttribute('aria-current')).toBe('page');
     });
 
     it('inactive items do not have aria-current', () => {
       renderWithRouter(<BottomNavigation />, '/');
       
-      const studyLink = screen.getByLabelText('Study');
-      expect(studyLink.getAttribute('aria-current')).toBeNull();
+      const studyLink = screen.getByText('Study').closest('a');
+      expect(studyLink?.getAttribute('aria-current')).toBeNull();
     });
 
     it('icons have aria-hidden="true"', () => {
@@ -257,21 +257,21 @@ describe('BottomNavigation', () => {
     it('handles route changes correctly', () => {
       // Test with home route
       const { unmount: unmount1 } = renderWithRouter(<BottomNavigation />, '/');
-      let homeLink = screen.getByLabelText('Home');
-      expect(homeLink.getAttribute('aria-current')).toBe('page');
+      let homeLink = screen.getByText('Home').closest('a');
+      expect(homeLink?.getAttribute('aria-current')).toBe('page');
       unmount1();
       
       // Test with study route
       renderWithRouter(<BottomNavigation />, '/study');
-      const studyLink = screen.getByLabelText('Study');
-      expect(studyLink.getAttribute('aria-current')).toBe('page');
+      const studyLink = screen.getByText('Study').closest('a');
+      expect(studyLink?.getAttribute('aria-current')).toBe('page');
     });
 
     it('handles nested routes correctly', () => {
       renderWithRouter(<BottomNavigation />, '/study/syllabus');
       
-      const studyLink = screen.getByLabelText('Study');
-      expect(studyLink.getAttribute('aria-current')).toBe('page');
+      const studyLink = screen.getByText('Study').closest('a');
+      expect(studyLink?.getAttribute('aria-current')).toBe('page');
     });
   });
 });

@@ -154,7 +154,12 @@
 
 
 
-- [ ] 9. Build QuickLinksSection component
+- [x] 9. Build QuickLinksSection component
+
+
+
+
+
 
   - Create section with SectionHeader
   - Render grid of QuickLinkCards (Study Past Questions, Video Lessons, Novels, Study Hub)
@@ -182,8 +187,13 @@
 - [ ]* 10.1 Write property test for event cards
   - **Property 11: Event cards display dates**
   - **Validates: Requirements 6.2**
+-
 
-- [ ] 11. Implement UpcomingEventsSection component
+- [x] 11. Implement UpcomingEventsSection component
+
+
+
+
 
   - Create section with SectionHeader and "View All" link
 
@@ -404,6 +414,11 @@
 
 
 
+
+
+
+
+
 - [ ] 21. Final testing and polish
 
 
@@ -415,6 +430,8 @@
   - Test with different user states (logged in, logged out)
   - Verify error states and edge cases
   - _Requirements: All requirements_
+
+x
 
 - [ ] 22. Checkpoint - Ensure all tests pass
 

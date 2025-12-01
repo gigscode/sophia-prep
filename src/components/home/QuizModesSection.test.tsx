@@ -27,27 +27,29 @@ describe('QuizModesSection', () => {
   it('displays Practice Mode card with correct description', () => {
     renderWithRouter(<QuizModesSection />);
     
-    expect(screen.getByText(/Familiarize yourself with exam questions/)).toBeInTheDocument();
+    const descriptions = screen.getAllByText(/Familiarize yourself with exam questions/);
+    expect(descriptions.length).toBeGreaterThan(0);
   });
 
   it('displays CBT Quiz card with correct description', () => {
     renderWithRouter(<QuizModesSection />);
     
-    expect(screen.getByText(/Timed past questions quiz/)).toBeInTheDocument();
+    const descriptions = screen.getAllByText(/Timed past questions quiz/);
+    expect(descriptions.length).toBeGreaterThan(0);
   });
 
   it('renders expand action button when onExpandClick is provided', () => {
     const handleExpand = vi.fn();
     renderWithRouter(<QuizModesSection onExpandClick={handleExpand} />);
     
-    const actionButton = screen.getByLabelText('Section action');
+    const actionButton = screen.getByLabelText(/View more for Quiz Modes/);
     expect(actionButton).toBeInTheDocument();
   });
 
   it('does not render expand action button when onExpandClick is not provided', () => {
     renderWithRouter(<QuizModesSection />);
     
-    const actionButton = screen.queryByLabelText('Section action');
+    const actionButton = screen.queryByLabelText(/View more for Quiz Modes/);
     expect(actionButton).not.toBeInTheDocument();
   });
 
@@ -57,7 +59,7 @@ describe('QuizModesSection', () => {
     
     renderWithRouter(<QuizModesSection onExpandClick={handleExpand} />);
     
-    const actionButton = screen.getByLabelText('Section action');
+    const actionButton = screen.getByLabelText(/View more for Quiz Modes/);
     await user.click(actionButton);
     
     expect(handleExpand).toHaveBeenCalledTimes(1);

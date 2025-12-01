@@ -54,14 +54,14 @@ describe('QuickLinksSection', () => {
     const handleExpand = vi.fn();
     renderWithRouter(<QuickLinksSection onExpandClick={handleExpand} />);
     
-    const actionButton = screen.getByLabelText('Section action');
+    const actionButton = screen.getByLabelText('View more for Quick Links');
     expect(actionButton).toBeInTheDocument();
   });
 
   it('does not render expand action button when onExpandClick is not provided', () => {
     renderWithRouter(<QuickLinksSection />);
     
-    const actionButton = screen.queryByLabelText('Section action');
+    const actionButton = screen.queryByLabelText('View more for Quick Links');
     expect(actionButton).not.toBeInTheDocument();
   });
 
@@ -71,7 +71,7 @@ describe('QuickLinksSection', () => {
     
     renderWithRouter(<QuickLinksSection onExpandClick={handleExpand} />);
     
-    const actionButton = screen.getByLabelText('Section action');
+    const actionButton = screen.getByLabelText('View more for Quick Links');
     await user.click(actionButton);
     
     expect(handleExpand).toHaveBeenCalledTimes(1);

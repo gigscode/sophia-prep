@@ -129,7 +129,7 @@ describe('QuizModeCard', () => {
 
     const card = screen.getByRole('button');
     expect(card).toHaveAttribute('tabIndex', '0');
-    expect(card).toHaveAttribute('aria-label', 'Practice Mode: Test description');
+    expect(card).toHaveAttribute('aria-label', 'Quiz mode: Practice Mode. Test description');
   });
 
   it('applies custom className when provided', () => {

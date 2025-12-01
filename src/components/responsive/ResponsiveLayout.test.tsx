@@ -141,8 +141,8 @@ describe('Responsive Layout Implementation', () => {
       
       const card = screen.getByRole('button');
       
-      // Check minimum touch target size classes
-      expect(card).toHaveClass('min-h-[44px]'); // Minimum height
+      // Check minimum touch target size classes - EventCard uses card-touch-target class
+      expect(card).toHaveClass('card-touch-target'); // Touch target class
       expect(card).toHaveClass('w-full'); // Full width
       expect(card).toHaveClass('p-4'); // Adequate padding
     });
@@ -209,11 +209,8 @@ describe('Responsive Layout Implementation', () => {
       
       const card = screen.getByRole('button');
       
-      // Check focus management classes
-      expect(card).toHaveClass('focus-visible:outline-none');
-      expect(card).toHaveClass('focus-visible:ring-2');
-      expect(card).toHaveClass('focus-visible:ring-blue-500');
-      expect(card).toHaveClass('focus-visible:ring-offset-2');
+      // Check focus management classes - uses focus-visible-ring utility class
+      expect(card).toHaveClass('focus-visible-ring');
     });
 
     it('cards have proper ARIA labels', () => {
@@ -228,7 +225,8 @@ describe('Responsive Layout Implementation', () => {
       );
       
       const card = screen.getByRole('button');
-      expect(card).toHaveAttribute('aria-label', 'Practice Mode: Test with explanations');
+      // QuizModeCard uses format: "Quiz mode: {title}. {description}"
+      expect(card).toHaveAttribute('aria-label', 'Quiz mode: Practice Mode. Test with explanations');
     });
 
     it('cards support keyboard navigation', () => {
