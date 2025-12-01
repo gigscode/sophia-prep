@@ -37,43 +37,62 @@ class TimerService {
       // Try to find most specific configuration first
       // Priority: exam_type + subject + year > exam_type + subject > exam_type + year > exam_type
       
-      const queries = [
-        // Most specific: exam_type + subject + year
-        config.subjectSlug && config.year ? {
-          exam_type: config.examType,
-          subject_slug: config.subjectSlug,
-          year: config.year
-        } : null,
-        // exam_type + subject
-        config.subjectSlug ? {
-          exam_type: config.examType,
-          subject_slug: config.subjectSlug,
-          year: null
-        } : null,
-        // exam_type + year
-        config.year ? {
-          exam_type: config.examType,
-          subject_slug: null,
-          year: config.year
-        } : null,
-        // Default: exam_type only
-        {
-          exam_type: config.examType,
-          subject_slug: null,
-          year: null
-        }
-      ].filter(q => q !== null);
-
-      for (const query of queries) {
+      // Most specific: exam_type + subject + year
+      if (config.subjectSlug && config.year) {
         const { data, error } = await supabase
           .from('timer_configurations')
           .select('duration_seconds')
-          .match(query as any)
+          .eq('exam_type', config.examType)
+          .eq('subject_slug', config.subjectSlug)
+          .eq('year', config.year)
           .maybeSingle();
 
         if (!error && data) {
           return (data as { duration_seconds: number }).duration_seconds;
         }
+      }
+
+      // exam_type + subject (year is null)
+      if (config.subjectSlug) {
+        const { data, error } = await supabase
+          .from('timer_configurations')
+          .select('duration_seconds')
+          .eq('exam_type', config.examType)
+          .eq('subject_slug', config.subjectSlug)
+          .is('year', null)
+          .maybeSingle();
+
+        if (!error && data) {
+          return (data as { duration_seconds: number }).duration_seconds;
+        }
+      }
+
+      // exam_type + year (subject_slug is null)
+      if (config.year) {
+        const { data, error } = await supabase
+          .from('timer_configurations')
+          .select('duration_seconds')
+          .eq('exam_type', config.examType)
+          .is('subject_slug', null)
+          .eq('year', config.year)
+          .maybeSingle();
+
+        if (!error && data) {
+          return (data as { duration_seconds: number }).duration_seconds;
+        }
+      }
+
+      // Default: exam_type only (both subject_slug and year are null)
+      const { data, error } = await supabase
+        .from('timer_configurations')
+        .select('duration_seconds')
+        .eq('exam_type', config.examType)
+        .is('subject_slug', null)
+        .is('year', null)
+        .maybeSingle();
+
+      if (!error && data) {
+        return (data as { duration_seconds: number }).duration_seconds;
       }
 
       // Fallback to hardcoded defaults if database query fails
@@ -227,14 +246,15 @@ class TimerService {
     durationSeconds: number;
   }): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('timer_configurations')
-        .upsert({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .upsert as any)({
           exam_type: config.examType,
           subject_slug: config.subjectSlug || null,
           year: config.year || null,
           duration_seconds: config.durationSeconds
-        } as any, {
+        }, {
           onConflict: 'exam_type,subject_slug,year'
         });
 

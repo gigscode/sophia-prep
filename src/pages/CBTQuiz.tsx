@@ -27,10 +27,10 @@ interface QuizQuestion {
 /**
  * @deprecated Use UnifiedQuiz with ModeSelectionPage instead
  */
+const START_TIME = 35 * 60; // seconds
+
 export function CBTQuiz() {
   const navigate = useNavigate();
-  const START_TIME = 35 * 60; // seconds
-  const [startTime] = useState(Date.now());
   const [timeLeft, setTimeLeft] = useState(START_TIME);
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -95,10 +95,10 @@ export function CBTQuiz() {
         const subject = subjectSel;
         const exam_year = yearSel;
         const exam_type = typeSel as 'JAMB' | 'WAEC'; // At this point, exam_type is 'JAMB' | 'WAEC', never 'ALL' (guarded by check above)
-        let qs: any[] = [];
+        let qs: QuizQuestion[] = [];
         if (subject) {
           const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type, limit: 60 });
-          qs = normalizeQuestions(rows, { exam_year: exam_year as any, exam_type: exam_type });
+          qs = normalizeQuestions(rows, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type });
         } else {
           const local = await quizService.getRandomQuestions(20);
           qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
@@ -176,7 +176,7 @@ export function CBTQuiz() {
         });
       })();
     }
-  }, [completed, pool, answers, navigate, timeLeft, START_TIME, subjectSel, yearSel]);
+  }, [completed, pool, answers, navigate, timeLeft, subjectSel, yearSel]);
 
   const score = useMemo(() => {
     if (!completed) return 0;
@@ -188,8 +188,8 @@ export function CBTQuiz() {
     setAnswers(a => ({ ...a, [current.id]: key }));
   }, [completed, current]);
 
-  const next = () => setIndex(i => Math.min(pool.length - 1, i + 1));
-  const prev = () => setIndex(i => Math.max(0, i - 1));
+  const next = useCallback(() => setIndex(i => Math.min(pool.length - 1, i + 1)), [pool.length]);
+  const prev = useCallback(() => setIndex(i => Math.max(0, i - 1)), []);
 
   // keyboard navigation
   useEffect(() => {
@@ -203,7 +203,7 @@ export function CBTQuiz() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [completed, select]);
+  }, [completed, next, prev, select]);
 
   // Exam Type Selection Screen
   if (typeSel === 'ALL') {
@@ -254,7 +254,6 @@ export function CBTQuiz() {
 
   // Subject and Year Selection Screen
   if (showSelectionPage && (typeSel === 'JAMB' || typeSel === 'WAEC')) {
-    const examTypeColor = typeSel === 'WAEC' ? 'green' : 'blue';
     const examTypeBg = typeSel === 'WAEC' ? 'bg-green-50' : 'bg-blue-50';
     const examTypeBorder = typeSel === 'WAEC' ? 'border-green-500' : 'border-blue-500';
     const examTypeText = typeSel === 'WAEC' ? 'text-green-700' : 'text-blue-700';
@@ -279,96 +278,104 @@ export function CBTQuiz() {
           {/* Selection Form */}
           <Card>
             <div className="space-y-6">
-              {/* Subject Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Subject <span className="text-red-500">*</span>
-                </label>
-                {loadingSubjects ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-2 text-sm text-gray-600">Loading subjects...</p>
+              {loadingSubjects ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-sm text-gray-600">Loading subjects...</p>
+                </div>
+              ) : (
+                <>
+                  {/* Subject Selection */}
+                  <div>
+                    <label htmlFor="subject-select" className="block text-sm font-semibold text-gray-700 mb-3">
+                      Subject <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="subject-select"
+                      value={subjectSel || ''}
+                      onChange={(e) => setSubjectSel(e.target.value || undefined)}
+                      className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
+                        ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                        : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                        }`}
+                    >
+                      <option value="">Select a subject</option>
+                      {availableSubjects.map((subject) => (
+                        <option key={subject.id} value={subject.slug}>
+                          {subject.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                ) : (
-                  <select
-                    value={subjectSel || ''}
-                    onChange={(e) => setSubjectSel(e.target.value || undefined)}
-                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
-                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                      }`}
-                  >
-                    <option value="">Select a subject</option>
-                    {availableSubjects.map((subject) => (
-                      <option key={subject.id} value={subject.slug}>
-                        {subject.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-              </div>
 
-              {/* Year Selection */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Exam Year
-                </label>
-                <select
-                  value={yearSel === 'ALL' ? 'ALL' : String(yearSel)}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setYearSel(value === 'ALL' ? 'ALL' : Number(value));
-                  }}
-                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
-                    ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                    : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                    }`}
-                >
-                  <option value="ALL">All Years</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                  <option value="2020">2020</option>
-                  <option value="2019">2019</option>
-                </select>
-              </div>
+                  {/* Year Selection */}
+                  <div>
+                    <label htmlFor="year-select" className="block text-sm font-semibold text-gray-700 mb-3">
+                      Exam Year (Optional)
+                    </label>
+                    <select
+                      id="year-select"
+                      value={yearSel === 'ALL' ? 'ALL' : String(yearSel)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setYearSel(value === 'ALL' ? 'ALL' : Number(value));
+                      }}
+                      className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
+                        ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                        : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                        }`}
+                    >
+                      <option value="ALL">All Years</option>
+                      <option value="2024">2024</option>
+                      <option value="2023">2023</option>
+                      <option value="2022">2022</option>
+                      <option value="2021">2021</option>
+                      <option value="2020">2020</option>
+                      <option value="2019">2019</option>
+                      <option value="2018">2018</option>
+                      <option value="2017">2017</option>
+                      <option value="2016">2016</option>
+                      <option value="2015">2015</option>
+                    </select>
+                  </div>
 
-              {/* Start Button */}
-              <div className="pt-4">
-                <Button
-                  variant="primary"
-                  onClick={() => {
-                    if (subjectSel) {
-                      setShowSelectionPage(false);
-                      applyParams(subjectSel, yearSel, typeSel);
-                    }
-                  }}
-                  disabled={!subjectSel}
-                  className="w-full py-4 text-lg font-semibold flex items-center justify-center gap-2"
-                >
-                  Start CBT Quiz
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-                {!subjectSel && (
-                  <p className="text-sm text-red-500 mt-2 text-center">Please select a subject to continue</p>
-                )}
-              </div>
+                  {/* Start Button */}
+                  <div className="pt-4">
+                    <Button
+                      variant="primary"
+                      onClick={() => {
+                        if (subjectSel) {
+                          setShowSelectionPage(false);
+                          applyParams(subjectSel, yearSel, typeSel);
+                        }
+                      }}
+                      disabled={!subjectSel}
+                      className="w-full py-4 text-lg font-semibold flex items-center justify-center gap-2"
+                    >
+                      Start CBT Quiz
+                      <ArrowRight className="w-5 h-5" />
+                    </Button>
+                    {!subjectSel && (
+                      <p className="text-sm text-red-500 mt-2 text-center">Please select a subject to continue</p>
+                    )}
+                  </div>
 
-              {/* Back Button */}
-              <div className="text-center">
-                <button
-                  onClick={() => {
-                    setTypeSel('ALL');
-                    setSubjectSel(undefined);
-                    setYearSel('ALL');
-                    applyParams(undefined, 'ALL', 'ALL');
-                  }}
-                  className="text-gray-600 hover:text-gray-800 text-sm font-medium"
-                >
-                  ← Change Exam Type
-                </button>
-              </div>
+                  {/* Back Button */}
+                  <div className="text-center">
+                    <button
+                      onClick={() => {
+                        setTypeSel('ALL');
+                        setSubjectSel(undefined);
+                        setYearSel('ALL');
+                        applyParams(undefined, 'ALL', 'ALL');
+                      }}
+                      className="text-gray-600 hover:text-gray-800 text-sm font-medium"
+                    >
+                      ← Change Exam Type
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </Card>
         </div>
@@ -414,7 +421,7 @@ export function CBTQuiz() {
           <div className="mb-4">
             <div className="text-base md:text-lg font-semibold mb-3">{current.text}</div>
             <div className="grid grid-cols-1 gap-3">
-              {current.options.map((opt: any) => (
+              {current.options.map((opt: { key: string; text: string }) => (
                 <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={answers[current.id] === opt.key} onSelect={select} />
               ))}
             </div>
@@ -434,7 +441,7 @@ export function CBTQuiz() {
           <h2 className="text-2xl font-bold mb-2">Exam Completed</h2>
           <p className="mb-4">Score: <span className="font-semibold">{score}</span> / <span className="font-semibold">{pool.length}</span></p>
           <div className="space-y-3">
-            {pool.map((q: any) => (
+            {pool.map((q: QuizQuestion) => (
               <div key={q.id} className="p-3 border rounded-lg">
                 <div className="font-medium mb-1">{q.text}</div>
                 <div className="text-sm text-gray-600">Your answer: <span className="font-semibold">{answers[q.id] ?? '—'}</span> • Correct: <span className="font-semibold">{q.correct ?? '—'}</span></div>
