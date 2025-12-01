@@ -28,8 +28,26 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Get config from props or location state
-  const config = propConfig || (location.state as { config?: QuizConfig })?.config;
+  // Get config from props, location state, or sessionStorage
+  const getConfig = (): QuizConfig | undefined => {
+    if (propConfig) return propConfig;
+    
+    const locationConfig = (location.state as { config?: QuizConfig })?.config;
+    if (locationConfig) return locationConfig;
+    
+    const sessionConfig = sessionStorage.getItem('quizConfig');
+    if (sessionConfig) {
+      try {
+        return JSON.parse(sessionConfig) as QuizConfig;
+      } catch (error) {
+        console.error('Failed to parse quiz config from sessionStorage:', error);
+      }
+    }
+    
+    return undefined;
+  };
+  
+  const config = getConfig();
 
   const [loading, setLoading] = useState(true);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -245,10 +263,11 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
       await analyticsService.saveQuizAttempt({
         subject_id,
         quiz_mode: quizModeIdentifier as any,
+        exam_type: config.examType,
+        exam_year: config.year,
         total_questions: questions.length,
         correct_answers: calculatedScore,
         time_taken_seconds: timeTaken,
-        exam_year: config.year,
         questions_data: questions.map(q => ({
           question_id: q.id,
           user_answer: answers[q.id],

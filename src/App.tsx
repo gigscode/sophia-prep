@@ -19,6 +19,7 @@ const NovelsPage = lazy(() => import('./pages/NovelsPage').then(module => ({ def
 const VideosPage = lazy(() => import('./pages/VideosPage').then(module => ({ default: module.VideosPage })));
 const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
 const ModeSelectionPage = lazy(() => import('./pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
+const UnifiedQuiz = lazy(() => import('./pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
 const PracticeModeQuiz = lazy(() => import('./pages/PracticeModeQuiz').then(module => ({ default: module.PracticeModeQuiz })));
 const CBTQuiz = lazy(() => import('./pages/CBTQuiz').then(module => ({ default: module.CBTQuiz })));
 const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
@@ -67,6 +68,7 @@ export function App() {
           {/* Quiz Routes */}
           <Route path="/quiz" element={<Layout showFooter={false}><QuizModeSelectorPage /></Layout>} />
           <Route path="/quiz/mode-selection" element={<Layout showFooter={false}><ModeSelectionPage /></Layout>} />
+          <Route path="/quiz/unified" element={<Layout showFooter={false}><UnifiedQuiz /></Layout>} />
           <Route path="/quiz/practice" element={<Layout showFooter={false}><PracticeModeQuiz /></Layout>} />
           <Route path="/quiz/cbt" element={<Layout showFooter={false}><CBTQuiz /></Layout>} />
           <Route path="/quiz/results" element={<Layout showFooter={false}><QuizResultsPage /></Layout>} />

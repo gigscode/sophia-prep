@@ -5,13 +5,14 @@ export interface QuizAttempt {
   user_id: string;
   subject_id: string | null;
   topic_id: string | null;
-  quiz_mode: 'PRACTICE' | 'MOCK_EXAM' | 'READER' | 'PAST_QUESTIONS';
+  quiz_mode: 'PRACTICE' | 'MOCK_EXAM' | 'READER' | 'PAST_QUESTIONS' | string;
+  exam_type?: 'JAMB' | 'WAEC' | null;
+  exam_year: number | null;
   total_questions: number;
   correct_answers: number;
   incorrect_answers: number;
   score_percentage: number;
   time_taken_seconds: number;
-  exam_year: number | null;
   questions_data: any[];
   completed_at: string;
   created_at: string;
@@ -56,15 +57,17 @@ export interface PerformanceTrend {
 class AnalyticsService {
   /**
    * Save a quiz attempt to the database
+   * Requirements: 8.1, 8.2, 8.3, 8.4, 10.3
    */
   async saveQuizAttempt(data: {
     subject_id?: string;
     topic_id?: string;
-    quiz_mode: 'practice' | 'cbt' | 'mock' | 'reader';
+    quiz_mode: 'practice' | 'cbt' | 'mock' | 'reader' | string;
+    exam_type?: 'JAMB' | 'WAEC';
+    exam_year?: number;
     total_questions: number;
     correct_answers: number;
     time_taken_seconds: number;
-    exam_year?: number;
     questions_data?: any[];
   }): Promise<{ success: boolean; error?: string }> {
     try {
@@ -75,9 +78,11 @@ class AnalyticsService {
       }
 
       const incorrect_answers = data.total_questions - data.correct_answers;
-      const score_percentage = (data.correct_answers / data.total_questions) * 100;
+      const score_percentage = (data.total_questions > 0) 
+        ? (data.correct_answers / data.total_questions) * 100 
+        : 0;
 
-      // Map quiz mode to database enum
+      // Map legacy quiz modes to database enum, but allow new mode identifiers to pass through
       const modeMap: Record<string, string> = {
         'practice': 'PRACTICE',
         'cbt': 'PAST_QUESTIONS',
@@ -85,19 +90,22 @@ class AnalyticsService {
         'reader': 'READER'
       };
 
+      const mappedMode = modeMap[data.quiz_mode] || data.quiz_mode;
+
       const { error } = await supabase
         .from('quiz_attempts')
         .insert({
           user_id: user.id,
           subject_id: data.subject_id || null,
           topic_id: data.topic_id || null,
-          quiz_mode: modeMap[data.quiz_mode] || 'PRACTICE',
+          quiz_mode: mappedMode,
+          exam_type: data.exam_type || null,
+          exam_year: data.exam_year || null,
           total_questions: data.total_questions,
           correct_answers: data.correct_answers,
           incorrect_answers,
           score_percentage,
           time_taken_seconds: data.time_taken_seconds,
-          exam_year: data.exam_year || null,
           questions_data: data.questions_data || []
         } as any);
 
@@ -359,6 +367,7 @@ class AnalyticsService {
 
   /**
    * Get recent quiz attempts
+   * Requirements: 8.4
    */
   async getRecentAttempts(userId?: string, limit: number = 10): Promise<QuizAttempt[]> {
     try {

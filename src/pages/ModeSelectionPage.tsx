@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, Clock, Calendar, BookMarked } from 'lucide-react';
 import type { ExamType, QuizMode, SelectionMethod, QuizConfig } from '../types/quiz-config';
 import { QuizConfigHelpers } from '../types/quiz-config';
@@ -20,6 +20,9 @@ interface ModeSelectionState {
 
 export function ModeSelectionPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const preselectedMode = (location.state as { preselectedMode?: QuizMode })?.preselectedMode;
+  
   const [state, setState] = useState<ModeSelectionState>({
     step: 'exam-type',
     examType: null,
@@ -33,6 +36,14 @@ export function ModeSelectionPage() {
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Handle preselected mode from navigation
+  useEffect(() => {
+    if (preselectedMode && state.step === 'exam-type' && !state.mode) {
+      // Store the preselected mode to apply after exam type selection
+      setState(prev => ({ ...prev, mode: preselectedMode }));
+    }
+  }, [preselectedMode, state.step, state.mode]);
 
   // Load subjects when exam type is selected
   useEffect(() => {

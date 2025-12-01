@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { CheckCircle, XCircle, Home, RotateCcw, BookOpen } from 'lucide-react';
+import type { QuizConfig } from '../types/quiz-config';
+import { QuizConfigHelpers } from '../types/quiz-config';
 
 interface QuizQuestion {
   id: string;
@@ -21,8 +23,11 @@ interface QuizResultsData {
   score: number;
   totalQuestions: number;
   timeTaken?: number;
-  quizMode?: 'practice' | 'mock' | 'reader' | 'past';
+  quizMode?: string;
+  examType?: 'JAMB' | 'WAEC';
   subject?: string;
+  year?: number;
+  config?: QuizConfig;
 }
 
 export function QuizResultsPage() {
@@ -54,9 +59,12 @@ export function QuizResultsPage() {
     );
   }
 
-  const { questions, answers, score, totalQuestions, timeTaken, quizMode, subject } = resultsData;
+  const { questions, answers, score, totalQuestions, timeTaken, quizMode, examType, config } = resultsData;
   const percentage = Math.round((score / totalQuestions) * 100);
   const passed = percentage >= 50;
+
+  // Get consistent mode label
+  const modeLabel = config ? QuizConfigHelpers.getModeLabel(config.mode) : quizMode || 'Quiz';
 
   const correctCount = score;
   const incorrectCount = totalQuestions - score;
@@ -98,7 +106,10 @@ export function QuizResultsPage() {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Quiz Results</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">
+        {modeLabel} Results
+        {examType && <span className="text-xl ml-2 text-gray-600">({examType})</span>}
+      </h1>
 
       {/* Overall Score Summary */}
       <Card className="mb-6">
@@ -138,14 +149,19 @@ export function QuizResultsPage() {
           <Home className="w-4 h-4 mr-2" />
           Home
         </Button>
-        <Button variant="outline" onClick={() => navigate('/subjects')}>
+        <Button variant="outline" onClick={() => navigate('/quiz/mode-selection')}>
           <BookOpen className="w-4 h-4 mr-2" />
-          Choose Subject
+          New Quiz
         </Button>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Try Again
-        </Button>
+        {config && (
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/quiz/unified', { state: { config } })}
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
+        )}
       </div>
 
       {/* Performance Analytics */}
