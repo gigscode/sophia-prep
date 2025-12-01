@@ -81,13 +81,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/practice" className="text-blue-200 transition-colors footer-link">
-                  Practice Mode
-                </Link>
-              </li>
-              <li>
-                <Link to="/mock-exams" className="text-blue-200 transition-colors footer-link">
-                  Mock Exams
+                <Link to="/quiz" className="text-blue-200 transition-colors footer-link">
+                  Quiz
                 </Link>
               </li>
               <li>

@@ -186,7 +186,7 @@ export function SubjectDetailPage() {
           onClick={() => navigate(`/mock-exams?subject=${subject.slug}`)}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
-          Take Mock Exam
+          Take Quiz
         </button>
         <button className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
           View Study Materials

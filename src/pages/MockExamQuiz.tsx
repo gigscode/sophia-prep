@@ -227,7 +227,7 @@ export function MockExamQuiz() {
               ) : (
                 <GraduationCap className={`w-5 h-5 ${examTypeText}`} />
               )}
-              <span className={`font-semibold ${examTypeText}`}>{typeSel} Mock Exam</span>
+              <span className={`font-semibold ${examTypeText}`}>{typeSel} Quiz</span>
             </div>
             <h1 className="text-3xl font-bold mb-2">Practice Mode</h1>
             <p className="text-gray-600">Select your subject and exam year to begin</p>
@@ -306,7 +306,7 @@ export function MockExamQuiz() {
                   disabled={!subjectSel}
                   className="w-full py-4 text-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  Start Mock Exam
+                  Start Quiz
                   <ArrowRight className="w-5 h-5" />
                 </Button>
                 {!subjectSel && (
@@ -339,7 +339,7 @@ export function MockExamQuiz() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Quiz</h1>
         <Card>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -352,7 +352,7 @@ export function MockExamQuiz() {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Quiz</h1>
 
       {(!current || pool.length === 0) ? (
         <Card>

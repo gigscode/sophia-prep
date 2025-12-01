@@ -13,7 +13,7 @@ export function Navbar() {
     { to: '/', label: 'Home', icon: Home },
     { to: '/subjects', label: 'Subjects', icon: BookOpen },
     { to: '/practice', label: 'Practice', icon: GraduationCap },
-    { to: '/mock-exams', label: 'Mock Exams', icon: Target },
+    { to: '/mock-exams', label: 'Quiz', icon: Target },
     { to: '/study', label: 'Study Hub', icon: BookOpen },
     { to: '/help', label: 'Help', icon: HelpCircle },
   ];

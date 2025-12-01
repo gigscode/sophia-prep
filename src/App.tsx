@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { AuthProvider } from './hooks/useAuth';
@@ -20,8 +20,6 @@ const VideosPage = lazy(() => import('./pages/VideosPage').then(module => ({ def
 const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
 const PracticeModeQuiz = lazy(() => import('./pages/PracticeModeQuiz').then(module => ({ default: module.PracticeModeQuiz })));
 const CBTQuiz = lazy(() => import('./pages/CBTQuiz').then(module => ({ default: module.CBTQuiz })));
-const MockExamQuiz = lazy(() => import('./pages/MockExamQuiz').then(module => ({ default: module.MockExamQuiz })));
-const ReaderModeQuiz = lazy(() => import('./pages/ReaderModeQuiz').then(module => ({ default: module.ReaderModeQuiz })));
 const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then(module => ({ default: module.AboutPage })));
@@ -33,6 +31,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ defau
 const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.SignupPage })));
 const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
 const ImportQuestionsPage = lazy(() => import('./pages/ImportQuestionsPage').then(module => ({ default: module.ImportQuestionsPage })));
+const MorePage = lazy(() => import('./pages/MorePage').then(module => ({ default: module.MorePage })));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -66,11 +65,9 @@ export function App() {
 
           {/* Quiz Routes */}
           <Route path="/quiz" element={<Layout><QuizModeSelectorPage /></Layout>} />
-          <Route path="/quiz/practice" element={<Layout><PracticeModeQuiz /></Layout>} />
-          <Route path="/quiz/cbt" element={<Layout><CBTQuiz /></Layout>} />
-          <Route path="/quiz/mock" element={<Layout><MockExamQuiz /></Layout>} />
-          <Route path="/quiz/reader" element={<Layout><ReaderModeQuiz /></Layout>} />
-          <Route path="/quiz/results" element={<Layout><QuizResultsPage /></Layout>} />
+          <Route path="/quiz/practice" element={<Layout showFooter={false}><PracticeModeQuiz /></Layout>} />
+          <Route path="/quiz/cbt" element={<Layout showFooter={false}><CBTQuiz /></Layout>} />
+          <Route path="/quiz/results" element={<Layout showFooter={false}><QuizResultsPage /></Layout>} />
 
           {/* Help & Info */}
           <Route path="/help" element={<Layout><HelpCenter /></Layout>} />
@@ -83,14 +80,17 @@ export function App() {
           <Route path="/events" element={<Navigate to="/" replace />} />
           <Route path="/events/:id" element={<Navigate to="/" replace />} />
 
+          {/* More Page */}
+          <Route path="/more" element={<Layout><MorePage /></Layout>} />
+
           {/* Profile / Auth */}
           <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />
           <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
 
           {/* Admin - Now with BottomNavigation */}
-          <Route path="/7351/admin" element={<Layout><AdminPage /></Layout>} />
-          <Route path="/admin/import-questions" element={<Layout><ImportQuestionsPage /></Layout>} />
+          <Route path="/7351/admin" element={<Layout showFooter={false}><AdminPage /></Layout>} />
+          <Route path="/admin/import-questions" element={<Layout showFooter={false}><ImportQuestionsPage /></Layout>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

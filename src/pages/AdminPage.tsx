@@ -170,7 +170,7 @@ export function AdminPage() {
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="p-6 border-t border-gray-200">
+          <div className="p-6 border-t border-gray-200 mb-12">
             <div className="text-xs text-gray-500">
               <p className="font-medium text-gray-700 mb-1">Logged in as:</p>
               <p className="truncate">{user.email}</p>
@@ -180,7 +180,7 @@ export function AdminPage() {
       </motion.aside>
 
       {/* Main Content */}
-      <div className="lg:ml-64 min-h-screen">
+      <div className="lg:ml-64 min-h-screen mb-12">
         <div className="container mx-auto px-4 py-6 md:py-8 lg:px-8">
           {/* Page Header */}
           <motion.div

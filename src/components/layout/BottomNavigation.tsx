@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, BookOpen, ClipboardList, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { Home, BookOpen, ClipboardList, Layers, MoreHorizontal } from 'lucide-react';
 import { generateAriaLabel } from '../../utils/accessibility';
 
 /**
@@ -28,6 +28,20 @@ const navItems: NavItem[] = [
     description: 'Go to home page with quiz modes and quick links' 
   },
   { 
+    id: 'subjects', 
+    label: 'Subjects', 
+    icon: Layers, 
+    route: '/subjects', 
+    description: 'Browse all available subjects' 
+  },
+  { 
+    id: 'quiz', 
+    label: 'Quiz', 
+    icon: ClipboardList, 
+    route: '/quiz', 
+    description: 'Take practice tests and CBT quizzes' 
+  },
+  { 
     id: 'study', 
     label: 'Study', 
     icon: BookOpen, 
@@ -35,24 +49,10 @@ const navItems: NavItem[] = [
     description: 'Access study materials and learning resources' 
   },
   { 
-    id: 'test', 
-    label: 'Test', 
-    icon: ClipboardList, 
-    route: '/quiz', 
-    description: 'Take practice tests and CBT quizzes' 
-  },
-  { 
-    id: 'chat', 
-    label: 'Chat', 
-    icon: MessageCircle, 
-    route: '/help', 
-    description: 'Get help and support' 
-  },
-  { 
     id: 'more', 
     label: 'More', 
     icon: MoreHorizontal, 
-    route: '/profile', 
+    route: '/more', 
     description: 'Access profile and additional options' 
   },
 ];
