@@ -146,7 +146,7 @@ export function HomePage() {
           <div className="section-reveal animate-delay-0">
             <HeroBanner
               title="Sophia Prep Exam Success"
-              description="Get lifetime access to all features, unlimited practice questions, and comprehensive study materials for as low as ₦1,500. Start your journey to exam success today!"
+              description="Your WAEC & JAMB success starts here — lifetime access for just ₦4,999."
               buttonText="Get Started"
               buttonAction={handleHeroBannerAction}
               gradientColors={['hsl(var(--color-primary-purple))', 'hsl(var(--color-primary-blue))']}

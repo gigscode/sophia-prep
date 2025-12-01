@@ -53,18 +53,18 @@ export function App() {
           <Route path="/" element={<HomePage />} />
 
           {/* Subjects */}
-          <Route path="/subjects" element={<Layout><SubjectsPage /></Layout>} />
+          <Route path="/subjects" element={<Layout showFooter={false}><SubjectsPage /></Layout>} />
           <Route path="/subjects/:slug" element={<Layout><SubjectDetailPage /></Layout>} />
 
           {/* Study Resources */}
-          <Route path="/study" element={<Layout><StudyHub /></Layout>} />
+          <Route path="/study" element={<Layout showFooter={false}><StudyHub /></Layout>} />
           <Route path="/syllabus" element={<Layout><SyllabusPage /></Layout>} />
           <Route path="/summaries" element={<Layout><SummariesPage /></Layout>} />
           <Route path="/novels" element={<Layout><NovelsPage /></Layout>} />
           <Route path="/videos" element={<Layout><VideosPage /></Layout>} />
 
           {/* Quiz Routes */}
-          <Route path="/quiz" element={<Layout><QuizModeSelectorPage /></Layout>} />
+          <Route path="/quiz" element={<Layout showFooter={false}><QuizModeSelectorPage /></Layout>} />
           <Route path="/quiz/practice" element={<Layout showFooter={false}><PracticeModeQuiz /></Layout>} />
           <Route path="/quiz/cbt" element={<Layout showFooter={false}><CBTQuiz /></Layout>} />
           <Route path="/quiz/results" element={<Layout showFooter={false}><QuizResultsPage /></Layout>} />
@@ -81,7 +81,7 @@ export function App() {
           <Route path="/events/:id" element={<Navigate to="/" replace />} />
 
           {/* More Page */}
-          <Route path="/more" element={<Layout><MorePage /></Layout>} />
+          <Route path="/more" element={<Layout showFooter={false}><MorePage /></Layout>} />
 
           {/* Profile / Auth */}
           <Route path="/profile" element={<Layout showFooter={false}><ProfilePage /></Layout>} />
