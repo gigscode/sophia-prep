@@ -4,6 +4,7 @@ import { BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
 import { quizService } from '../services/quiz-service';
 import { questionService, normalizeQuestions } from '../services/question-service';
 import { subjectService } from '../services/subject-service';
+import { analyticsService } from '../services/analytics-service';
 import { Card } from '../components/ui/Card';
 import { OptionButton } from '../components/ui/OptionButton';
 import { Button } from '../components/ui/Button';
@@ -110,13 +111,42 @@ export function PracticeModeQuiz() {
     if (key === (q.correct || '')) setScore(s => s + 1);
   }, [q, showFeedback]);
 
-  const next = () => {
+  const next = async () => {
     setSelected(null);
     setShowFeedback(false);
     if (index < pool.length - 1) {
       setIndex(i => i + 1);
     } else {
-      // Quiz completed - navigate to results
+      // Quiz completed - save attempt and navigate to results
+      const timeTaken = Math.floor((Date.now() - Date.now()) / 1000); // Approximate time
+      
+      // Get subject_id from slug
+      let subject_id: string | undefined;
+      if (subjectSel) {
+        try {
+          const subject = await subjectService.getSubjectBySlug(subjectSel);
+          subject_id = subject?.id;
+        } catch (e) {
+          console.error('Failed to get subject:', e);
+        }
+      }
+
+      // Save quiz attempt
+      await analyticsService.saveQuizAttempt({
+        subject_id,
+        quiz_mode: 'practice',
+        total_questions: pool.length,
+        correct_answers: score,
+        time_taken_seconds: timeTaken || 60,
+        exam_year: typeof yearSel === 'number' ? yearSel : undefined,
+        questions_data: pool.map(q => ({
+          question_id: q.id,
+          user_answer: answers[q.id],
+          correct_answer: q.correct,
+          is_correct: answers[q.id] === q.correct
+        }))
+      });
+
       navigate('/quiz/results', {
         state: {
           questions: pool,
@@ -168,7 +198,8 @@ export function PracticeModeQuiz() {
               <h2 className="text-2xl font-bold text-gray-800">WAEC</h2>
             </div>
             <p className="text-gray-600 text-lg">
-              Practice with past questions and mock exams specifically designed for the West African Senior School Certificate Examination.
+              No time Limits!
+              Practice with past questions and mock exams specifically designed for the West African Senior School Certificate Examination. Immediate feedback after each answer with explanations.
             </p>
           </button>
 
@@ -186,7 +217,8 @@ export function PracticeModeQuiz() {
               <h2 className="text-2xl font-bold text-gray-800">JAMB</h2>
             </div>
             <p className="text-gray-600 text-lg">
-              Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
+              Immediate feedback after each answer with explanations.
+Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
             </p>
           </button>
         </div>

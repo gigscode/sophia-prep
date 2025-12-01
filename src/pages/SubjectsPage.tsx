@@ -52,12 +52,10 @@ export function SubjectsPage() {
       );
     }
 
-    // Filter by category (always show GENERAL and LANGUAGE subjects)
+    // Filter by category - only show subjects that match the selected category
     if (selectedCategory !== 'ALL') {
       filtered = filtered.filter(
-        s => s.subject_category === selectedCategory ||
-             s.subject_category === 'GENERAL' ||
-             s.subject_category === 'LANGUAGE'
+        s => s.subject_category === selectedCategory
       );
     }
 
@@ -73,9 +71,7 @@ export function SubjectsPage() {
   const getCategoryCount = (category: CategoryFilter): number => {
     if (category === 'ALL') return subjects.length;
     return subjects.filter(
-      s => s.subject_category === category ||
-           s.subject_category === 'GENERAL' ||
-           s.subject_category === 'LANGUAGE'
+      s => s.subject_category === category
     ).length;
   };
 

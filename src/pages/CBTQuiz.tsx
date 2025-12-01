@@ -4,6 +4,7 @@ import { BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
 import { quizService } from '../services/quiz-service';
 import { questionService, normalizeQuestions } from '../services/question-service';
 import { subjectService } from '../services/subject-service';
+import { analyticsService } from '../services/analytics-service';
 import { Card } from '../components/ui/Card';
 import { ProgressBar } from '../components/ui/ProgressBar';
 import { OptionButton } from '../components/ui/OptionButton';
@@ -122,19 +123,47 @@ export function CBTQuiz() {
       const timeTaken = START_TIME - timeLeft;
       const calculatedScore = pool.reduce((acc, q) => acc + (answers[q.id] === (q.correct ?? '') ? 1 : 0), 0);
 
-      navigate('/quiz/results', {
-        state: {
-          questions: pool,
-          answers,
-          score: calculatedScore,
-          totalQuestions: pool.length,
-          timeTaken,
-          quizMode: 'cbt',
-          subject: subjectSel,
-        },
-      });
+      // Save quiz attempt
+      (async () => {
+        let subject_id: string | undefined;
+        if (subjectSel) {
+          try {
+            const subject = await subjectService.getSubjectBySlug(subjectSel);
+            subject_id = subject?.id;
+          } catch (e) {
+            console.error('Failed to get subject:', e);
+          }
+        }
+
+        await analyticsService.saveQuizAttempt({
+          subject_id,
+          quiz_mode: 'cbt',
+          total_questions: pool.length,
+          correct_answers: calculatedScore,
+          time_taken_seconds: timeTaken,
+          exam_year: typeof yearSel === 'number' ? yearSel : undefined,
+          questions_data: pool.map(q => ({
+            question_id: q.id,
+            user_answer: answers[q.id],
+            correct_answer: q.correct,
+            is_correct: answers[q.id] === q.correct
+          }))
+        });
+
+        navigate('/quiz/results', {
+          state: {
+            questions: pool,
+            answers,
+            score: calculatedScore,
+            totalQuestions: pool.length,
+            timeTaken,
+            quizMode: 'cbt',
+            subject: subjectSel,
+          },
+        });
+      })();
     }
-  }, [completed, pool, answers, navigate, timeLeft, START_TIME, subjectSel]);
+  }, [completed, pool, answers, navigate, timeLeft, START_TIME, subjectSel, yearSel]);
 
   const score = useMemo(() => {
     if (!completed) return 0;
@@ -183,7 +212,7 @@ export function CBTQuiz() {
               <h2 className="text-2xl font-bold text-gray-800">WAEC</h2>
             </div>
             <p className="text-gray-600 text-lg">
-              Practice with past questions and mock exams specifically designed for the West African Senior School Certificate Examination.
+              Practice with past questions and mock exams specifically designed for the West African Senior School Certificate Examination. Timed exam with results shown at completion.
             </p>
           </button>
 
@@ -201,6 +230,7 @@ export function CBTQuiz() {
               <h2 className="text-2xl font-bold text-gray-800">JAMB</h2>
             </div>
             <p className="text-gray-600 text-lg">
+              Timed exam with results shown at completion.
               Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
             </p>
           </button>
