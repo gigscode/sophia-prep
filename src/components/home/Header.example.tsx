@@ -4,7 +4,6 @@
  * This file demonstrates how to use the Header component in different scenarios.
  */
 
-import React from 'react';
 import { Header } from './Header';
 
 // Example 1: Logged in user with name
@@ -12,6 +11,7 @@ export function LoggedInHeaderExample() {
   return (
     <Header
       userName="John Doe"
+      userEmail="john.doe@example.com"
       isLoggedIn={true}
       onCartClick={() => console.log('Cart clicked')}
       onNotificationClick={() => console.log('Notifications clicked')}
@@ -37,6 +37,7 @@ export function ManyNotificationsExample() {
   return (
     <Header
       userName="Jane Smith"
+      userEmail="jane.smith@example.com"
       isLoggedIn={true}
       onCartClick={() => console.log('Cart clicked')}
       onNotificationClick={() => console.log('Notifications clicked')}
@@ -64,6 +65,7 @@ export function HeaderWithAuthExample() {
   return (
     <Header
       userName={user?.name}
+      userEmail={user?.email}
       isLoggedIn={!!user}
       onCartClick={handleCartClick}
       onNotificationClick={handleNotificationClick}
