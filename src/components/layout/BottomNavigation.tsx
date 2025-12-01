@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Home, BookOpen, ClipboardList, MessageCircle, MoreHorizontal } from 'lucide-react';
+import { generateAriaLabel } from '../../utils/accessibility';
 
 /**
  * BottomNavigation Component
@@ -15,14 +16,45 @@ interface NavItem {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   route: string;
+  description: string;
 }
 
 const navItems: NavItem[] = [
-  { id: 'home', label: 'Home', icon: Home, route: '/' },
-  { id: 'study', label: 'Study', icon: BookOpen, route: '/study' },
-  { id: 'test', label: 'Test', icon: ClipboardList, route: '/quiz' },
-  { id: 'chat', label: 'Chat', icon: MessageCircle, route: '/help' },
-  { id: 'more', label: 'More', icon: MoreHorizontal, route: '/profile' },
+  { 
+    id: 'home', 
+    label: 'Home', 
+    icon: Home, 
+    route: '/', 
+    description: 'Go to home page with quiz modes and quick links' 
+  },
+  { 
+    id: 'study', 
+    label: 'Study', 
+    icon: BookOpen, 
+    route: '/study', 
+    description: 'Access study materials and learning resources' 
+  },
+  { 
+    id: 'test', 
+    label: 'Test', 
+    icon: ClipboardList, 
+    route: '/quiz', 
+    description: 'Take practice tests and CBT quizzes' 
+  },
+  { 
+    id: 'chat', 
+    label: 'Chat', 
+    icon: MessageCircle, 
+    route: '/help', 
+    description: 'Get help and support' 
+  },
+  { 
+    id: 'more', 
+    label: 'More', 
+    icon: MoreHorizontal, 
+    route: '/profile', 
+    description: 'Access profile and additional options' 
+  },
 ];
 
 export function BottomNavigation() {
@@ -37,7 +69,7 @@ export function BottomNavigation() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-[1200]"
+      className="fixed bottom-0 left-0 right-0 bg-white shadow-lg z-[1200] safe-area-inset-bottom"
       style={{
         height: 'var(--bottom-nav-height, 64px)',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -46,7 +78,7 @@ export function BottomNavigation() {
       aria-label="Primary navigation"
     >
       <div className="flex items-center justify-around h-full px-2">
-        {navItems.map((item) => {
+        {navItems.map((item, index) => {
           const Icon = item.icon;
           const active = isActive(item.route);
 
@@ -59,10 +91,12 @@ export function BottomNavigation() {
                 flex flex-col items-center justify-center flex-1 h-full
                 transition-colors duration-200 ease-out
                 focus-visible-ring
+                interactive-element
                 ${active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}
               `}
-              aria-label={item.label}
+              aria-label={generateAriaLabel(item.label, item.description)}
               aria-current={active ? 'page' : undefined}
+              aria-describedby={`nav-item-${item.id}-description`}
             >
               <div className="relative flex flex-col items-center">
                 {/* Active indicator dot */}
@@ -91,11 +125,27 @@ export function BottomNavigation() {
                 >
                   {item.label}
                 </span>
+
+                {/* Hidden description for screen readers */}
+                <span 
+                  id={`nav-item-${item.id}-description`} 
+                  className="sr-only"
+                >
+                  {item.description}
+                </span>
               </div>
             </Link>
           );
         })}
       </div>
+
+      {/* Live region for navigation announcements */}
+      <div 
+        aria-live="polite" 
+        aria-atomic="true" 
+        className="sr-only"
+        id="navigation-announcements"
+      />
     </nav>
   );
 }

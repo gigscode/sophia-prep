@@ -129,6 +129,12 @@
   /* Touch Targets - Minimum size for accessibility */
   --touch-target-min: 2.75rem; /* 44px - WCAG AA standard */
   
+  /* Focus Indicators - Keyboard navigation accessibility */
+  --focus-ring-color: var(--color-primary-blue);
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-style: solid;
+  
   /* Bottom Navigation */
   --bottom-nav-height: var(--space-16); /* 64px */
   

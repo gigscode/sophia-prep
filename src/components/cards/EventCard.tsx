@@ -1,4 +1,5 @@
 import React from 'react';
+import { handleKeyboardActivation, generateAriaLabel } from '../../utils/accessibility';
 
 export interface EventCardProps {
   title: string;
@@ -32,6 +33,11 @@ export function EventCard({
   onClick,
   className = '',
 }: EventCardProps) {
+  const cardId = React.useId();
+  const titleId = `${cardId}-title`;
+  const descriptionId = description ? `${cardId}-description` : undefined;
+  const dateId = `${cardId}-date`;
+
   // Format date as "31 Dec, 2025"
   const formatDate = (date: Date): string => {
     const day = date.getDate();
@@ -71,19 +77,23 @@ export function EventCard({
 
   const colors = typeColors[type];
   const isClickable = !!onClick;
+  const formattedDate = formatDate(date);
+
+  const Component = isClickable ? 'article' : 'div';
 
   return (
-    <div
+    <Component
       onClick={onClick}
+      onKeyDown={isClickable ? (e) => handleKeyboardActivation(e, onClick!) : undefined}
       className={`
-        ${isClickable ? 'card-hover card-touch-target cursor-pointer focus-visible-ring' : ''}
-        card-container
+        ${isClickable ? 'cursor-pointer hover:scale-[1.02] hover:shadow-lg focus-visible-ring interactive-element card-touch-target' : ''}
         rounded-2xl
         shadow-sm
         transition-all
         duration-200
         ease-out
         p-4
+        w-full
         flex
         items-center
         gap-4
@@ -94,17 +104,9 @@ export function EventCard({
       }}
       role={isClickable ? 'button' : undefined}
       tabIndex={isClickable ? 0 : undefined}
-      onKeyDown={
-        isClickable
-          ? (e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onClick?.();
-              }
-            }
-          : undefined
-      }
-      aria-label={`${type}: ${title} on ${formatDate(date)}`}
+      aria-labelledby={titleId}
+      aria-describedby={[dateId, descriptionId].filter(Boolean).join(' ')}
+      aria-label={generateAriaLabel(title, description, type)}
     >
       {/* Date Badge - Square with day and month */}
       <div
@@ -121,6 +123,7 @@ export function EventCard({
         style={{
           backgroundColor: colors.backgroundColor,
         }}
+        aria-hidden="true"
       >
         <div
           className="text-2xl font-bold leading-none"
@@ -149,6 +152,7 @@ export function EventCard({
             style={{
               backgroundColor: colors.indicatorColor,
             }}
+            aria-hidden="true"
           />
           <span
             className="text-xs font-medium uppercase tracking-wide"
@@ -162,6 +166,7 @@ export function EventCard({
 
         {/* Event Title */}
         <h3
+          id={titleId}
           className="text-base font-semibold leading-tight mb-1 truncate"
           style={{
             color: 'hsl(var(--color-text-primary))',
@@ -173,6 +178,7 @@ export function EventCard({
         {/* Event Description (if provided) */}
         {description && (
           <p
+            id={descriptionId}
             className="text-sm leading-relaxed line-clamp-2"
             style={{
               color: 'hsl(var(--color-text-secondary))',
@@ -181,8 +187,20 @@ export function EventCard({
             {description}
           </p>
         )}
+
+        {/* Hidden date for screen readers */}
+        <span id={dateId} className="sr-only">
+          Event date: {formattedDate}
+        </span>
       </div>
-    </div>
+
+      {/* Screen reader helper text */}
+      {isClickable && (
+        <span className="sr-only">
+          Click to view details for {title} on {formattedDate}
+        </span>
+      )}
+    </Component>
   );
 }
 

@@ -8,20 +8,21 @@ import PWAInstall from './components/PWAInstall';
 import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 
-// Lazy load pages for performance optimization
+// Lazy load all pages
 const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
 const SubjectsPage = lazy(() => import('./pages/SubjectsPage').then(module => ({ default: module.SubjectsPage })));
 const SubjectDetailPage = lazy(() => import('./pages/SubjectDetailPage').then(module => ({ default: module.SubjectDetailPage })));
-const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
-const PracticeModeQuiz = lazy(() => import('./pages/PracticeModeQuiz').then(module => ({ default: module.PracticeModeQuiz })));
-const MockExamQuiz = lazy(() => import('./pages/MockExamQuiz').then(module => ({ default: module.MockExamQuiz })));
-const ReaderModeQuiz = lazy(() => import('./pages/ReaderModeQuiz').then(module => ({ default: module.ReaderModeQuiz })));
-const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const StudyHub = lazy(() => import('./pages/StudyHub').then(module => ({ default: module.StudyHub })));
 const SyllabusPage = lazy(() => import('./pages/SyllabusPage').then(module => ({ default: module.SyllabusPage })));
 const SummariesPage = lazy(() => import('./pages/SummariesPage').then(module => ({ default: module.SummariesPage })));
 const NovelsPage = lazy(() => import('./pages/NovelsPage').then(module => ({ default: module.NovelsPage })));
 const VideosPage = lazy(() => import('./pages/VideosPage').then(module => ({ default: module.VideosPage })));
+const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
+const PracticeModeQuiz = lazy(() => import('./pages/PracticeModeQuiz').then(module => ({ default: module.PracticeModeQuiz })));
+const CBTQuiz = lazy(() => import('./pages/CBTQuiz').then(module => ({ default: module.CBTQuiz })));
+const MockExamQuiz = lazy(() => import('./pages/MockExamQuiz').then(module => ({ default: module.MockExamQuiz })));
+const ReaderModeQuiz = lazy(() => import('./pages/ReaderModeQuiz').then(module => ({ default: module.ReaderModeQuiz })));
+const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then(module => ({ default: module.AboutPage })));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })));
@@ -49,26 +50,29 @@ export function App() {
       <ToastContainer />
       <Suspense fallback={<PageLoader />}>
         <Routes>
-          {/* HomePage without Layout - it has its own design */}
+          {/* Home - Modern UI Redesign with BottomNavigation */}
           <Route path="/" element={<HomePage />} />
 
-          {/* All other routes wrapped with Layout */}
+          {/* Subjects */}
           <Route path="/subjects" element={<Layout><SubjectsPage /></Layout>} />
           <Route path="/subjects/:slug" element={<Layout><SubjectDetailPage /></Layout>} />
 
-          {/* Quiz Modes */}
-          <Route path="/quiz" element={<Layout><QuizModeSelectorPage /></Layout>} />
-          <Route path="/practice" element={<Layout><PracticeModeQuiz /></Layout>} />
-          <Route path="/mock-exams" element={<Layout><MockExamQuiz /></Layout>} />
-          <Route path="/reader" element={<Layout><ReaderModeQuiz /></Layout>} />
-          <Route path="/quiz-results" element={<Layout><QuizResultsPage /></Layout>} />
-
-          {/* Study & Help */}
+          {/* Study Resources */}
           <Route path="/study" element={<Layout><StudyHub /></Layout>} />
           <Route path="/syllabus" element={<Layout><SyllabusPage /></Layout>} />
           <Route path="/summaries" element={<Layout><SummariesPage /></Layout>} />
           <Route path="/novels" element={<Layout><NovelsPage /></Layout>} />
           <Route path="/videos" element={<Layout><VideosPage /></Layout>} />
+
+          {/* Quiz Routes */}
+          <Route path="/quiz" element={<Layout><QuizModeSelectorPage /></Layout>} />
+          <Route path="/quiz/practice" element={<Layout><PracticeModeQuiz /></Layout>} />
+          <Route path="/quiz/cbt" element={<Layout><CBTQuiz /></Layout>} />
+          <Route path="/quiz/mock" element={<Layout><MockExamQuiz /></Layout>} />
+          <Route path="/quiz/reader" element={<Layout><ReaderModeQuiz /></Layout>} />
+          <Route path="/quiz/results" element={<Layout><QuizResultsPage /></Layout>} />
+
+          {/* Help & Info */}
           <Route path="/help" element={<Layout><HelpCenter /></Layout>} />
           <Route path="/about" element={<Layout><AboutPage /></Layout>} />
           <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />
@@ -79,12 +83,14 @@ export function App() {
           <Route path="/events" element={<Navigate to="/" replace />} />
           <Route path="/events/:id" element={<Navigate to="/" replace />} />
 
-          {/* Profile / Auth / Admin */}
+          {/* Profile / Auth */}
           <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />
           <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
-          <Route path="/7351/admin" element={<AdminPage />} />
-          <Route path="/admin/import-questions" element={<ImportQuestionsPage />} />
+
+          {/* Admin - Now with BottomNavigation */}
+          <Route path="/7351/admin" element={<Layout><AdminPage /></Layout>} />
+          <Route path="/admin/import-questions" element={<Layout><ImportQuestionsPage /></Layout>} />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -31,9 +31,13 @@ describe('Property Test 17.2: Loading Skeletons', () => {
             </BrowserRouter>
         );
 
-        // Should show actual content instead
-        const practiceMode = screen.getByText(/Practice Mode/i);
-        expect(practiceMode).toBeTruthy();
+        // Should show actual content instead (use getAllByText since text appears in multiple places)
+        const practiceModeElements = screen.getAllByText(/Practice Mode/i);
+        expect(practiceModeElements.length).toBeGreaterThan(0);
+        
+        // Should NOT have shimmer skeletons
+        const skeletons = container.querySelectorAll('.shimmer');
+        expect(skeletons.length).toBe(0);
     });
 
     it('should show loading skeletons in QuickLinksSection when isLoading is true', () => {

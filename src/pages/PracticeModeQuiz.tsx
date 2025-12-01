@@ -117,7 +117,7 @@ export function PracticeModeQuiz() {
       setIndex(i => i + 1);
     } else {
       // Quiz completed - navigate to results
-      navigate('/quiz-results', {
+      navigate('/quiz/results', {
         state: {
           questions: pool,
           answers,

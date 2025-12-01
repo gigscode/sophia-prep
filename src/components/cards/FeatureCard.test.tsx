@@ -171,7 +171,8 @@ describe('FeatureCard', () => {
     );
 
     const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain('card-hover');
+    expect(card.className).toContain('hover:scale-[1.02]');
+    expect(card.className).toContain('hover:shadow-lg');
   });
 
   it('has proper accessibility attributes', () => {

@@ -3,7 +3,7 @@ import { BookOpen, Clock, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { QuizModeCard } from '../cards/QuizModeCard';
-import { LoadingSkeleton } from '../ui/LoadingSkeleton';
+import { CardSkeleton } from '../ui/CardSkeleton';
 
 export interface QuizModesSectionProps {
   onExpandClick?: () => void;
@@ -31,11 +31,11 @@ export function QuizModesSection({
   const navigate = useNavigate();
 
   const handlePracticeModeClick = () => {
-    navigate('/practice');
+    navigate('/quiz/practice');
   };
 
   const handleCBTQuizClick = () => {
-    navigate('/mock-exams');
+    navigate('/quiz/cbt');
   };
 
   return (
@@ -47,23 +47,26 @@ export function QuizModesSection({
         onActionClick={onExpandClick}
       />
 
-      {/* Quiz Mode Cards Grid - Responsive */}
+      {/* Quiz Mode Cards Grid - Responsive: 1 column mobile, 2 columns tablet+ */}
       <div
         className="
           grid
           grid-cols-1
           md:grid-cols-2
           gap-4
+          w-full
         "
       >
         {isLoading ? (
           <>
-            <div className="h-[200px] w-full rounded-2xl overflow-hidden">
-              <LoadingSkeleton variant="rectangular" height="100%" width="100%" />
-            </div>
-            <div className="h-[200px] w-full rounded-2xl overflow-hidden">
-              <LoadingSkeleton variant="rectangular" height="100%" width="100%" />
-            </div>
+            <CardSkeleton
+              variant="quiz-mode"
+              className="animate-fade-in-up animate-delay-0"
+            />
+            <CardSkeleton
+              variant="quiz-mode"
+              className="animate-fade-in-up animate-delay-100"
+            />
           </>
         ) : (
           <>
@@ -81,8 +84,8 @@ export function QuizModesSection({
             <QuizModeCard
               mode="cbt"
               icon={<Clock size={28} />}
-              title="CBT Quiz (Past Questions)"
-              description="Timed quiz simulating real JAMB/WAEC exam conditions with automatic submission. No explanations shown until after completion."
+              title="CBT Quiz"
+              description="Timed past questions quiz. 2hr 30min for JAMB. Auto-submits when time expires. No explanations until completion."
               onClick={handleCBTQuizClick}
               className="animate-fade-in-up animate-delay-100"
             />

@@ -1,6 +1,15 @@
-// Sophia Prep Service Worker
-const CACHE_NAME = 'sophia-prep-v2';
-const RUNTIME_CACHE = 'sophia-prep-runtime-v2';
+// Sophia Prep Service Worker - Enhanced Caching Strategy
+const CACHE_NAME = 'sophia-prep-v3';
+const RUNTIME_CACHE = 'sophia-prep-runtime-v3';
+const IMAGE_CACHE = 'sophia-prep-images-v3';
+const STATIC_CACHE = 'sophia-prep-static-v3';
+
+// Cache duration in milliseconds
+const CACHE_DURATION = {
+  STATIC: 7 * 24 * 60 * 60 * 1000, // 7 days
+  IMAGES: 30 * 24 * 60 * 60 * 1000, // 30 days
+  RUNTIME: 24 * 60 * 60 * 1000, // 1 day
+};
 
 // Assets to cache on install
 const PRECACHE_URLS = [
@@ -9,9 +18,17 @@ const PRECACHE_URLS = [
   '/favicon.png',
   '/apple-touch-icon.png',
   '/manifest.json',
+  '/icons/icon-16x16.png',
+  '/icons/icon-32x32.png',
+  '/icons/icon-48x48.png',
+  '/icons/icon-72x72.png',
+  '/icons/icon-96x96.png',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png',
+  '/icons/apple-touch-icon.png',
   '/sophiahero2.png',
+  '/sophialogo1.png',
+  '/sophialogo2.png',
 ];
 
 // Install event - cache essential assets
@@ -30,12 +47,13 @@ self.addEventListener('install', (event) => {
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   console.log('Service Worker activating...');
+  const currentCaches = [CACHE_NAME, RUNTIME_CACHE, IMAGE_CACHE, STATIC_CACHE];
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames
           .filter((cacheName) => {
-            return cacheName !== CACHE_NAME && cacheName !== RUNTIME_CACHE;
+            return !currentCaches.includes(cacheName);
           })
           .map((cacheName) => {
             console.log('Deleting old cache:', cacheName);
@@ -46,7 +64,36 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - serve from cache, fallback to network
+// Helper function to determine cache strategy
+function getCacheStrategy(request) {
+  const url = new URL(request.url);
+  
+  // Images - long-term cache
+  if (url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico)$/)) {
+    return { cacheName: IMAGE_CACHE, duration: CACHE_DURATION.IMAGES };
+  }
+  
+  // Static assets (JS, CSS, fonts) - medium-term cache
+  if (url.pathname.match(/\.(js|css|woff|woff2|ttf|eot)$/)) {
+    return { cacheName: STATIC_CACHE, duration: CACHE_DURATION.STATIC };
+  }
+  
+  // Runtime cache for everything else
+  return { cacheName: RUNTIME_CACHE, duration: CACHE_DURATION.RUNTIME };
+}
+
+// Helper function to check if cached response is still fresh
+function isCacheFresh(response, duration) {
+  if (!response) return false;
+  
+  const cachedTime = response.headers.get('sw-cache-time');
+  if (!cachedTime) return true; // If no timestamp, assume fresh
+  
+  const age = Date.now() - parseInt(cachedTime, 10);
+  return age < duration;
+}
+
+// Fetch event - enhanced caching strategy
 self.addEventListener('fetch', (event) => {
   // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
@@ -60,34 +107,48 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
+      const strategy = getCacheStrategy(event.request);
+      
+      // Check if cached response is still fresh
+      if (cachedResponse && isCacheFresh(cachedResponse, strategy.duration)) {
         return cachedResponse;
       }
 
-      return caches.open(RUNTIME_CACHE).then((cache) => {
-        return fetch(event.request).then((response) => {
-          // Don't cache non-successful responses
-          if (!response || response.status !== 200 || response.type === 'error') {
-            return response;
-          }
-
-          // Clone the response before caching
-          const responseToCache = response.clone();
-          
-          // Cache static assets (JS, CSS, images, fonts)
-          if (
-            event.request.url.match(/\.(js|css|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot)$/)
-          ) {
-            cache.put(event.request, responseToCache);
-          }
-
+      // Fetch from network
+      return fetch(event.request).then((response) => {
+        // Don't cache non-successful responses
+        if (!response || response.status !== 200 || response.type === 'error') {
           return response;
-        }).catch(() => {
-          // Return offline page if available
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
+        }
+
+        // Clone the response before caching
+        const responseToCache = response.clone();
+        
+        // Add timestamp header for cache freshness check
+        const headers = new Headers(response.headers);
+        headers.append('sw-cache-time', Date.now().toString());
+        
+        const modifiedResponse = new Response(responseToCache.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: headers,
         });
+
+        // Cache the response
+        caches.open(strategy.cacheName).then((cache) => {
+          cache.put(event.request, modifiedResponse);
+        });
+
+        return response;
+      }).catch(() => {
+        // Return cached response even if stale, or offline page
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        
+        if (event.request.mode === 'navigate') {
+          return caches.match('/index.html');
+        }
       });
     })
   );

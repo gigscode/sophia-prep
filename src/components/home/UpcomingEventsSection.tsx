@@ -3,7 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { EventCard } from '../cards/EventCard';
-import { LoadingSkeleton } from '../ui/LoadingSkeleton';
+import { CardSkeleton } from '../ui/CardSkeleton';
 
 export interface EventData {
   id: string;
@@ -103,8 +103,7 @@ export function UpcomingEventsSection({
         )}
       </div>
 
-      {/* Event Cards Grid - Responsive (Requirement 6.1) */}
-      {/* 1 column mobile, 2-3 columns desktop */}
+      {/* Event Cards Grid - Responsive: 1 column mobile, 2 columns tablet, 3 columns desktop */}
       <div
         className="
           grid
@@ -112,13 +111,16 @@ export function UpcomingEventsSection({
           md:grid-cols-2
           lg:grid-cols-3
           gap-4
+          w-full
         "
       >
         {isLoading
           ? Array.from({ length: 3 }).map((_, index) => (
-            <div key={index} className="h-[100px] w-full rounded-2xl overflow-hidden">
-              <LoadingSkeleton variant="rectangular" height="100%" width="100%" />
-            </div>
+            <CardSkeleton
+              key={index}
+              variant="event"
+              className="animate-fade-in-up animate-delay-0"
+            />
           ))
           : events.map((event, index) => (
             <EventCard

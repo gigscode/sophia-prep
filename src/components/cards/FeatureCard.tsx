@@ -1,4 +1,5 @@
 import React from 'react';
+import { handleKeyboardActivation, generateAriaLabel } from '../../utils/accessibility';
 
 export interface FeatureCardProps {
   title: string;
@@ -38,6 +39,10 @@ export function FeatureCard({
   size = 'medium',
   className = '',
 }: FeatureCardProps) {
+  const cardId = React.useId();
+  const titleId = `${cardId}-title`;
+  const descriptionId = description ? `${cardId}-description` : undefined;
+
   // Size-based styling
   const sizeClasses = {
     small: 'p-4',
@@ -58,19 +63,24 @@ export function FeatureCard({
   };
 
   return (
-    <div
+    <article
       onClick={onClick}
+      onKeyDown={(e) => handleKeyboardActivation(e, onClick)}
       className={`
-        card-hover
-        card-touch-target
-        card-container
         cursor-pointer
         rounded-2xl
         shadow-sm
         transition-all
         duration-200
         ease-out
+        hover:scale-[1.02]
+        hover:shadow-lg
+        min-h-[44px]
+        min-w-[44px]
+        w-full
         focus-visible-ring
+        interactive-element
+        card-touch-target
         ${sizeClasses[size]}
         ${className}
       `.trim()}
@@ -79,13 +89,9 @@ export function FeatureCard({
       }}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      aria-label={title}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+      aria-label={generateAriaLabel(title, description, 'Feature card')}
     >
       {/* Icon Container - Circular with background color */}
       <div
@@ -100,6 +106,7 @@ export function FeatureCard({
         style={{
           backgroundColor: iconBackgroundColor,
         }}
+        aria-hidden="true"
       >
         {icon}
       </div>
@@ -107,6 +114,7 @@ export function FeatureCard({
       {/* Content */}
       <div className="space-y-1">
         <h3
+          id={titleId}
           className={`
             ${titleSizeClasses[size]}
             font-semibold
@@ -121,6 +129,7 @@ export function FeatureCard({
 
         {description && (
           <p
+            id={descriptionId}
             className="text-sm leading-relaxed"
             style={{
               color: 'hsl(var(--color-text-secondary))',
@@ -130,7 +139,13 @@ export function FeatureCard({
           </p>
         )}
       </div>
-    </div>
+
+      {/* Screen reader helper text */}
+      <span className="sr-only">
+        Click to access {title.toLowerCase()}
+        {description && `. ${description}`}
+      </span>
+    </article>
   );
 }
 

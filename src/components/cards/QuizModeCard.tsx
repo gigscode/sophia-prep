@@ -1,4 +1,5 @@
 import React from 'react';
+import { handleKeyboardActivation, generateAriaLabel } from '../../utils/accessibility';
 
 export interface QuizModeCardProps {
   mode: 'practice' | 'cbt';
@@ -32,6 +33,10 @@ export function QuizModeCard({
   onClick,
   className = '',
 }: QuizModeCardProps) {
+  const cardId = React.useId();
+  const titleId = `${cardId}-title`;
+  const descriptionId = `${cardId}-description`;
+
   // Color scheme based on mode
   const colorScheme = {
     practice: {
@@ -47,22 +52,27 @@ export function QuizModeCard({
   };
 
   const colors = colorScheme[mode];
+  const modeLabel = mode === 'practice' ? 'Practice Mode' : 'CBT Quiz Mode';
 
   return (
-    <div
+    <article
       onClick={onClick}
+      onKeyDown={(e) => handleKeyboardActivation(e, onClick)}
       className={`
-        card-hover
-        card-touch-target
-        card-container
         cursor-pointer
         rounded-2xl
         shadow-sm
         transition-all
         duration-200
         ease-out
+        hover:scale-[1.02]
+        hover:shadow-lg
         p-6
+        min-h-[44px]
+        w-full
         focus-visible-ring
+        interactive-element
+        card-touch-target
         ${className}
       `.trim()}
       style={{
@@ -70,13 +80,9 @@ export function QuizModeCard({
       }}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      aria-label={`${title}: ${description}`}
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+      aria-label={generateAriaLabel(title, description, 'Quiz mode')}
     >
       {/* Icon Container - Circular with mode-specific background color */}
       <div
@@ -93,6 +99,7 @@ export function QuizModeCard({
           backgroundColor: colors.iconBackgroundColor,
           color: colors.iconColor,
         }}
+        aria-hidden="true"
       >
         {icon}
       </div>
@@ -100,6 +107,7 @@ export function QuizModeCard({
       {/* Content */}
       <div className="space-y-2">
         <h3
+          id={titleId}
           className="text-xl font-semibold"
           style={{
             color: 'hsl(var(--color-text-primary))',
@@ -109,6 +117,7 @@ export function QuizModeCard({
         </h3>
 
         <p
+          id={descriptionId}
           className="text-sm leading-relaxed"
           style={{
             color: 'hsl(var(--color-text-secondary))',
@@ -117,7 +126,12 @@ export function QuizModeCard({
           {description}
         </p>
       </div>
-    </div>
+
+      {/* Screen reader helper text */}
+      <span className="sr-only">
+        Click to start {modeLabel.toLowerCase()}. {description}
+      </span>
+    </article>
   );
 }
 

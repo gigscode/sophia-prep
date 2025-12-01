@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Layout } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
+import { useLazyLoad } from '../hooks/useLazyLoad';
 import { Header } from '../components/home/Header';
 import { HeroBanner } from '../components/home/HeroBanner';
 import { QuizModesSection } from '../components/home/QuizModesSection';
 import { QuickLinksSection } from '../components/home/QuickLinksSection';
 import { UpcomingEventsSection, EventData } from '../components/home/UpcomingEventsSection';
+import { logPerformanceMetrics, markInteractive } from '../utils/performance';
 
 /**
  * HomePage Component - Modern UI Redesign
@@ -24,6 +27,20 @@ import { UpcomingEventsSection, EventData } from '../components/home/UpcomingEve
 export function HomePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  // Lazy load refs for below-the-fold sections
+  const [quickLinksRef, quickLinksVisible] = useLazyLoad<HTMLDivElement>({
+    threshold: 0.01,
+    rootMargin: '100px',
+  });
+  const [eventsRef, eventsVisible] = useLazyLoad<HTMLDivElement>({
+    threshold: 0.01,
+    rootMargin: '100px',
+  });
+
+  // Loading states for sections
+  const [isQuickLinksLoading, setIsQuickLinksLoading] = useState(true);
+  const [isEventsLoading, setIsEventsLoading] = useState(true);
 
   // Sample events data - in production, this would come from an API
   const upcomingEvents: EventData[] = [
@@ -50,28 +67,65 @@ export function HomePage() {
     },
   ];
 
+  // Performance monitoring
+  useEffect(() => {
+    // Mark page as interactive
+    markInteractive('HomePage');
+
+    // Log performance metrics in development
+    if (process.env.NODE_ENV === 'development') {
+      logPerformanceMetrics();
+    }
+  }, []);
+
+  // Simulate loading for Quick Links when visible
+  useEffect(() => {
+    if (quickLinksVisible) {
+      // Simulate brief loading state
+      const timer = setTimeout(() => {
+        setIsQuickLinksLoading(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [quickLinksVisible]);
+
+  // Simulate loading for Events when visible
+  useEffect(() => {
+    if (eventsVisible) {
+      // Simulate brief loading state
+      const timer = setTimeout(() => {
+        setIsEventsLoading(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [eventsVisible]);
+
   // Handler functions
   const handleCartClick = () => {
-    navigate('/cart');
+    // Cart functionality - navigate to profile for now until cart page is implemented
+    navigate('/profile');
   };
 
   const handleNotificationClick = () => {
-    navigate('/notifications');
+    // Notifications functionality - navigate to help center for now
+    navigate('/help');
   };
 
   const handleHeroBannerAction = () => {
-    navigate('/subscription');
+    // Subscription/signup action
+    navigate('/signup');
   };
 
   return (
     <Layout showNavbar={false} showFooter={false}>
-      {/* Page Container with responsive padding */}
+      {/* Page Container with responsive padding and page transition animation */}
       <div
         className="
           min-h-screen
           page-padding
           pb-20
           mobile-no-overflow
+          page-enter
         "
         style={{
           backgroundColor: 'hsl(var(--color-bg-page))',
@@ -86,26 +140,41 @@ export function HomePage() {
           notificationCount={0}
         />
 
-        {/* Main Content with Section Spacing (32px) */}
+        {/* Main Content with Section Spacing (32px) and section reveal animations */}
         <div className="space-y-8 max-w-7xl mx-auto">
-          {/* Hero Banner */}
-          <HeroBanner
-            title="Unlock Your Full Potential"
-            description="Get lifetime access to all features, unlimited practice questions, and comprehensive study materials for just ₦1,500. Start your journey to exam success today!"
-            buttonText="Get Started"
-            buttonAction={handleHeroBannerAction}
-            gradientColors={['hsl(var(--color-primary-purple))', 'hsl(var(--color-primary-blue))']}
-            icon={<Sparkles className="w-8 h-8 text-white" />}
-          />
+          {/* Hero Banner with section reveal animation */}
+          <div className="section-reveal animate-delay-0">
+            <HeroBanner
+              title="Sophia Prep Exam Success"
+              description="Get lifetime access to all features, unlimited practice questions, and comprehensive study materials for as low as ₦1,500. Start your journey to exam success today!"
+              buttonText="Get Started"
+              buttonAction={handleHeroBannerAction}
+              gradientColors={['hsl(var(--color-primary-purple))', 'hsl(var(--color-primary-blue))']}
+              icon={<Sparkles className="w-8 h-8 text-white" />}
+            />
+          </div>
 
-          {/* Quiz Modes Section */}
-          <QuizModesSection />
+          {/* Quiz Modes Section with section reveal animation */}
+          <div className="section-reveal animate-delay-100">
+            <QuizModesSection />
+          </div>
 
-          {/* Quick Links Section */}
-          <QuickLinksSection />
+          {/* Quick Links Section with lazy loading */}
+          <div ref={quickLinksRef} className="section-reveal animate-delay-200">
+            {quickLinksVisible && (
+              <QuickLinksSection isLoading={isQuickLinksLoading} />
+            )}
+          </div>
 
-          {/* Upcoming Events Section */}
-          <UpcomingEventsSection events={upcomingEvents} />
+          {/* Upcoming Events Section with lazy loading */}
+          <div ref={eventsRef} className="section-reveal animate-delay-300">
+            {eventsVisible && (
+              <UpcomingEventsSection 
+                events={upcomingEvents} 
+                isLoading={isEventsLoading}
+              />
+            )}
+          </div>
         </div>
       </div>
     </Layout>

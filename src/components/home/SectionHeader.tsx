@@ -1,9 +1,11 @@
 import React from 'react';
+import { handleKeyboardActivation } from '../../utils/accessibility';
 
 export interface SectionHeaderProps {
   title: string;
   actionIcon?: React.ReactNode;
   onActionClick?: () => void;
+  actionLabel?: string;
 }
 
 /**
@@ -17,20 +19,25 @@ export interface SectionHeaderProps {
  * @param title - The section title text
  * @param actionIcon - Optional icon element for the action button
  * @param onActionClick - Optional click handler for the action button
+ * @param actionLabel - Optional accessible label for the action button
  */
 export function SectionHeader({
   title,
   actionIcon,
   onActionClick,
+  actionLabel = 'View more',
 }: SectionHeaderProps) {
+  const headingId = React.useId();
+  
   return (
     <div
       className="flex items-center justify-between mb-4"
-      role="heading"
-      aria-level={2}
+      role="region"
+      aria-labelledby={headingId}
     >
       {/* Section Title */}
       <h2
+        id={headingId}
         className="text-xl font-bold"
         style={{
           color: 'hsl(var(--color-text-primary))',
@@ -43,6 +50,7 @@ export function SectionHeader({
       {actionIcon && onActionClick && (
         <button
           onClick={onActionClick}
+          onKeyDown={(e) => handleKeyboardActivation(e, onActionClick)}
           className="
             icon-button-touch-target
             flex
@@ -53,13 +61,18 @@ export function SectionHeader({
             ease-out
             hover:opacity-70
             focus-visible-ring
+            interactive-element
           "
           style={{
             color: 'hsl(var(--color-text-secondary))',
           }}
-          aria-label="Section action"
+          aria-label={`${actionLabel} for ${title}`}
+          type="button"
         >
           {actionIcon}
+          <span className="sr-only">
+            {actionLabel} for {title}
+          </span>
         </button>
       )}
     </div>

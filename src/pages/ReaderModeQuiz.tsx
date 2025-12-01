@@ -74,7 +74,7 @@ export function ReaderModeQuiz() {
         return acc + (question && ans === question.correct ? 1 : 0);
       }, 0);
 
-      navigate('/quiz-results', {
+      navigate('/quiz/results', {
         state: {
           questions,
           answers,

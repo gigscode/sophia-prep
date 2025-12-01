@@ -49,11 +49,20 @@ export default defineConfig(({ mode }) => {
       target: 'esnext',
       minify: 'esbuild',
       sourcemap: false,
+      // Performance optimizations
+      chunkSizeWarningLimit: 1000,
+      cssCodeSplit: true,
+      assetsInlineLimit: 4096, // Inline assets smaller than 4kb
       rollupOptions: {
         input: {
           main: path.resolve(__dirname, 'index.html')
         },
         output: {
+          // Optimize chunk naming for better caching
+          entryFileNames: 'assets/[name]-[hash].js',
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash].[ext]',
+          
           manualChunks: {
             // Core frameworks
             vendor: ['react', 'react-dom', 'react-router-dom'],

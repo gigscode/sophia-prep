@@ -17,7 +17,7 @@ interface QuizQuestion {
   correct?: string;
 }
 
-export function MockExamQuiz() {
+export function CBTQuiz() {
   const navigate = useNavigate();
   const START_TIME = 35 * 60; // seconds
   const [startTime] = useState(Date.now());
@@ -129,7 +129,7 @@ export function MockExamQuiz() {
           score: calculatedScore,
           totalQuestions: pool.length,
           timeTaken,
-          quizMode: 'mock',
+          quizMode: 'cbt',
           subject: subjectSel,
         },
       });
@@ -227,7 +227,7 @@ export function MockExamQuiz() {
               ) : (
                 <GraduationCap className={`w-5 h-5 ${examTypeText}`} />
               )}
-              <span className={`font-semibold ${examTypeText}`}>{typeSel} Mock Exam</span>
+              <span className={`font-semibold ${examTypeText}`}>{typeSel} CBT Quiz</span>
             </div>
             <h1 className="text-3xl font-bold mb-2">Practice Mode</h1>
             <p className="text-gray-600">Select your subject and exam year to begin</p>
@@ -250,11 +250,10 @@ export function MockExamQuiz() {
                   <select
                     value={subjectSel || ''}
                     onChange={(e) => setSubjectSel(e.target.value || undefined)}
-                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${
-                      typeSel === 'WAEC'
-                        ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                        : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
+                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                      }`}
                   >
                     <option value="">Select a subject</option>
                     {availableSubjects.map((subject) => (
@@ -277,11 +276,10 @@ export function MockExamQuiz() {
                     const value = e.target.value;
                     setYearSel(value === 'ALL' ? 'ALL' : Number(value));
                   }}
-                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${
-                    typeSel === 'WAEC'
-                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                  }`}
+                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
+                    ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                    : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                    }`}
                 >
                   <option value="ALL">All Years</option>
                   <option value="2024">2024</option>
@@ -306,7 +304,7 @@ export function MockExamQuiz() {
                   disabled={!subjectSel}
                   className="w-full py-4 text-lg font-semibold flex items-center justify-center gap-2"
                 >
-                  Start Mock Exam
+                  Start CBT Quiz
                   <ArrowRight className="w-5 h-5" />
                 </Button>
                 {!subjectSel && (
@@ -339,7 +337,7 @@ export function MockExamQuiz() {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+        <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">CBT Quiz (Past Questions)</h1>
         <Card>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -352,7 +350,7 @@ export function MockExamQuiz() {
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8">
-      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">Mock Exam</h1>
+      <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">CBT Quiz (Past Questions)</h1>
 
       {(!current || pool.length === 0) ? (
         <Card>

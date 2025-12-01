@@ -1,4 +1,5 @@
 import React from 'react';
+import { handleKeyboardActivation, generateAriaLabel } from '../../utils/accessibility';
 
 export interface HeroBannerProps {
   title: string;
@@ -33,9 +34,12 @@ export function HeroBanner({
   icon,
 }: HeroBannerProps) {
   const [gradientStart, gradientEnd] = gradientColors;
+  const bannerId = React.useId();
+  const titleId = `${bannerId}-title`;
+  const descriptionId = `${bannerId}-description`;
 
   return (
-    <div
+    <section
       className="
         relative
         overflow-hidden
@@ -46,29 +50,40 @@ export function HeroBanner({
         duration-200
         ease-out
         hover:shadow-lg
+        focus-within:shadow-lg
       "
       style={{
         background: `linear-gradient(135deg, ${gradientStart}, ${gradientEnd})`,
       }}
       role="region"
-      aria-label="Hero banner"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
     >
       {/* Content Container */}
       <div className="relative z-10 flex flex-col gap-4">
         {/* Icon (if provided) */}
         {icon && (
-          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm">
+          <div 
+            className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm"
+            aria-hidden="true"
+          >
             {icon}
           </div>
         )}
 
         {/* Title */}
-        <h2 className="text-2xl md:text-3xl font-bold text-white leading-tight">
+        <h2 
+          id={titleId}
+          className="text-2xl md:text-3xl font-bold text-white leading-tight"
+        >
           {title}
         </h2>
 
         {/* Description */}
-        <p className="text-base md:text-lg text-white/90 leading-relaxed max-w-2xl">
+        <p 
+          id={descriptionId}
+          className="text-base md:text-lg text-white/90 leading-relaxed max-w-2xl"
+        >
           {description}
         </p>
 
@@ -76,6 +91,7 @@ export function HeroBanner({
         <div className="mt-2">
           <button
             onClick={buttonAction}
+            onKeyDown={(e) => handleKeyboardActivation(e, buttonAction)}
             className="
               button-touch-target
               inline-flex
@@ -100,10 +116,16 @@ export function HeroBanner({
               focus:ring-white
               focus:ring-offset-2
               focus:ring-offset-transparent
+              interactive-element
             "
-            aria-label={buttonText}
+            aria-label={generateAriaLabel(buttonText, description)}
+            aria-describedby={`${bannerId}-button-help`}
+            type="button"
           >
             {buttonText}
+            <span id={`${bannerId}-button-help`} className="sr-only">
+              Click to {buttonText.toLowerCase()}
+            </span>
           </button>
         </div>
       </div>
@@ -117,7 +139,7 @@ export function HeroBanner({
         }}
         aria-hidden="true"
       />
-    </div>
+    </section>
   );
 }
 

@@ -3,7 +3,7 @@ import { BookOpen, Video, BookMarked, GraduationCap, ChevronRight } from 'lucide
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { QuickLinkCard } from '../cards/QuickLinkCard';
-import { LoadingSkeleton } from '../ui/LoadingSkeleton';
+import { CardSkeleton } from '../ui/CardSkeleton';
 
 export interface QuickLinksSectionProps {
   onExpandClick?: () => void;
@@ -79,7 +79,7 @@ export function QuickLinksSection({
         onActionClick={onExpandClick}
       />
 
-      {/* Quick Link Cards Grid - Responsive */}
+      {/* Quick Link Cards Grid - Responsive: 1 column mobile, 2 columns tablet, 4 columns desktop */}
       <div
         className="
           grid
@@ -87,13 +87,16 @@ export function QuickLinksSection({
           sm:grid-cols-2
           lg:grid-cols-4
           gap-4
+          w-full
         "
       >
         {isLoading
           ? Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="aspect-square w-full rounded-2xl overflow-hidden">
-              <LoadingSkeleton variant="rectangular" height="100%" width="100%" />
-            </div>
+            <CardSkeleton
+              key={index}
+              variant="quick-link"
+              className="animate-fade-in-up animate-delay-0"
+            />
           ))
           : quickLinks.map((link, index) => (
             <QuickLinkCard

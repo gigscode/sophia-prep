@@ -1,4 +1,5 @@
 import React from 'react';
+import { handleKeyboardActivation, generateAriaLabel } from '../../utils/accessibility';
 
 export interface QuickLinkCardProps {
   title: string;
@@ -35,29 +36,37 @@ export function QuickLinkCard({
   aspectRatio = '1:1',
   className = '',
 }: QuickLinkCardProps) {
+  const cardId = React.useId();
+  const titleId = `${cardId}-title`;
+
   // Aspect ratio classes
   const aspectRatioClass = aspectRatio === '1:1' ? 'aspect-square' : 'aspect-[4/3]';
 
   return (
-    <div
+    <article
       onClick={onClick}
+      onKeyDown={(e) => handleKeyboardActivation(e, onClick)}
       className={`
-        card-hover
-        card-touch-target
-        card-container
         cursor-pointer
         rounded-2xl
         shadow-sm
         transition-all
         duration-200
         ease-out
+        hover:scale-[1.02]
+        hover:shadow-lg
         p-6
+        min-h-[44px]
+        min-w-[44px]
+        w-full
         flex
         flex-col
         items-center
         justify-center
         text-center
         focus-visible-ring
+        interactive-element
+        card-touch-target
         ${aspectRatioClass}
         ${className}
       `.trim()}
@@ -66,13 +75,8 @@ export function QuickLinkCard({
       }}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick();
-        }
-      }}
-      aria-label={title}
+      aria-labelledby={titleId}
+      aria-label={generateAriaLabel(title, undefined, 'Quick link')}
     >
       {/* Icon - Centered with optional color */}
       <div
@@ -87,12 +91,14 @@ export function QuickLinkCard({
         style={{
           color: iconColor || 'hsl(var(--color-text-primary))',
         }}
+        aria-hidden="true"
       >
         {icon}
       </div>
 
       {/* Title - Centered below icon */}
       <h3
+        id={titleId}
         className="
           text-base
           font-semibold
@@ -104,7 +110,12 @@ export function QuickLinkCard({
       >
         {title}
       </h3>
-    </div>
+
+      {/* Screen reader helper text */}
+      <span className="sr-only">
+        Click to access {title.toLowerCase()}
+      </span>
+    </article>
   );
 }
 

@@ -33,7 +33,7 @@ describe('QuizModesSection', () => {
   it('displays CBT Quiz card with correct description', () => {
     renderWithRouter(<QuizModesSection />);
     
-    expect(screen.getByText(/Timed quiz simulating real JAMB\/WAEC exam conditions/)).toBeInTheDocument();
+    expect(screen.getByText(/Timed past questions quiz/)).toBeInTheDocument();
   });
 
   it('renders expand action button when onExpandClick is provided', () => {

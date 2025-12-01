@@ -21,8 +21,8 @@ export function LoadingSkeleton({
     width,
     height,
 }: LoadingSkeletonProps) {
-    // Base classes for the skeleton
-    const baseClasses = 'bg-gray-200 relative overflow-hidden';
+    // Base classes for the skeleton with shimmer effect
+    const baseClasses = 'bg-gray-200 relative overflow-hidden shimmer';
 
     // Variant-specific classes
     const variantClasses = {
@@ -37,7 +37,6 @@ export function LoadingSkeleton({
             className={`
         ${baseClasses}
         ${variantClasses[variant]}
-        shimmer
         ${className}
       `.trim()}
             style={{ width, height }}
