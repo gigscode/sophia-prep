@@ -3,6 +3,7 @@ import { BookOpen, Video, BookMarked, GraduationCap, ChevronRight } from 'lucide
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { QuickLinkCard } from '../cards/QuickLinkCard';
+import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 
 export interface QuickLinksSectionProps {
   onExpandClick?: () => void;
@@ -20,11 +21,13 @@ export interface QuickLinksSectionProps {
  * 
  * @param onExpandClick - Optional handler for section expand action
  * @param className - Additional CSS classes for customization
+ * @param isLoading - Whether the section is in loading state
  */
 export function QuickLinksSection({
   onExpandClick,
   className = '',
-}: QuickLinksSectionProps) {
+  isLoading = false,
+}: QuickLinksSectionProps & { isLoading?: boolean }) {
   const navigate = useNavigate();
 
   // Quick link data with pastel colors from design system
@@ -86,17 +89,24 @@ export function QuickLinksSection({
           gap-4
         "
       >
-        {quickLinks.map((link) => (
-          <QuickLinkCard
-            key={link.id}
-            title={link.title}
-            icon={link.icon}
-            backgroundColor={link.backgroundColor}
-            iconColor={link.iconColor}
-            onClick={() => handleCardClick(link.route)}
-            aspectRatio="1:1"
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="aspect-square w-full rounded-2xl overflow-hidden">
+              <LoadingSkeleton variant="rectangular" height="100%" width="100%" />
+            </div>
+          ))
+          : quickLinks.map((link, index) => (
+            <QuickLinkCard
+              key={link.id}
+              title={link.title}
+              icon={link.icon}
+              backgroundColor={link.backgroundColor}
+              iconColor={link.iconColor}
+              onClick={() => handleCardClick(link.route)}
+              aspectRatio="1:1"
+              className={`animate-fade-in-up animate-delay-${index * 50}`}
+            />
+          ))}
       </div>
     </section>
   );

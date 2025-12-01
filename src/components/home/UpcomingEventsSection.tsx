@@ -3,6 +3,7 @@ import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { EventCard } from '../cards/EventCard';
+import { LoadingSkeleton } from '../ui/LoadingSkeleton';
 
 export interface EventData {
   id: string;
@@ -30,12 +31,14 @@ export interface UpcomingEventsSectionProps {
  * @param events - Array of event data to display
  * @param onViewAllClick - Optional handler for "View All" action
  * @param className - Additional CSS classes for customization
+ * @param isLoading - Whether the section is in loading state
  */
 export function UpcomingEventsSection({
   events = [],
   onViewAllClick,
   className = '',
-}: UpcomingEventsSectionProps) {
+  isLoading = false,
+}: UpcomingEventsSectionProps & { isLoading?: boolean }) {
   const navigate = useNavigate();
 
   // Show "View All" link when more than 3 events exist (Requirement 6.4)
@@ -56,8 +59,8 @@ export function UpcomingEventsSection({
     navigate(`/events/${eventId}`);
   };
 
-  // Don't render section if no events
-  if (events.length === 0) {
+  // Don't render section if no events (unless loading)
+  if (events.length === 0 && !isLoading) {
     return null;
   }
 
@@ -70,9 +73,9 @@ export function UpcomingEventsSection({
           actionIcon={undefined}
           onActionClick={undefined}
         />
-        
+
         {/* View All Link - shown when more than 3 events (Requirement 6.4) */}
-        {showViewAll && (
+        {showViewAll && !isLoading && (
           <button
             onClick={handleViewAllClick}
             className="
@@ -82,6 +85,7 @@ export function UpcomingEventsSection({
               gap-1
               text-sm
               font-medium
+              text-blue-600
               transition-colors
               duration-200
               ease-out
@@ -89,7 +93,7 @@ export function UpcomingEventsSection({
               focus-visible-ring
             "
             style={{
-              color: 'hsl(var(--color-primary-blue))',
+              color: undefined,
             }}
             aria-label="View all events"
           >
@@ -110,16 +114,23 @@ export function UpcomingEventsSection({
           gap-4
         "
       >
-        {events.map((event) => (
-          <EventCard
-            key={event.id}
-            title={event.title}
-            date={event.date}
-            description={event.description}
-            type={event.type}
-            onClick={() => handleEventClick(event.id)}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, index) => (
+            <div key={index} className="h-[100px] w-full rounded-2xl overflow-hidden">
+              <LoadingSkeleton variant="rectangular" height="100%" width="100%" />
+            </div>
+          ))
+          : events.map((event, index) => (
+            <EventCard
+              key={event.id}
+              title={event.title}
+              date={event.date}
+              description={event.description}
+              type={event.type}
+              onClick={() => handleEventClick(event.id)}
+              className={`animate-fade-in-up animate-delay-${index * 50}`}
+            />
+          ))}
       </div>
     </section>
   );

@@ -68,20 +68,20 @@ export function BottomNavigation() {
                 {/* Active indicator dot */}
                 {active && (
                   <div
-                    className="absolute -top-2 w-1.5 h-1.5 rounded-full bg-blue-600"
+                    className="absolute -top-2 w-1.5 h-1.5 rounded-full bg-blue-600 animate-scale-in"
                     aria-hidden="true"
                   />
                 )}
-                
+
                 {/* Icon */}
                 <Icon
                   className={`
                     w-6 h-6 transition-all duration-200 ease-out
-                    ${active ? 'text-blue-600' : 'text-gray-500'}
+                    ${active ? 'text-blue-600 scale-110' : 'text-gray-500'}
                   `}
                   aria-hidden="true"
                 />
-                
+
                 {/* Label */}
                 <span
                   className={`

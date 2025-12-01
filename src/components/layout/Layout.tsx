@@ -19,7 +19,7 @@ export function Layout({
   return (
     <div className="flex flex-col min-h-screen">
       {showNavbar && <Navbar />}
-      <main className="flex-1 pb-16 md:pb-0">
+      <main className="flex-1 pb-16 md:pb-0 animate-fade-in transition-smooth">
         {children}
       </main>
       {showFooter && <Footer />}
