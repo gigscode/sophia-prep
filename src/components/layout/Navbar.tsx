@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, BookOpen, Target, GraduationCap, HelpCircle, User, ServerCog } from 'lucide-react';
+import { Menu, X, Home, BookOpen, Target, GraduationCap, HelpCircle, User, ServerCog, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const navLinks = [
     { to: '/', label: 'Home', icon: Home },
@@ -76,6 +76,15 @@ export function Navbar() {
                 <User className="w-5 h-5" />
               )}
             </Link>
+            {user && (
+              <button
+                onClick={() => logout()}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-white hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -126,15 +135,17 @@ export function Navbar() {
                 <User className="w-5 h-5" />
                 <span className="font-medium">{user ? 'Profile' : 'Login'}</span>
               </Link>
-              {user?.isAdmin && (
-                <Link
-                  to="/7351/admin"
-                  onClick={() => setIsMenuOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 text-white hover:bg-blue-700"
+              {user && (
+                <button
+                  onClick={() => {
+                    logout();
+                    setIsMenuOpen(false);
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 text-white hover:bg-blue-700 w-full text-left"
                 >
-                  <ServerCog className="w-5 h-5" />
-                  <span className="font-medium">Admin</span>
-                </Link>
+                  <LogOut className="w-5 h-5" />
+                  <span className="font-medium">Logout</span>
+                </button>
               )}
             </div>
           </div>
