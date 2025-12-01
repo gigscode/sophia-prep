@@ -280,8 +280,8 @@ export function SubjectsPage() {
                 {subject.subject_category.toLowerCase()}
               </span>
               <div className="flex items-center gap-2">
-                <Link to={`/practice?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-blue-600 text-white rounded text-xs">Practice</Link>
-                <Link to={`/mock-exams?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 text-blue-900 rounded text-xs" style={{ backgroundColor: '#95db83ff' }}>Quiz</Link>
+                <Link to={`/quiz/practice?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-blue-600 text-white rounded text-xs">Practice</Link>
+                <Link to={`/quiz/cbt?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 text-white rounded text-xs" style={{ backgroundColor: '#95db83ff' }}>Quiz</Link>
               </div>
             </div>
           </div>

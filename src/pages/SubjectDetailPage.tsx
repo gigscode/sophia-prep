@@ -177,13 +177,13 @@ export function SubjectDetailPage() {
       {/* Action Buttons */}
       <div className="mt-8 flex gap-4 justify-center md:justify-end">
         <button
-          onClick={() => navigate(`/practice?subject=${subject.slug}`)}
+          onClick={() => navigate(`/quiz/practice?subject=${subject.slug}`)}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Start Practice
         </button>
         <button
-          onClick={() => navigate(`/mock-exams?subject=${subject.slug}`)}
+          onClick={() => navigate(`/quiz/cbt?subject=${subject.slug}`)}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
           Take Quiz
