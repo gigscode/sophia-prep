@@ -1,0 +1,188 @@
+/**
+ * Modern UI Redesign - Design System Tokens
+ * 
+ * This file contains all design tokens for the Sophia Prep modern UI redesign.
+ * These tokens are used throughout the application for consistent styling.
+ * 
+ * Based on the design document at: .kiro/specs/modern-ui-redesign/design.md
+ */
+
+:root {
+  /* ===== COLOR SYSTEM ===== */
+  
+  /* Primary Colors - Main brand colors for key UI elements */
+  --color-primary-blue: 217 91% 60%; /* #3B82F6 - rgb(59, 130, 246) - Trust and reliability */
+  --color-primary-orange: 20 95% 53%; /* #F97316 - rgb(249, 115, 22) - Energy and enthusiasm */
+  --color-primary-green: 158 64% 52%; /* #10B981 - rgb(16, 185, 129) - Success and growth */
+  --color-primary-purple: 258 90% 66%; /* #8B5CF6 - rgb(139, 92, 246) - Creativity and wisdom */
+  
+  /* Background Colors - Page and component backgrounds */
+  --color-bg-page: 210 40% 98%; /* #F8FAFC - rgb(248, 250, 252) - Light gray-blue */
+  --color-bg-card: 0 0% 100%; /* #FFFFFF - rgb(255, 255, 255) - Pure white */
+  --color-bg-section: 214 32% 97%; /* #F1F5F9 - rgb(241, 245, 249) - Subtle gray */
+  
+  /* Pastel Accent Colors - For feature cards and highlights */
+  --color-pastel-mint: 152 81% 90%; /* #D1FAE5 - rgb(209, 250, 229) - JAMB CBT, Study materials */
+  --color-mint-green: 152 81% 90%; /* Alias for pastel-mint */
+  --color-pastel-peach: 32 98% 88%; /* #FED7AA - rgb(254, 215, 170) - General CBT, Warm actions */
+  --color-pastel-lavender: 270 91% 91%; /* #E9D5FF - rgb(233, 213, 255) - Videos, Creative content */
+  --color-lavender: 270 91% 91%; /* Alias for pastel-lavender */
+  --color-pastel-sky: 213 97% 87%; /* #DBEAFE - rgb(219, 234, 254) - Past questions, Academic */
+  --color-sky-blue: 213 97% 87%; /* Alias for pastel-sky */
+  --color-pastel-yellow: 48 96% 89%; /* #FEF3C7 - rgb(254, 243, 199) - Events, Highlights */
+  --color-soft-yellow: 48 96% 89%; /* Alias for pastel-yellow */
+  
+  /* Text Colors - Typography hierarchy */
+  --color-text-primary: 215 25% 27%; /* #1E293B - rgb(30, 41, 59) - Dark slate */
+  --color-text-secondary: 215 16% 47%; /* #64748B - rgb(100, 116, 139) - Medium gray */
+  --color-text-muted: 214 14% 65%; /* #94A3B8 - rgb(148, 163, 184) - Light gray */
+  
+  /* Semantic Colors - Status and feedback */
+  --color-success: 158 64% 52%; /* #10B981 - Green */
+  --color-warning: 38 92% 50%; /* #F59E0B - Amber */
+  --color-error: 0 84% 60%; /* #EF4444 - Red */
+  --color-info: 217 91% 60%; /* #3B82F6 - Blue */
+  
+  /* ===== TYPOGRAPHY SYSTEM ===== */
+  
+  /* Font Sizes - Based on design document scale */
+  --text-xs: 0.75rem;    /* 12px - Small labels, captions */
+  --text-sm: 0.875rem;   /* 14px - Body text, descriptions */
+  --text-base: 1rem;     /* 16px - Default body text */
+  --text-lg: 1.125rem;   /* 18px - Emphasized text */
+  --text-xl: 1.25rem;    /* 20px - Section headers */
+  --text-2xl: 1.5rem;    /* 24px - Card titles */
+  --text-3xl: 1.875rem;  /* 30px - Page headings, greetings */
+  --text-4xl: 2.25rem;   /* 36px - Hero text */
+  
+  /* Font Weights */
+  --font-regular: 400;   /* Body text */
+  --font-medium: 500;    /* Emphasized text */
+  --font-semibold: 600;  /* Subheadings, buttons */
+  --font-bold: 700;      /* Headings, important labels */
+  
+  /* ===== SPACING SYSTEM ===== */
+  /* Based on 4px base unit for consistent spacing */
+  
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px - Base spacing unit */
+  --space-5: 1.25rem;  /* 20px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px - Section spacing */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px - Bottom navigation height */
+  
+  /* Layout Spacing - Responsive page padding */
+  --page-padding-mobile: var(--space-4);   /* 16px */
+  --page-padding-tablet: var(--space-6);   /* 24px */
+  --page-padding-desktop: var(--space-8);  /* 32px */
+  --section-spacing: var(--space-8);       /* 32px between sections */
+  --card-spacing: var(--space-4);          /* 16px gap in grids */
+  --content-padding: var(--space-5);       /* 20px inside cards */
+  
+  /* ===== BORDER RADIUS ===== */
+  
+  --radius-sm: 0.5rem;   /* 8px - Small elements */
+  --radius-md: 0.75rem;  /* 12px - Medium elements */
+  --radius-lg: 1rem;     /* 16px - Cards, buttons */
+  --radius-xl: 1.5rem;   /* 24px - Large cards */
+  --radius-full: 9999px; /* Full circle - Icon containers */
+  
+  /* ===== SHADOWS ===== */
+  /* Elevation system for depth */
+  
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* ===== TRANSITIONS ===== */
+  /* Animation timing for micro-interactions */
+  
+  --transition-fast: 100ms ease-out;   /* Button press */
+  --transition-base: 200ms ease-out;   /* Card hover, navigation */
+  --transition-slow: 300ms ease-out;   /* Page transitions, reveals */
+  
+  /* ===== Z-INDEX SCALE ===== */
+  /* Layering system for stacking context */
+  
+  --z-base: 0;
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;      /* Bottom navigation */
+  --z-modal: 1300;
+  --z-popover: 1400;
+  --z-tooltip: 1500;
+  
+  /* ===== COMPONENT-SPECIFIC TOKENS ===== */
+  
+  /* Icon Sizes */
+  --icon-sm: 1rem;      /* 16px */
+  --icon-md: 1.5rem;    /* 24px */
+  --icon-lg: 2rem;      /* 32px */
+  --icon-xl: 2.5rem;    /* 40px */
+  --icon-container: 3rem; /* 48px - Circular icon container */
+  
+  /* Touch Targets - Minimum size for accessibility */
+  --touch-target-min: 2.75rem; /* 44px - WCAG AA standard */
+  
+  /* Bottom Navigation */
+  --bottom-nav-height: var(--space-16); /* 64px */
+  
+  /* Card Dimensions */
+  --card-min-height: 8rem; /* 128px */
+  
+  /* Responsive Breakpoints (for reference in JS) */
+  --breakpoint-mobile: 0px;
+  --breakpoint-tablet: 640px;
+  --breakpoint-desktop: 1024px;
+}
+
+/* ===== DARK MODE OVERRIDES ===== */
+/* Future enhancement - dark mode support */
+
+.dark {
+  /* Color adjustments for dark mode */
+  --color-bg-page: 215 25% 12%;
+  --color-bg-card: 215 25% 16%;
+  --color-bg-section: 215 25% 14%;
+  
+  --color-text-primary: 210 40% 98%;
+  --color-text-secondary: 215 16% 70%;
+  --color-text-muted: 214 14% 50%;
+}
+
+/* ===== USAGE EXAMPLES ===== */
+
+/*
+Example: Using design tokens in components
+
+.feature-card {
+  background-color: hsl(var(--color-bg-card));
+  border-radius: var(--radius-lg);
+  padding: var(--content-padding);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+.greeting-text {
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: hsl(var(--color-text-primary));
+}
+
+.icon-container {
+  width: var(--icon-container);
+  height: var(--icon-container);
+  border-radius: var(--radius-full);
+  background-color: hsl(var(--color-pastel-sky));
+}
+*/
