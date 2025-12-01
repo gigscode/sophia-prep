@@ -10,11 +10,6 @@ export function Navbar() {
   const { user, logout } = useAuth();
 
   const navLinks = [
-    { to: '/', label: 'Home', icon: Home },
-    { to: '/subjects', label: 'Subjects', icon: BookOpen },
-    { to: '/quiz/practice', label: 'Practice', icon: GraduationCap },
-    { to: '/quiz/cbt', label: 'Quiz', icon: Target },
-    { to: '/study', label: 'Study Hub', icon: BookOpen },
     { to: '/help', label: 'Help', icon: HelpCircle },
   ];
 

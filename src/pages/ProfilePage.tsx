@@ -1,18 +1,40 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, BarChart3, Settings } from 'lucide-react';
+import { User, BarChart3, Settings, Crown, Calendar, CreditCard, ArrowRight } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
+import { subscriptionService, UserSubscription } from '../services/subscription-service';
 import { Card } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
 
 export function ProfilePage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'profile' | 'analytics'>('profile');
+  const [subscription, setSubscription] = useState<UserSubscription | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) navigate('/login');
   }, [user, loading, navigate]);
+
+  useEffect(() => {
+    if (user) {
+      loadSubscription();
+    }
+  }, [user]);
+
+  const loadSubscription = async () => {
+    setLoadingSubscription(true);
+    try {
+      const activeSub = await subscriptionService.getActiveSubscription();
+      setSubscription(activeSub);
+    } catch (error) {
+      console.error('Error loading subscription:', error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  };
 
   if (loading || !user) {
     return (
@@ -25,7 +47,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 mb-6">
       {/* Profile Header */}
       <Card className="p-6 mb-6">
         <div className="flex items-center gap-6">
@@ -72,31 +94,134 @@ export function ProfilePage() {
 
       {/* Tab Content */}
       {activeTab === 'profile' ? (
-        <Card className="p-6">
-          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <Settings className="w-5 h-5" />
-            Account Information
-          </h3>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-              <p className="text-gray-900">{user.name || 'Not set'}</p>
+        <div className="space-y-6">
+          {/* Subscription Status Card */}
+          {loadingSubscription ? (
+            <Card className="p-6">
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              </div>
+            </Card>
+          ) : subscription ? (
+            <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-blue-600 rounded-lg">
+                    <Crown className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Premium Member</h3>
+                    <p className="text-sm text-gray-600">{subscription.subscription_plans?.name}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                  Active
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-xs text-gray-600">Days Remaining</p>
+                    <p className="font-bold text-gray-900">
+                      {subscriptionService.getDaysRemaining(subscription.end_date)} days
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <CreditCard className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-xs text-gray-600">Plan Price</p>
+                    <p className="font-bold text-gray-900">
+                      ₦{subscription.subscription_plans?.price.toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Calendar className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-xs text-gray-600">Expires On</p>
+                    <p className="font-bold text-gray-900">
+                      {new Date(subscription.end_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {subscription.auto_renew && (
+                <div className="mt-4 p-3 bg-blue-100 rounded-lg">
+                  <p className="text-sm text-blue-800">
+                    ✓ Auto-renewal is enabled. Your subscription will renew automatically.
+                  </p>
+                </div>
+              )}
+            </Card>
+          ) : (
+            <Card className="p-6 bg-gradient-to-br from-orange-50 to-yellow-50 border-2 border-orange-200">
+              <div className="text-center py-6">
+                <div className="inline-flex p-4 bg-orange-100 rounded-full mb-4">
+                  <Crown className="w-12 h-12 text-orange-600" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">Free Account</h3>
+                <p className="text-gray-600 mb-6">
+                  Upgrade to Premium to unlock all subjects, unlimited quizzes, and advanced features!
+                </p>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate('/more')}
+                  className="inline-flex items-center gap-2 px-6 py-3 text-lg"
+                >
+                  Upgrade Now
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                  <div className="p-3 bg-white rounded-lg">
+                    <p className="text-sm font-semibold text-gray-900">✓ All Subjects</p>
+                    <p className="text-xs text-gray-600">Access to JAMB & WAEC subjects</p>
+                  </div>
+                  <div className="p-3 bg-white rounded-lg">
+                    <p className="text-sm font-semibold text-gray-900">✓ Unlimited Quizzes</p>
+                    <p className="text-xs text-gray-600">Practice without limits</p>
+                  </div>
+                  <div className="p-3 bg-white rounded-lg">
+                    <p className="text-sm font-semibold text-gray-900">✓ Past Questions</p>
+                    <p className="text-xs text-gray-600">2010-2024 questions</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Account Information Card */}
+          <Card className="p-6">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Account Information
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <p className="text-gray-900">{user.name || 'Not set'}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <p className="text-gray-900">{user.email}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
+                <p className="text-gray-900">
+                  {user.isAdmin ? 'Administrator' : subscription ? 'Premium Student' : 'Free Student'}
+                </p>
+              </div>
+              <div className="pt-4 border-t">
+                <p className="text-sm text-gray-600">
+                  To update your profile details, please contact support or use the account settings.
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <p className="text-gray-900">{user.email}</p>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Type</label>
-              <p className="text-gray-900">{user.isAdmin ? 'Administrator' : 'Student'}</p>
-            </div>
-            <div className="pt-4 border-t">
-              <p className="text-sm text-gray-600">
-                To update your profile details, please contact support or use the account settings.
-              </p>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </div>
       ) : (
         <AnalyticsDashboard />
       )}

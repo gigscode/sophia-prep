@@ -84,7 +84,7 @@ export function App() {
           <Route path="/more" element={<Layout><MorePage /></Layout>} />
 
           {/* Profile / Auth */}
-          <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
+          <Route path="/profile" element={<Layout showFooter={false}><ProfilePage /></Layout>} />
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />
           <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
 
