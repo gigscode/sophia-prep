@@ -62,7 +62,7 @@ export function QuickLinksSection({
       icon: <GraduationCap size={40} />,
       backgroundColor: 'hsl(var(--color-mint-green))', // Mint green pastel
       iconColor: 'hsl(var(--color-primary-green))',
-      route: '/study-hub',
+      route: '/study',
     },
   ];
 

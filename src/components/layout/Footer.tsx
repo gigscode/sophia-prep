@@ -16,6 +16,7 @@ export function Footer() {
                 src="/sophialogo2.png"
                 alt="Sophia Prep"
                 className="w-12 h-12 object-contain"
+                loading="lazy"
               />
               <div>
                 <h3 className="text-xl font-bold" style={{ color: '#B78628' }}>Sophia Prep</h3>

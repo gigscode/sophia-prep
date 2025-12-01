@@ -75,6 +75,10 @@ export function App() {
           <Route path="/terms" element={<Layout><TermsOfServicePage /></Layout>} />
           <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
 
+          {/* Events - placeholder routes until EventsPage is created */}
+          <Route path="/events" element={<Navigate to="/" replace />} />
+          <Route path="/events/:id" element={<Navigate to="/" replace />} />
+
           {/* Profile / Auth / Admin */}
           <Route path="/profile" element={<Layout><ProfilePage /></Layout>} />
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />

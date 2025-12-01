@@ -171,6 +171,7 @@ export function VideosPage() {
                           src={video.thumbnail}
                           alt={video.title}
                           className="w-full h-48 object-cover"
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Play className="w-16 h-16 text-white" />

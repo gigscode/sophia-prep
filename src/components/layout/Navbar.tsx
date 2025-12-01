@@ -36,6 +36,7 @@ export function Navbar() {
               src="/sophialogo2.png"
               alt="Sophia Prep"
               className="w-12 h-12 md:w-12 md:h-12 object-contain drop-shadow-lg"
+              loading="lazy"
             />
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight" style={{ color: '#B78628' }}>Sophia Prep</h1>
