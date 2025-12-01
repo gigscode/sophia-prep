@@ -20,7 +20,9 @@
   - **Property 22: Timer configuration fallback**
   - **Validates: Requirements 9.3**
 
-- [-] 2. Create unified quiz configuration types and interfaces
+- [x] 2. Create unified quiz configuration types and interfaces
+
+
 
 
   - Define QuizConfig, QuizState, and QuizMode types
@@ -28,7 +30,10 @@
   - Define timer service interface
   - _Requirements: 1.1, 2.1, 2.2, 2.3_
 
-- [ ] 3. Implement mode selection flow component
+- [x] 3. Implement mode selection flow component
+
+
+
 
   - Create ModeSelectionPage component with multi-step wizard
   - Implement exam type selection screen (WAEC/JAMB)
@@ -45,8 +50,12 @@
 - [ ]* 3.2 Write property test for exam type selection loads filtered subjects
   - **Property 1: Exam type selection loads filtered subjects**
   - **Validates: Requirements 1.2**
+-
 
-- [ ] 4. Create UnifiedQuiz component
+- [x] 4. Create UnifiedQuiz component
+
+
+
 
   - Create new UnifiedQuiz component accepting QuizConfig
   - Implement question loading based on config (subject or year)
@@ -73,7 +82,11 @@
   - **Property 14: Exam mode submit prevention**
   - **Validates: Requirements 6.4, 11.1**
 
-- [ ] 5. Implement question filtering logic
+- [x] 5. Implement question filtering logic
+
+
+
+
 
   - Enhance questionService to support combined filters
   - Implement subject-based question loading
@@ -97,7 +110,10 @@
   - **Property 27: Question query filtering**
   - **Validates: Requirements 12.4**
 
-- [ ] 6. Implement timer service
+- [x] 6. Implement timer service
+
+
+
 
   - Create TimerService class with start, stop, pause, resume methods
   - Implement countdown with localStorage persistence
@@ -112,8 +128,11 @@
 - [ ]* 6.2 Write property test for timer configuration hot-reload
   - **Property 23: Timer configuration hot-reload**
   - **Validates: Requirements 9.4**
+-
 
-- [ ] 7. Implement explanation visibility logic
+- [-] 7. Implement explanation visibility logic
+
+
   - Add conditional rendering for explanations in practice mode
   - Hide explanations during exam simulation
   - Show explanations in review screen after completion
@@ -145,6 +164,7 @@
   - **Validates: Requirements 7.3, 7.4**
 
 - [ ] 8. Enhance analytics service for mode tracking
+
   - Update saveQuizAttempt to accept quiz_mode, exam_type, exam_year
   - Modify quiz attempt creation to include mode metadata
   - Update quiz history retrieval to include mode information
@@ -171,6 +191,7 @@
   - **Validates: Requirements 10.3**
 
 - [ ] 9. Create quiz results and review screen
+
   - Create results screen showing score and time taken
   - Display mode label consistently with selection
   - Show all questions with user answers and correct answers
@@ -179,6 +200,7 @@
   - _Requirements: 7.3, 7.4, 10.3_
 
 - [ ] 10. Update routing and navigation
+
   - Add route for mode selection page
   - Add route for unified quiz component
   - Update navigation from home page to mode selection
@@ -186,6 +208,7 @@
   - _Requirements: 1.1, 2.1_
 
 - [ ] 11. Verify admin question import supports exam metadata
+
   - Verify exam_type and exam_year fields are accepted in import
   - Test question import with and without metadata
   - Verify null handling for optional fields
@@ -200,6 +223,7 @@
   - **Validates: Requirements 12.3**
 
 - [ ] 12. Implement error handling and edge cases
+
   - Add error handling for timer failures
   - Add error handling for question loading failures
   - Add error handling for submission failures

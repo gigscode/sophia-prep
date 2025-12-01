@@ -2,6 +2,11 @@ import { supabase } from '../integrations/supabase/client';
 import type { Question, Subject } from '../integrations/supabase/types';
 
 export class QuestionService {
+  /**
+   * Get questions by subject slug with optional filters
+   * Supports filtering by exam_year, exam_type, or both
+   * Requirements: 3.2, 3.3
+   */
   async getQuestionsBySubjectSlug(slug: string, filters?: { exam_year?: number; exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<Question[]> {
     const { data: subject } = await supabase
       .from('subjects')
@@ -29,6 +34,59 @@ export class QuestionService {
     if (filters?.exam_year) q = q.eq('exam_year', filters.exam_year);
     if (filters?.exam_type) q = q.eq('exam_type', filters.exam_type);
     if (filters?.limit) q = q.limit(filters.limit);
+
+    const { data } = await q;
+    return (data as Question[]) || [];
+  }
+
+  /**
+   * Get questions by year with optional exam_type filter
+   * Requirements: 4.2
+   */
+  async getQuestionsByYear(year: number, filters?: { exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<Question[]> {
+    let q = supabase
+      .from('questions')
+      .select('*')
+      .eq('exam_year', year)
+      .eq('is_active', true)
+      .order('question_number', { ascending: true });
+
+    if (filters?.exam_type) q = q.eq('exam_type', filters.exam_type);
+    if (filters?.limit) q = q.limit(filters.limit);
+
+    const { data } = await q;
+    return (data as Question[]) || [];
+  }
+
+  /**
+   * Get questions with combined filters (exam_type and/or exam_year)
+   * Requirements: 12.4
+   */
+  async getQuestionsByFilters(filters: { exam_type?: 'JAMB' | 'WAEC'; exam_year?: number; subject_slug?: string; limit?: number }): Promise<Question[]> {
+    // If subject_slug is provided, use subject-based filtering
+    if (filters.subject_slug) {
+      return this.getQuestionsBySubjectSlug(filters.subject_slug, {
+        exam_year: filters.exam_year,
+        exam_type: filters.exam_type,
+        limit: filters.limit
+      });
+    }
+
+    // If only year is provided, use year-based filtering
+    if (filters.exam_year && !filters.exam_type) {
+      return this.getQuestionsByYear(filters.exam_year, { limit: filters.limit });
+    }
+
+    // Build query with all applicable filters
+    let q = supabase
+      .from('questions')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (filters.exam_type) q = q.eq('exam_type', filters.exam_type);
+    if (filters.exam_year) q = q.eq('exam_year', filters.exam_year);
+    if (filters.limit) q = q.limit(filters.limit);
 
     const { data } = await q;
     return (data as Question[]) || [];
