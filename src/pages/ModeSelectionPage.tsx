@@ -177,24 +177,29 @@ export function ModeSelectionPage() {
       return;
     }
 
-    const config: QuizConfig = {
-      examType: state.examType,
-      mode: state.mode,
-      selectionMethod: state.selectionMethod,
-      subjectSlug: state.subjectSlug || undefined,
-      year: state.year || undefined,
-    };
+    try {
+      const config: QuizConfig = {
+        examType: state.examType,
+        mode: state.mode,
+        selectionMethod: state.selectionMethod,
+        subjectSlug: state.subjectSlug || undefined,
+        year: state.year || undefined,
+      };
 
-    const validationError = QuizConfigHelpers.validateConfig(config);
-    if (validationError) {
-      setError(validationError);
-      return;
+      const validationError = QuizConfigHelpers.validateConfig(config);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
+
+      // Navigate to unified quiz with config
+      // Store in sessionStorage and navigate
+      sessionStorage.setItem('quizConfig', JSON.stringify(config));
+      navigate('/quiz/unified');
+    } catch (err) {
+      console.error('Error starting quiz:', err);
+      setError('Failed to start quiz. Please try again.');
     }
-
-    // Navigate to unified quiz with config
-    // For now, we'll store in sessionStorage and navigate
-    sessionStorage.setItem('quizConfig', JSON.stringify(config));
-    navigate('/quiz/unified');
   };
 
   const canProceed = () => {
@@ -212,17 +217,26 @@ export function ModeSelectionPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Skip link */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded"
+        >
+          Skip to main content
+        </a>
+
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
+            aria-label="Go back to previous step"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
             Back
           </button>
           <h1 className="text-3xl font-bold text-gray-900">Start a Quiz</h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-2" role="status" aria-live="polite">
             {state.step === 'exam-type' && 'Select your exam type'}
             {state.step === 'mode' && 'Choose your quiz mode'}
             {state.step === 'method' && 'How would you like to practice?'}
@@ -232,16 +246,17 @@ export function ModeSelectionPage() {
         </div>
 
         {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <nav className="mb-8" aria-label="Quiz setup progress">
+          <ol className="flex items-center justify-between">
             {['exam-type', 'mode', 'method', 'selection'].map((step, index) => {
               const stepOrder: WizardStep[] = ['exam-type', 'mode', 'method', 'selection'];
+              const stepLabels = ['Exam Type', 'Quiz Mode', 'Practice Method', 'Selection'];
               const currentIndex = stepOrder.indexOf(state.step);
               const isActive = index === currentIndex;
               const isCompleted = index < currentIndex;
 
               return (
-                <div key={step} className="flex items-center flex-1">
+                <li key={step} className="flex items-center flex-1">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                       isActive
@@ -250,6 +265,8 @@ export function ModeSelectionPage() {
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-300 text-gray-600'
                     }`}
+                    aria-label={`Step ${index + 1}: ${stepLabels[index]}`}
+                    aria-current={isActive ? 'step' : undefined}
                   >
                     {index + 1}
                   </div>
@@ -258,13 +275,14 @@ export function ModeSelectionPage() {
                       className={`flex-1 h-1 mx-2 ${
                         isCompleted ? 'bg-green-500' : 'bg-gray-300'
                       }`}
+                      aria-hidden="true"
                     />
                   )}
-                </div>
+                </li>
               );
             })}
-          </div>
-        </div>
+          </ol>
+        </nav>
 
         {/* Error Message */}
         {error && (
@@ -274,18 +292,19 @@ export function ModeSelectionPage() {
         )}
 
         {/* Step Content */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <main id="main-content" className="bg-white rounded-lg shadow-lg p-8" tabIndex={-1}>
           {/* Step 1: Exam Type Selection */}
           {state.step === 'exam-type' && (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold mb-6">Select Exam Type</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" role="group" aria-label="Exam type options">
                 <button
                   onClick={() => handleExamTypeSelect('JAMB')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Select JAMB examination"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <BookMarked className="w-8 h-8 text-blue-600" />
+                    <BookMarked className="w-8 h-8 text-blue-600" aria-hidden="true" />
                     <h3 className="text-xl font-semibold">JAMB</h3>
                   </div>
                   <p className="text-gray-600">
@@ -295,10 +314,11 @@ export function ModeSelectionPage() {
 
                 <button
                   onClick={() => handleExamTypeSelect('WAEC')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  aria-label="Select WAEC examination"
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <BookMarked className="w-8 h-8 text-green-600" />
+                    <BookMarked className="w-8 h-8 text-green-600" aria-hidden="true" />
                     <h3 className="text-xl font-semibold">WAEC</h3>
                   </div>
                   <p className="text-gray-600">
@@ -465,7 +485,7 @@ export function ModeSelectionPage() {
               </button>
             </div>
           )}
-        </div>
+        </main>
 
         {/* Summary Panel */}
         {(state.examType || state.mode || state.selectionMethod) && (

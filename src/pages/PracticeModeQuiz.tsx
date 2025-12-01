@@ -1,3 +1,9 @@
+/**
+ * @deprecated This component is deprecated and will be removed in a future version.
+ * Use UnifiedQuiz component with ModeSelectionPage instead.
+ * Routes now redirect to /quiz/mode-selection
+ */
+
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
@@ -19,6 +25,9 @@ interface QuizQuestion {
   explanation?: string;
 }
 
+/**
+ * @deprecated Use UnifiedQuiz with ModeSelectionPage instead
+ */
 export function PracticeModeQuiz() {
   const navigate = useNavigate();
   const [index, setIndex] = useState(0);

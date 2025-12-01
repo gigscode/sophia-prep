@@ -20,8 +20,6 @@ const VideosPage = lazy(() => import('./pages/VideosPage').then(module => ({ def
 const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
 const ModeSelectionPage = lazy(() => import('./pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
 const UnifiedQuiz = lazy(() => import('./pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
-const PracticeModeQuiz = lazy(() => import('./pages/PracticeModeQuiz').then(module => ({ default: module.PracticeModeQuiz })));
-const CBTQuiz = lazy(() => import('./pages/CBTQuiz').then(module => ({ default: module.CBTQuiz })));
 const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then(module => ({ default: module.AboutPage })));
@@ -69,8 +67,9 @@ export function App() {
           <Route path="/quiz" element={<Layout showFooter={false}><QuizModeSelectorPage /></Layout>} />
           <Route path="/quiz/mode-selection" element={<Layout showFooter={false}><ModeSelectionPage /></Layout>} />
           <Route path="/quiz/unified" element={<Layout showFooter={false}><UnifiedQuiz /></Layout>} />
-          <Route path="/quiz/practice" element={<Layout showFooter={false}><PracticeModeQuiz /></Layout>} />
-          <Route path="/quiz/cbt" element={<Layout showFooter={false}><CBTQuiz /></Layout>} />
+          {/* Legacy routes - redirect to new unified system */}
+          <Route path="/quiz/practice" element={<Navigate to="/quiz/mode-selection" state={{ preselectedMode: 'practice' }} replace />} />
+          <Route path="/quiz/cbt" element={<Navigate to="/quiz/mode-selection" state={{ preselectedMode: 'exam' }} replace />} />
           <Route path="/quiz/results" element={<Layout showFooter={false}><QuizResultsPage /></Layout>} />
 
           {/* Help & Info */}

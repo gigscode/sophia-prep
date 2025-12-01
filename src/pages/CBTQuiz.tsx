@@ -1,3 +1,9 @@
+/**
+ * @deprecated This component is deprecated and will be removed in a future version.
+ * Use UnifiedQuiz component with ModeSelectionPage instead.
+ * Routes now redirect to /quiz/mode-selection
+ */
+
 import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, GraduationCap, ArrowRight } from 'lucide-react';
@@ -18,6 +24,9 @@ interface QuizQuestion {
   correct?: string;
 }
 
+/**
+ * @deprecated Use UnifiedQuiz with ModeSelectionPage instead
+ */
 export function CBTQuiz() {
   const navigate = useNavigate();
   const START_TIME = 35 * 60; // seconds
