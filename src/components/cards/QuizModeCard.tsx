@@ -108,7 +108,7 @@ export function QuizModeCard({
       <div className="space-y-2">
         <h3
           id={titleId}
-          className="text-xl font-semibold"
+          className="text-2xl font-semibold"
           style={{
             color: 'hsl(var(--color-text-primary))',
           }}
@@ -118,7 +118,7 @@ export function QuizModeCard({
 
         <p
           id={descriptionId}
-          className="text-sm leading-relaxed"
+          className="text-lg leading-relaxed"
           style={{
             color: 'hsl(var(--color-text-secondary))',
           }}

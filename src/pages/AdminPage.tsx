@@ -82,17 +82,21 @@ export function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Mobile Menu Button - Only show when sidebar is CLOSED */}
-      {!sidebarOpen && (
-        <div className="lg:hidden fixed top-4 left-4 z-40">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
-          >
+      {/* Mobile Header Bar - Always visible on mobile */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 shadow-sm z-[70] flex items-center px-4">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          aria-label={sidebarOpen ? "Close menu" : "Open menu"}
+        >
+          {sidebarOpen ? (
+            <X className="w-6 h-6 text-gray-700" />
+          ) : (
             <Menu className="w-6 h-6 text-gray-700" />
-          </button>
-        </div>
-      )}
+          )}
+        </button>
+        <h1 className="ml-3 text-lg font-semibold text-gray-800">Admin Panel</h1>
+      </div>
 
       {/* Sidebar Overlay (Mobile) */}
       <AnimatePresence>
@@ -114,7 +118,7 @@ export function AdminPage() {
           x: isDesktop ? 0 : (sidebarOpen ? 0 : '-100%'),
         }}
         transition={{ type: "spring", bounce: 0, duration: 0.3 }}
-        className="fixed top-0 left-0 h-full w-64 bg-white border-r border-gray-200 shadow-lg z-[60] lg:z-0"
+        className="fixed top-16 lg:top-0 left-0 h-[calc(100%-4rem)] lg:h-full w-64 bg-white border-r border-gray-200 shadow-lg z-[60] lg:z-0"
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
@@ -180,7 +184,7 @@ export function AdminPage() {
       </motion.aside>
 
       {/* Main Content */}
-      <div className="lg:ml-64 min-h-screen mb-12">
+      <div className="lg:ml-64 min-h-screen mb-12 pt-16 lg:pt-0">
         <div className="container mx-auto px-4 py-6 md:py-8 lg:px-8">
           {/* Page Header */}
           <motion.div
