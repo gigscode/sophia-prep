@@ -77,6 +77,7 @@ export function HeroBanner({
           <button
             onClick={buttonAction}
             className="
+              button-touch-target
               inline-flex
               items-center
               justify-center

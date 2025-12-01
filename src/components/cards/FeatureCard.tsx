@@ -62,12 +62,15 @@ export function FeatureCard({
       onClick={onClick}
       className={`
         card-hover
+        card-touch-target
+        card-container
         cursor-pointer
         rounded-2xl
         shadow-sm
         transition-all
         duration-200
         ease-out
+        focus-visible-ring
         ${sizeClasses[size]}
         ${className}
       `.trim()}

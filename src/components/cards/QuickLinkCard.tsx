@@ -43,6 +43,8 @@ export function QuickLinkCard({
       onClick={onClick}
       className={`
         card-hover
+        card-touch-target
+        card-container
         cursor-pointer
         rounded-2xl
         shadow-sm
@@ -55,6 +57,7 @@ export function QuickLinkCard({
         items-center
         justify-center
         text-center
+        focus-visible-ring
         ${aspectRatioClass}
         ${className}
       `.trim()}

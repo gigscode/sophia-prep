@@ -76,7 +76,8 @@ export function EventCard({
     <div
       onClick={onClick}
       className={`
-        ${isClickable ? 'card-hover cursor-pointer' : ''}
+        ${isClickable ? 'card-hover card-touch-target cursor-pointer focus-visible-ring' : ''}
+        card-container
         rounded-2xl
         shadow-sm
         transition-all

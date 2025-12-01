@@ -1,6 +1,7 @@
 /* Modern UI Redesign - Design System */
 @import './styles/design-tokens.css';
 @import './styles/animations.css';
+@import './styles/responsive.css';
 
 @tailwind base;
 @tailwind components;

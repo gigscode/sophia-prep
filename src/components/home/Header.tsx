@@ -19,7 +19,7 @@ export function Header({
   const displayName = isLoggedIn && userName ? userName : 'Guest';
 
   return (
-    <header className="flex items-center justify-between px-4 py-6 md:px-6 lg:px-8">
+    <header className="flex items-center justify-between py-6">
       {/* Greeting */}
       <div>
         <h1 className="text-3xl font-bold text-gray-800">
@@ -28,11 +28,11 @@ export function Header({
       </div>
 
       {/* Action Icons */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
         {/* Cart Icon */}
         <button
           onClick={onCartClick}
-          className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="icon-button-touch-target relative rounded-full hover:bg-gray-100 transition-colors focus-visible-ring"
           aria-label="Shopping cart"
         >
           <ShoppingCart className="w-6 h-6 text-gray-700" />
@@ -41,7 +41,7 @@ export function Header({
         {/* Notification Icon */}
         <button
           onClick={onNotificationClick}
-          className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+          className="icon-button-touch-target relative rounded-full hover:bg-gray-100 transition-colors focus-visible-ring"
           aria-label="Notifications"
         >
           <Bell className="w-6 h-6 text-gray-700" />

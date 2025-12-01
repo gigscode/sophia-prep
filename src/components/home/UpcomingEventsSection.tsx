@@ -76,6 +76,7 @@ export function UpcomingEventsSection({
           <button
             onClick={handleViewAllClick}
             className="
+              touch-target-interactive
               flex
               items-center
               gap-1
@@ -85,9 +86,7 @@ export function UpcomingEventsSection({
               duration-200
               ease-out
               hover:opacity-70
-              focus:outline-none
-              focus:ring-2
-              focus:ring-offset-2
+              focus-visible-ring
             "
             style={{
               color: 'hsl(var(--color-primary-blue))',

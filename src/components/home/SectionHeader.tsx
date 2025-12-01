@@ -44,18 +44,15 @@ export function SectionHeader({
         <button
           onClick={onActionClick}
           className="
+            icon-button-touch-target
             flex
             items-center
             justify-center
-            w-6
-            h-6
             transition-colors
             duration-200
             ease-out
             hover:opacity-70
-            focus:outline-none
-            focus:ring-2
-            focus:ring-offset-2
+            focus-visible-ring
           "
           style={{
             color: 'hsl(var(--color-text-secondary))',

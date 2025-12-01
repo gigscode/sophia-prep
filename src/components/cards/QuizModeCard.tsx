@@ -53,6 +53,8 @@ export function QuizModeCard({
       onClick={onClick}
       className={`
         card-hover
+        card-touch-target
+        card-container
         cursor-pointer
         rounded-2xl
         shadow-sm
@@ -60,6 +62,7 @@ export function QuizModeCard({
         duration-200
         ease-out
         p-6
+        focus-visible-ring
         ${className}
       `.trim()}
       style={{
