@@ -58,6 +58,16 @@ export interface Question {
   updated_at: string;
 }
 
+export interface TimerConfiguration {
+  id: string;
+  exam_type: 'JAMB' | 'WAEC';
+  subject_slug: string | null;
+  year: number | null;
+  duration_seconds: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -80,6 +90,11 @@ export interface Database {
         Row: Question;
         Insert: Omit<Question, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<Question, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      timer_configurations: {
+        Row: TimerConfiguration;
+        Insert: Omit<TimerConfiguration, 'id' | 'created_at' | 'updated_at'>;
+        Update: Partial<Omit<TimerConfiguration, 'id' | 'created_at' | 'updated_at'>>;
       };
     };
   };
