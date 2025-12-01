@@ -106,7 +106,7 @@ export function QuickLinksSection({
               backgroundColor={link.backgroundColor}
               iconColor={link.iconColor}
               onClick={() => handleCardClick(link.route)}
-              aspectRatio="1:1"
+              aspectRatio="4:3"
               className={`animate-fade-in-up animate-delay-${index * 50}`}
             />
           ))}

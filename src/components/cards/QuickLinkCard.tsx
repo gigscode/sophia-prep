@@ -55,7 +55,7 @@ export function QuickLinkCard({
         ease-out
         hover:scale-[1.02]
         hover:shadow-lg
-        p-6
+        p-3
         min-h-[44px]
         min-w-[44px]
         w-full
@@ -67,7 +67,7 @@ export function QuickLinkCard({
         focus-visible-ring
         interactive-element
         card-touch-target
-        ${aspectRatioClass}
+        aspect-[3/2]
         ${className}
       `.trim()}
       style={{
@@ -81,12 +81,12 @@ export function QuickLinkCard({
       {/* Icon - Centered with optional color */}
       <div
         className="
-          w-10
-          h-10
+          w-25
+          h-25
           flex
           items-center
           justify-center
-          mb-3
+          mb-1.5
         "
         style={{
           color: iconColor || 'hsl(var(--color-text-primary))',
@@ -100,7 +100,7 @@ export function QuickLinkCard({
       <h3
         id={titleId}
         className="
-          text-base
+          text-xl
           font-semibold
           leading-tight
         "
