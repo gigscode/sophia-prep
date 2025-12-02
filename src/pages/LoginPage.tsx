@@ -18,11 +18,25 @@ export function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null); // Clear previous errors
     try {
       await login(email, password);
       navigate('/');
-    } catch (err) {
-      setError('Failed to log in');
+    } catch (err: any) {
+      // The useAuth hook already shows a toast with categorized error
+      // We also display it in the form for better UX
+      const errorMessage = err?.message || 'An unexpected error occurred. Please try again';
+      
+      // Map common Supabase errors to user-friendly messages
+      if (errorMessage.includes('Invalid login credentials')) {
+        setError('Invalid email or password');
+      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+        setError('Network error. Please check your connection');
+      } else if (errorMessage.includes('database') || errorMessage.includes('relation')) {
+        setError('System error. Please try again later');
+      } else {
+        setError('An unexpected error occurred. Please try again');
+      }
     }
   };
 
