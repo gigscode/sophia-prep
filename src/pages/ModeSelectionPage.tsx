@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, Clock, Calendar, BookMarked } from 'lucide-react';
 import type { ExamType, QuizMode, SelectionMethod, QuizConfig } from '../types/quiz-config';
@@ -45,21 +45,7 @@ export function ModeSelectionPage() {
     }
   }, [preselectedMode, state.step, state.mode]);
 
-  // Load subjects when exam type is selected
-  useEffect(() => {
-    if (state.examType && state.step === 'selection' && state.selectionMethod === 'subject') {
-      loadSubjects();
-    }
-  }, [state.examType, state.step, state.selectionMethod]);
-
-  // Load available years when exam type is selected
-  useEffect(() => {
-    if (state.examType && state.step === 'selection' && state.selectionMethod === 'year') {
-      loadAvailableYears();
-    }
-  }, [state.examType, state.step, state.selectionMethod]);
-
-  const loadSubjects = async () => {
+  const loadSubjects = useCallback(async () => {
     if (!state.examType) return;
     
     setLoading(true);
@@ -73,9 +59,9 @@ export function ModeSelectionPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [state.examType]);
 
-  const loadAvailableYears = async () => {
+  const loadAvailableYears = useCallback(async () => {
     if (!state.examType) return;
     
     setLoading(true);
@@ -93,8 +79,8 @@ export function ModeSelectionPage() {
 
       // Extract unique years
       const years = Array.from(
-        new Set((data || []).map((q: any) => q.exam_year).filter((y: any) => y != null))
-      ).sort((a, b) => b - a);
+        new Set((data || []).map((q: { exam_year: number }) => q.exam_year).filter((y: number | null) => y != null))
+      ).sort((a, b) => (b as number) - (a as number));
 
       setAvailableYears(years as number[]);
     } catch (err) {
@@ -103,7 +89,21 @@ export function ModeSelectionPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [state.examType]);
+
+  // Load subjects when exam type is selected (for both methods)
+  useEffect(() => {
+    if (state.examType && state.step === 'selection') {
+      loadSubjects();
+    }
+  }, [state.examType, state.step, loadSubjects]);
+
+  // Load available years when exam type is selected (for both methods)
+  useEffect(() => {
+    if (state.examType && state.step === 'selection') {
+      loadAvailableYears();
+    }
+  }, [state.examType, state.step, loadAvailableYears]);
 
   const handleExamTypeSelect = (examType: ExamType) => {
     setState({
@@ -205,9 +205,11 @@ export function ModeSelectionPage() {
   const canProceed = () => {
     if (state.step === 'selection') {
       if (state.selectionMethod === 'subject') {
-        return state.subjectSlug !== null;
+        // Subject is required, year is optional
+        return state.subjectSlug !== null && state.subjectSlug !== '';
       }
       if (state.selectionMethod === 'year') {
+        // Year is required, subject is optional
         return state.year !== null;
       }
     }
@@ -397,72 +399,130 @@ export function ModeSelectionPage() {
             </div>
           )}
 
-          {/* Step 4: Specific Selection */}
-          {state.step === 'selection' && state.selectionMethod === 'subject' && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold mb-6">Select a Subject</h2>
+          {/* Step 4: Specific Selection with Dropdowns */}
+          {state.step === 'selection' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold mb-6">
+                {state.selectionMethod === 'subject' ? 'Select Subject and Year' : 'Select Year and Subject'}
+              </h2>
+              
               {loading ? (
                 <div className="text-center py-8">
                   <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-2 text-gray-600">Loading subjects...</p>
-                </div>
-              ) : subjects.length === 0 ? (
-                <div className="text-center py-8 text-gray-600">
-                  No subjects available for {state.examType}
+                  <p className="mt-2 text-gray-600">Loading options...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {subjects.map((subject) => (
-                    <button
-                      key={subject.id}
-                      onClick={() => handleSubjectSelect(subject.slug)}
-                      className={`p-4 border-2 rounded-lg transition-all text-left ${
-                        state.subjectSlug === subject.slug
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <h3 className="font-semibold text-lg">{subject.name}</h3>
-                      {subject.description && (
-                        <p className="text-sm text-gray-600 mt-1">{subject.description}</p>
+                <div className="space-y-6">
+                  {/* Subject Dropdown */}
+                  {state.selectionMethod === 'subject' && (
+                    <div>
+                      <label htmlFor="subject-select" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Subject <span className="text-red-500">*</span>
+                      </label>
+                      {subjects.length === 0 ? (
+                        <div className="text-center py-4 text-gray-600 bg-gray-50 rounded-lg">
+                          No subjects available for {state.examType}
+                        </div>
+                      ) : (
+                        <select
+                          id="subject-select"
+                          value={state.subjectSlug || ''}
+                          onChange={(e) => handleSubjectSelect(e.target.value)}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
+                        >
+                          <option value="">Select a subject</option>
+                          {subjects.map((subject) => (
+                            <option key={subject.id} value={subject.slug}>
+                              {subject.name}
+                            </option>
+                          ))}
+                        </select>
                       )}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+                    </div>
+                  )}
 
-          {state.step === 'selection' && state.selectionMethod === 'year' && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold mb-6">Select Exam Year</h2>
-              {loading ? (
-                <div className="text-center py-8">
-                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                  <p className="mt-2 text-gray-600">Loading available years...</p>
-                </div>
-              ) : availableYears.length === 0 ? (
-                <div className="text-center py-8 text-gray-600">
-                  No past exam papers available for {state.examType}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {availableYears.map((year) => (
-                    <button
-                      key={year}
-                      onClick={() => handleYearSelect(year)}
-                      className={`p-4 border-2 rounded-lg transition-all ${
-                        state.year === year
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="text-center">
-                        <Calendar className="w-6 h-6 mx-auto mb-2 text-gray-600" />
-                        <span className="font-semibold text-lg">{year}</span>
-                      </div>
-                    </button>
-                  ))}
+                  {/* Year Dropdown */}
+                  {state.selectionMethod === 'year' && (
+                    <div>
+                      <label htmlFor="year-select" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Exam Year <span className="text-red-500">*</span>
+                      </label>
+                      {availableYears.length === 0 ? (
+                        <div className="text-center py-4 text-gray-600 bg-gray-50 rounded-lg">
+                          No past exam papers available for {state.examType}
+                        </div>
+                      ) : (
+                        <select
+                          id="year-select"
+                          value={state.year || ''}
+                          onChange={(e) => handleYearSelect(Number(e.target.value))}
+                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
+                        >
+                          <option value="">Select a year</option>
+                          {availableYears.map((year) => (
+                            <option key={year} value={year}>
+                              {year}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Optional: Add year filter for subject selection */}
+                  {state.selectionMethod === 'subject' && state.subjectSlug && (
+                    <div>
+                      <label htmlFor="year-filter" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Filter by Year (Optional)
+                      </label>
+                      <select
+                        id="year-filter"
+                        value={state.year || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setState(prev => ({ ...prev, year: val ? Number(val) : null }));
+                        }}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
+                      >
+                        <option value="">All Years</option>
+                        <option value="2024">2024</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                        <option value="2020">2020</option>
+                        <option value="2019">2019</option>
+                        <option value="2018">2018</option>
+                        <option value="2017">2017</option>
+                        <option value="2016">2016</option>
+                        <option value="2015">2015</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {/* Optional: Add subject filter for year selection */}
+                  {state.selectionMethod === 'year' && state.year && subjects.length > 0 && (
+                    <div>
+                      <label htmlFor="subject-filter" className="block text-sm font-semibold text-gray-700 mb-2">
+                        Filter by Subject (Optional)
+                      </label>
+                      <select
+                        id="subject-filter"
+                        value={state.subjectSlug || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setState(prev => ({ ...prev, subjectSlug: val || null }));
+                        }}
+                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
+                      >
+                        <option value="">All Subjects</option>
+                        {subjects.map((subject) => (
+                          <option key={subject.id} value={subject.slug}>
+                            {subject.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

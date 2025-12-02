@@ -64,26 +64,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
   const [submitting, setSubmitting] = useState(false);
   const [announcement, setAnnouncement] = useState<string>('');
 
-  // Persist quiz state to localStorage
-  const persistState = useCallback(() => {
-    if (!config) return;
-    
-    try {
-      const state = {
-        config,
-        currentIndex,
-        answers,
-        startTime,
-        completed,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('quizState', JSON.stringify(state));
-    } catch (error) {
-      console.error('Failed to persist quiz state:', error);
-    }
-  }, [config, currentIndex, answers, startTime, completed]);
-
-  // Restore quiz state from localStorage
+  // Restore quiz state from localStorage (only once on mount)
   useEffect(() => {
     if (!config) return;
     
@@ -113,12 +94,27 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
     } catch (error) {
       console.error('Failed to restore quiz state:', error);
     }
-  }, [config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   // Persist state whenever it changes
   useEffect(() => {
-    persistState();
-  }, [persistState]);
+    if (!config) return;
+    
+    try {
+      const state = {
+        config,
+        currentIndex,
+        answers,
+        startTime,
+        completed,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('quizState', JSON.stringify(state));
+    } catch (error) {
+      console.error('Failed to persist quiz state:', error);
+    }
+  }, [config, currentIndex, answers, startTime, completed]);
 
   // Validate configuration
   useEffect(() => {
@@ -212,6 +208,11 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
     loadQuestions();
   }, [config]);
 
+  // Handle auto-submit when timer expires
+  const handleAutoSubmit = useCallback(() => {
+    setCompleted(true);
+  }, []);
+
   // Initialize timer for exam mode
   useEffect(() => {
     if (!config || config.mode !== 'exam' || questions.length === 0 || completed) return;
@@ -267,12 +268,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
         timerService.stopTimer(timerHandle);
       }
     };
-  }, [config, questions.length, completed]);
-
-  // Handle auto-submit when timer expires
-  const handleAutoSubmit = useCallback(() => {
-    setCompleted(true);
-  }, []);
+  }, [config, questions.length, completed, handleAutoSubmit, timerHandle]);
 
   // Handle manual submit
   const handleManualSubmit = useCallback(() => {
@@ -366,7 +362,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           try {
             await analyticsService.saveQuizAttempt({
               subject_id,
-              quiz_mode: quizModeIdentifier as any,
+              quiz_mode: quizModeIdentifier as unknown,
               exam_type: config.examType,
               exam_year: config.year,
               total_questions: questions.length,

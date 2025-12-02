@@ -1,9 +1,9 @@
-import React from 'react';
-import { ShoppingCart, Bell } from 'lucide-react';
-import { handleKeyboardActivation, generateAriaLabel } from '../../utils/accessibility';
+import { User, Bell } from 'lucide-react';
+import { handleKeyboardActivation } from '../../utils/accessibility';
 
 interface HeaderProps {
   userName?: string;
+  userEmail?: string;
   isLoggedIn: boolean;
   onCartClick: () => void;
   onNotificationClick: () => void;
@@ -12,12 +12,24 @@ interface HeaderProps {
 
 export function Header({
   userName,
+  userEmail,
   isLoggedIn,
   onCartClick,
   onNotificationClick,
   notificationCount = 0,
 }: HeaderProps) {
   const displayName = isLoggedIn && userName ? userName : 'Guest';
+  
+  // Get first letter for avatar
+  const getAvatarLetter = () => {
+    if (isLoggedIn) {
+      if (userName) return userName.charAt(0).toUpperCase();
+      if (userEmail) return userEmail.charAt(0).toUpperCase();
+    }
+    return '';
+  };
+  
+  const avatarLetter = getAvatarLetter();
 
   return (
     <header 
@@ -42,21 +54,30 @@ export function Header({
         role="toolbar"
         aria-label="Header actions"
       >
-        {/* Cart Icon */}
+        {/* User Avatar */}
         <button
           onClick={onCartClick}
           onKeyDown={(e) => handleKeyboardActivation(e, onCartClick)}
           className="icon-button-touch-target relative rounded-full hover:bg-gray-100 transition-colors focus-visible-ring interactive-element"
-          aria-label="Open shopping cart"
-          aria-describedby="cart-description"
+          aria-label={isLoggedIn ? "Open user menu" : "Open user profile"}
+          aria-describedby="user-avatar-description"
           type="button"
         >
-          <ShoppingCart 
-            className="w-6 h-6 text-gray-700" 
-            aria-hidden="true"
-          />
-          <span id="cart-description" className="sr-only">
-            Access your cart and manage purchases
+          {isLoggedIn && avatarLetter ? (
+            <div 
+              className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm"
+              aria-hidden="true"
+            >
+              {avatarLetter}
+            </div>
+          ) : (
+            <User 
+              className="w-6 h-6 text-gray-700" 
+              aria-hidden="true"
+            />
+          )}
+          <span id="user-avatar-description" className="sr-only">
+            {isLoggedIn ? "Access your profile and settings" : "Sign in to your account"}
           </span>
         </button>
 

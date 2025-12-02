@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -11,10 +11,11 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (user) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,21 +23,8 @@ export function LoginPage() {
     try {
       await login(email, password);
       navigate('/');
-    } catch (err: any) {
-      // The useAuth hook already shows a toast with categorized error
-      // We also display it in the form for better UX
-      const errorMessage = err?.message || 'An unexpected error occurred. Please try again';
-      
-      // Map common Supabase errors to user-friendly messages
-      if (errorMessage.includes('Invalid login credentials')) {
-        setError('Invalid email or password');
-      } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-        setError('Network error. Please check your connection');
-      } else if (errorMessage.includes('database') || errorMessage.includes('relation')) {
-        setError('System error. Please try again later');
-      } else {
-        setError('An unexpected error occurred. Please try again');
-      }
+    } catch (err) {
+      setError('Failed to log in');
     }
   };
 

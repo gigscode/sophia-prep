@@ -134,6 +134,7 @@ export function HomePage() {
         {/* Header - Greeting and Action Icons */}
         <Header
           userName={user?.name}
+          userEmail={user?.email}
           isLoggedIn={!!user}
           onCartClick={handleCartClick}
           onNotificationClick={handleNotificationClick}
