@@ -74,8 +74,8 @@ node scripts/reset-user-password.js <email>
 
 Both users have been updated with the password: `SophiaPrep2024!`
 
-- **sophiareignsacademy@gmail.com** - Password: `SophiaPrep2024!`
-- **reubensunday1220@gmail.com** - Password: `SophiaPrep2024!`
+- **sophiareignsacademy@gmail.com** - Password: `SophiaPrep2024!` (Super Admin)
+- **reubensunday1220@gmail.com** - Password: `SophiaPrep2024!` (Super Admin)
 
 You can now login with these credentials!
 

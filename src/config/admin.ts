@@ -36,6 +36,7 @@ const loadAdminEmails = (): Set<string> => {
   // Default admin emails (normalized)
   const defaultAdmins = [
     'reubensunday1220@gmail.com',
+    'sophiareignsacademy@gmail.com',
   ];
   
   // If environment variable is set, parse it
