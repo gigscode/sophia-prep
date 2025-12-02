@@ -12,7 +12,6 @@ export interface UserSubscription {
   updated_at: string;
   subscription_plans?: {
     name: string;
-    slug: string;
     description: string;
     price_ngn: number;
     duration_days: number;
@@ -66,7 +65,6 @@ class SubscriptionService {
           *,
           subscription_plans (
             name,
-            slug,
             description,
             price_ngn,
             duration_days
@@ -111,7 +109,6 @@ class SubscriptionService {
           *,
           subscription_plans (
             name,
-            slug,
             description,
             price_ngn,
             duration_days

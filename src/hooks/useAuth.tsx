@@ -275,6 +275,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signup = async (email: string, password: string, name?: string) => {
+    console.log(`Signup attempt for: ${redactEmail(email)}`);
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -286,11 +288,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) {
+      console.error(`Signup failed for ${redactEmail(email)}:`, error.message);
       showToast(error.message, 'error');
       throw error;
     }
 
     if (data.user) {
+      console.log(`Signup successful for: ${redactEmail(email)}`);
+      
+      // Immediately ensure user profile exists (fallback mechanism)
+      try {
+        await ensureUserProfile(data.user);
+        console.log(`[FALLBACK_PROFILE_CREATION] Profile ensured for user: ${redactEmail(email)}`);
+      } catch (profileError: any) {
+        // Log error but don't block signup
+        console.error(`[FALLBACK_PROFILE_CREATION_FAILED] User ${data.user.id}:`, profileError?.message || profileError);
+        // Continue with signup flow - profile will be created on next login
+      }
+      
       const u = await mapUser(data.user);
       return u;
     }

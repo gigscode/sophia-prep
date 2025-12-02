@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { AuthProvider } from './hooks/useAuth';
@@ -7,6 +7,7 @@ import WhatsAppButton from './components/WhatsAppButton';
 import PWAInstall from './components/PWAInstall';
 import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
+import { performStartupDatabaseChecks } from './utils/database-verification';
 
 // Lazy load all pages
 const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
@@ -41,6 +42,14 @@ const PageLoader = () => (
 );
 
 export function App() {
+  // Perform startup database verification checks
+  useEffect(() => {
+    // Run verification in the background, don't block app startup
+    performStartupDatabaseChecks().catch(error => {
+      console.error('[APP] Startup verification failed:', error);
+    });
+  }, []);
+
   return (
     <AuthProvider>
       <ScrollToTop />
