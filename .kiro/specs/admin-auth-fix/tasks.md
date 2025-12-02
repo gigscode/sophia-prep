@@ -118,9 +118,14 @@
 
 - [ ] 7. Checkpoint - Ensure all tests pass
 
+
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 8. Manual testing and verification
+- [x] 8. Manual testing and verification
+
+
+
+
 
   - Test login as reubensunday1220@gmail.com
   - Test login with different email cases
