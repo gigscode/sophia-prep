@@ -30,6 +30,8 @@ const ContactPage = lazy(() => import('./pages/ContactPage').then(module => ({ d
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
 const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.SignupPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(module => ({ default: module.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(module => ({ default: module.ResetPasswordPage })));
 const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
 const ImportQuestionsPage = lazy(() => import('./pages/ImportQuestionsPage').then(module => ({ default: module.ImportQuestionsPage })));
 const MorePage = lazy(() => import('./pages/MorePage').then(module => ({ default: module.MorePage })));
@@ -97,8 +99,10 @@ export function App() {
 
           {/* Profile / Auth */}
           <Route path="/profile" element={<Layout showFooter={false}><ProfilePage /></Layout>} />
-          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
-          <Route path="/signup" element={<Layout><SignupPage /></Layout>} />
+          <Route path="/login" element={<Layout showFooter={false}><LoginPage /></Layout>} />
+          <Route path="/signup" element={<Layout showFooter={false}><SignupPage /></Layout>} />
+          <Route path="/forgot-password" element={<Layout showFooter={false}><ForgotPasswordPage /></Layout>} />
+          <Route path="/reset-password" element={<Layout showFooter={false}><ResetPasswordPage /></Layout>} />
 
           {/* Admin - Now with BottomNavigation */}
           <Route path="/7351/admin" element={<Layout showFooter={false}><AdminPage /></Layout>} />

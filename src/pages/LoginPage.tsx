@@ -66,7 +66,13 @@ export function LoginPage() {
           <button className="w-full py-2 bg-blue-600 text-white rounded">Log In</button>
         </form>
 
-        <p className="text-sm text-gray-600 mt-4">
+        <div className="text-center mt-4">
+          <Link to="/forgot-password" className="text-sm text-blue-600 hover:underline">
+            Forgot your password?
+          </Link>
+        </div>
+
+        <p className="text-sm text-gray-600 mt-4 text-center">
           Don't have an account? <Link to="/signup" className="text-blue-600">Sign up</Link>
         </p>
       </div>
