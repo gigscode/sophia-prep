@@ -112,8 +112,13 @@ export function HomePage() {
   };
 
   const handleHeroBannerAction = () => {
-    // Subscription/signup action
-    navigate('/signup');
+    // If user is logged in, go to subjects page
+    // If not logged in, go to signup page
+    if (user) {
+      navigate('/subjects');
+    } else {
+      navigate('/signup');
+    }
   };
 
   return (

@@ -18,7 +18,14 @@ export function Header({
   onNotificationClick,
   notificationCount = 0,
 }: HeaderProps) {
-  const displayName = isLoggedIn && userName ? userName : 'Guest';
+  // Extract first name only (before first space)
+  const getFirstName = (fullName?: string) => {
+    if (!fullName) return 'Guest';
+    const firstName = fullName.split(' ')[0];
+    return firstName || fullName;
+  };
+  
+  const displayName = isLoggedIn && userName ? getFirstName(userName) : 'Guest';
   
   // Get first letter for avatar
   const getAvatarLetter = () => {
