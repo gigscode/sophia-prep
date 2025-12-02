@@ -134,7 +134,7 @@ export function ProfilePage() {
                   <div>
                     <p className="text-xs text-gray-600">Plan Price</p>
                     <p className="font-bold text-gray-900">
-                      ₦{subscription.subscription_plans?.price.toLocaleString()}
+                      ₦{subscription.subscription_plans?.price_ngn.toLocaleString()}
                     </p>
                   </div>
                 </div>

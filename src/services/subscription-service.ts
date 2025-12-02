@@ -14,7 +14,7 @@ export interface UserSubscription {
     name: string;
     slug: string;
     description: string;
-    price: number;
+    price_ngn: number;
     duration_days: number;
   };
 }
@@ -68,7 +68,7 @@ class SubscriptionService {
             name,
             slug,
             description,
-            price,
+            price_ngn,
             duration_days
           )
         `)
@@ -113,7 +113,7 @@ class SubscriptionService {
             name,
             slug,
             description,
-            price,
+            price_ngn,
             duration_days
           )
         `)
