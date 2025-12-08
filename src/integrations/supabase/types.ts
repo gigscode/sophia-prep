@@ -42,7 +42,8 @@ export type CorrectAnswer = 'A' | 'B' | 'C' | 'D';
 
 export interface Question {
   id: string;
-  topic_id: string;
+  subject_id: string | null;
+  topic_id: string | null;
   question_text: string;
   option_a: string;
   option_b: string;

@@ -4,22 +4,13 @@ import { UnifiedQuiz } from './UnifiedQuiz';
 import type { QuizConfig } from '../types/quiz-config';
 
 // Mock services
+const mockGetQuestionsBySubjectSlug = vi.fn();
+const mockGetSubjectsByExamType = vi.fn();
+const mockGetSubjectBySlug = vi.fn();
+
 vi.mock('../services/question-service', () => ({
   questionService: {
-    getQuestionsBySubjectSlug: vi.fn().mockResolvedValue([
-      {
-        id: '1',
-        question_text: 'Test question 1?',
-        option_a: 'Option A',
-        option_b: 'Option B',
-        option_c: 'Option C',
-        option_d: 'Option D',
-        correct_answer: 'A',
-        explanation: 'This is the explanation for question 1',
-        exam_type: 'JAMB',
-        exam_year: 2023
-      }
-    ])
+    getQuestionsBySubjectSlug: mockGetQuestionsBySubjectSlug
   },
   normalizeQuestions: vi.fn((questions) => questions.map((q: any) => ({
     id: q.id,
@@ -39,8 +30,8 @@ vi.mock('../services/question-service', () => ({
 
 vi.mock('../services/subject-service', () => ({
   subjectService: {
-    getSubjectsByExamType: vi.fn().mockResolvedValue([]),
-    getSubjectBySlug: vi.fn().mockResolvedValue({ id: 'subject-1', name: 'Mathematics' })
+    getSubjectsByExamType: mockGetSubjectsByExamType,
+    getSubjectBySlug: mockGetSubjectBySlug
   }
 }));
 
@@ -59,7 +50,8 @@ vi.mock('../services/timer-service', () => ({
       resume: vi.fn(),
       getRemaining: vi.fn().mockReturnValue(3600)
     }),
-    stopTimer: vi.fn()
+    stopTimer: vi.fn(),
+    restoreTimer: vi.fn().mockReturnValue(null)
   }
 }));
 

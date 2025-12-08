@@ -11,7 +11,8 @@ export type QuestionFilters = {
 };
 
 export type QuestionInput = {
-  topic_id: string;
+  subject_id?: string | null;
+  topic_id?: string | null;
   question_text: string;
   option_a: string;
   option_b: string;
@@ -32,6 +33,48 @@ export type ImportResult = {
 };
 
 export class AdminQuestionService {
+  /**
+   * Validates a question input for import/creation
+   * @param question The question input to validate
+   * @returns Object with isValid flag and array of error messages
+   */
+  validateQuestionInput(question: QuestionInput): { isValid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    const questionPreview = question.question_text?.substring(0, 50) || 'Unknown question';
+
+    // Validate that either subject_id or topic_id is provided
+    if (!question.subject_id && !question.topic_id) {
+      errors.push(`Either subject_id or topic_id must be provided. Question: "${questionPreview}..."`);
+    }
+
+    // Validate required fields
+    if (!question.question_text?.trim()) {
+      errors.push(`question_text is required. Question: "${questionPreview}..."`);
+    }
+    if (!question.option_a?.trim()) {
+      errors.push(`option_a is required. Question: "${questionPreview}..."`);
+    }
+    if (!question.option_b?.trim()) {
+      errors.push(`option_b is required. Question: "${questionPreview}..."`);
+    }
+    if (!question.option_c?.trim()) {
+      errors.push(`option_c is required. Question: "${questionPreview}..."`);
+    }
+    if (!question.option_d?.trim()) {
+      errors.push(`option_d is required. Question: "${questionPreview}..."`);
+    }
+    if (!question.correct_answer) {
+      errors.push(`correct_answer is required. Question: "${questionPreview}..."`);
+    } else if (!['A', 'B', 'C', 'D'].includes(question.correct_answer)) {
+      errors.push(`correct_answer must be A, B, C, or D (got "${question.correct_answer}"). Question: "${questionPreview}..."`);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors
+    };
+  }
+
   async getAllQuestions(filters?: QuestionFilters, page = 1, limit = 50): Promise<{ questions: Question[]; total: number }> {
     try {
       let query = supabase.from('questions').select('*', { count: 'exact' });
@@ -40,10 +83,13 @@ export class AdminQuestionService {
         query = query.ilike('question_text', `%${filters.search}%`);
       }
 
+      if (filters?.subjectId) {
+        query = query.eq('subject_id', filters.subjectId);
+      }
+
       if (filters?.topicId) {
         query = query.eq('topic_id', filters.topicId);
       }
-
 
       if (filters?.examType && filters.examType !== 'all') {
         query = query.eq('exam_type', filters.examType);
@@ -99,6 +145,12 @@ export class AdminQuestionService {
 
   async createQuestion(input: QuestionInput): Promise<Question | null> {
     try {
+      // Validate input before creating
+      const validation = this.validateQuestionInput(input);
+      if (!validation.isValid) {
+        throw new Error(`Validation failed: ${validation.errors.join('; ')}`);
+      }
+
       const { data, error } = await (supabase
         .from('questions') as any)
         .insert([input])
@@ -179,11 +231,11 @@ export class AdminQuestionService {
 
     for (const question of questions) {
       try {
-        // Validate required fields
-        if (!question.topic_id || !question.question_text || !question.option_a ||
-          !question.option_b || !question.option_c || !question.option_d || !question.correct_answer) {
+        // Validate question input
+        const validation = this.validateQuestionInput(question);
+        if (!validation.isValid) {
           result.failed++;
-          result.errors.push(`Missing required fields for question: ${question.question_text?.substring(0, 50)}...`);
+          result.errors.push(...validation.errors);
           continue;
         }
 
@@ -191,7 +243,8 @@ export class AdminQuestionService {
         result.success++;
       } catch (err: any) {
         result.failed++;
-        result.errors.push(`Failed to import question: "${question.question_text.substring(0, 30)}...". Error: ${err.message || JSON.stringify(err)}`);
+        const questionPreview = question.question_text?.substring(0, 30) || 'Unknown question';
+        result.errors.push(`Failed to import question: "${questionPreview}...". Error: ${err.message || JSON.stringify(err)}`);
       }
     }
 

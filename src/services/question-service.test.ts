@@ -20,31 +20,10 @@ describe('QuestionService', () => {
   describe('getQuestionsBySubjectSlug', () => {
     it('should load questions for a subject without filters', async () => {
       const mockSubject = { id: 'subject-1', slug: 'mathematics', is_active: true };
-      const mockTopics = [{ id: 'topic-1' }, { id: 'topic-2' }];
       const mockQuestions = [
-        { id: 'q1', topic_id: 'topic-1', question_text: 'Question 1', is_active: true },
-        { id: 'q2', topic_id: 'topic-2', question_text: 'Question 2', is_active: true }
+        { id: 'q1', subject_id: 'subject-1', question_text: 'Question 1', is_active: true },
+        { id: 'q2', subject_id: 'subject-1', question_text: 'Question 2', is_active: true }
       ];
-
-      const mockFrom = vi.fn().mockReturnValue({
-        select: vi.fn().mockReturnValue({
-          eq: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: mockSubject })
-            }),
-            in: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                order: vi.fn().mockResolvedValue({ data: mockQuestions })
-              })
-            })
-          }),
-          in: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              order: vi.fn().mockResolvedValue({ data: mockQuestions })
-            })
-          })
-        })
-      });
 
       (supabase.from as any).mockImplementation((table: string) => {
         if (table === 'subjects') {
@@ -58,21 +37,10 @@ describe('QuestionService', () => {
             })
           };
         }
-        if (table === 'topics') {
-          return {
-            select: vi.fn().mockReturnValue({
-              eq: vi.fn().mockReturnValue({
-                eq: vi.fn().mockReturnValue({
-                  data: mockTopics
-                })
-              })
-            })
-          };
-        }
         if (table === 'questions') {
           return {
             select: vi.fn().mockReturnValue({
-              in: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
                   order: vi.fn().mockResolvedValue({ data: mockQuestions })
                 })
@@ -158,6 +126,38 @@ describe('QuestionService', () => {
       });
     });
 
+    it('should use subject_id filtering when subject_id is provided', async () => {
+      const spy = vi.spyOn(questionService, 'getQuestionsBySubjectId').mockResolvedValue([]);
+      
+      await questionService.getQuestionsByFilters({
+        subject_id: 'subject-123',
+        exam_year: 2023,
+        exam_type: 'JAMB'
+      });
+      
+      expect(spy).toHaveBeenCalledWith('subject-123', {
+        exam_year: 2023,
+        exam_type: 'JAMB',
+        limit: undefined
+      });
+    });
+
+    it('should use topic-based filtering when topic_id is provided (backward compatibility)', async () => {
+      const spy = vi.spyOn(questionService, 'getQuestionsByTopic').mockResolvedValue([]);
+      
+      await questionService.getQuestionsByFilters({
+        topic_id: 'topic-456',
+        exam_year: 2023,
+        exam_type: 'WAEC'
+      });
+      
+      expect(spy).toHaveBeenCalledWith('topic-456', {
+        exam_year: 2023,
+        exam_type: 'WAEC',
+        limit: undefined
+      });
+    });
+
     it('should use year-based filtering when only year is provided', async () => {
       const spy = vi.spyOn(questionService, 'getQuestionsByYear').mockResolvedValue([]);
       
@@ -173,7 +173,7 @@ describe('QuestionService', () => {
         { id: 'q1', exam_type: 'JAMB', exam_year: 2023, question_text: 'Question 1', is_active: true }
       ];
 
-      (supabase.from as any).mockReturnValue({
+      (supabase.from as unknown).mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             order: vi.fn().mockReturnValue({

@@ -123,16 +123,16 @@ export function useAppVersion(): UseAppVersionReturn {
                     .then((newVersionInfo: VersionInfo) => {
                         localStorage.setItem(STORAGE_KEY, JSON.stringify(newVersionInfo));
                         // Force reload from server
-                        (window.location as any).reload();
+                        globalThis.location.reload();
                     })
                     .catch(() => {
                         // Reload anyway even if version fetch fails
-                        (window.location as any).reload();
+                        globalThis.location.reload();
                     });
             });
         } else {
             // No cache API, just reload
-            (window.location as any).reload();
+            globalThis.location.reload();
         }
     }, []);
 

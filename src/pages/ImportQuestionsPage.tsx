@@ -298,16 +298,12 @@ export function ImportQuestionsPage() {
             return;
         }
 
-        // Validate required fields for simple text mode
-        if (format === 'simple') {
-            if (!selectedSubject) {
-                showToast('Please select a Subject', 'error');
-                return;
-            }
-            if (!selectedTopic) {
-                showToast('Please select a Topic', 'error');
-                return;
-            }
+        // Validate required fields - subject is required when not provided in data, topic is optional
+        // For simple format, subject must be selected since it's not in the data
+        // For JSON/CSV formats, subject can be in the data or selected in the dropdown
+        if (!selectedSubject && format === 'simple') {
+            showToast('Validation Error: Please select a Subject. Topic is optional - questions can be assigned directly to subjects.', 'error');
+            return;
         }
 
         setImporting(true);
@@ -339,7 +335,7 @@ export function ImportQuestionsPage() {
             const errors: string[] = [];
 
             for (const pq of parsedQuestions) {
-                let topicId = selectedTopic;
+                let topicId = selectedTopic || null;
                 let subjectId = selectedSubject;
 
                 // 1. Resolve Subject (if not already selected)
@@ -356,57 +352,56 @@ export function ImportQuestionsPage() {
                 }
 
                 if (!subjectId) {
-                    errors.push(`Could not resolve subject for question: "${pq.question_text.substring(0, 30)}..." (Subject: ${pq.subject})`);
+                    errors.push(`Validation Error: Could not resolve subject for question: "${pq.question_text.substring(0, 30)}...". Either select a subject from the dropdown or provide a valid subject name in the data (Subject provided: ${pq.subject || 'none'})`);
                     continue;
                 }
 
-                // 2. Resolve Topic (if not already selected)
-                if (!topicId) {
-                    if (pq.topic) {
-                        // Look up in groupedTopics
-                        const subjectTopics = groupedTopics[subjectId] || [];
-                        let foundTopic = subjectTopics.find(t => t.name.toLowerCase().trim() === pq.topic?.toLowerCase().trim());
+                // 2. Resolve Topic (if not already selected and if topic is provided in data)
+                if (!topicId && pq.topic) {
+                    // Look up in groupedTopics
+                    const subjectTopics = groupedTopics[subjectId] || [];
+                    let foundTopic = subjectTopics.find(t => t.name.toLowerCase().trim() === pq.topic?.toLowerCase().trim());
 
-                        if (!foundTopic) {
-                            // Create new topic
-                            try {
-                                console.log(`Creating new topic: ${pq.topic} for subject: ${subjectId}`);
-                                const newTopic = await adminTopicService.createTopic({
-                                    subject_id: subjectId,
-                                    name: pq.topic.trim(),
-                                    description: `Auto-created from import`,
-                                    order_index: 0,
-                                    is_active: true,
-                                });
+                    if (!foundTopic) {
+                        // Create new topic
+                        try {
+                            console.log(`Creating new topic: ${pq.topic} for subject: ${subjectId}`);
+                            const newTopic = await adminTopicService.createTopic({
+                                subject_id: subjectId,
+                                name: pq.topic.trim(),
+                                description: `Auto-created from import`,
+                                order_index: 0,
+                                is_active: true,
+                            });
 
-                                if (newTopic) {
-                                    foundTopic = newTopic;
-                                    // Update local cache
-                                    if (!groupedTopics[subjectId]) groupedTopics[subjectId] = [];
-                                    groupedTopics[subjectId].push(newTopic);
-                                } else {
-                                    errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}..."`);
-                                    continue;
-                                }
-                            } catch (e: any) {
-                                console.error('Failed to create topic', e);
-                                errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}...". Error: ${e.message || JSON.stringify(e)}`);
+                            if (newTopic) {
+                                foundTopic = newTopic;
+                                // Update local cache
+                                if (!groupedTopics[subjectId]) groupedTopics[subjectId] = [];
+                                groupedTopics[subjectId].push(newTopic);
+                            } else {
+                                errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}..."`);
                                 continue;
                             }
+                        } catch (e: unknown) {
+                            console.error('Failed to create topic', e);
+                            errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}...". Error: ${e.message || JSON.stringify(e)}`);
+                            continue;
                         }
-                        topicId = foundTopic?.id || '';
-                    } else {
-                        errors.push(`Topic missing for question: "${pq.question_text.substring(0, 30)}..."`);
-                        continue;
                     }
+                    topicId = foundTopic?.id || null;
                 }
 
-                if (!topicId) {
-                    errors.push(`Could not resolve topic for question: "${pq.question_text.substring(0, 30)}..."`);
+                // Build question input with either subject_id or topic_id (or both)
+                // topic_id can be null for direct subject assignment
+                // Validate that at least one of subject_id or topic_id is provided
+                if (!subjectId && !topicId) {
+                    errors.push(`Validation Error: Either subject_id or topic_id must be provided for question: "${pq.question_text.substring(0, 30)}..."`);
                     continue;
                 }
 
                 questionsToImport.push({
+                    subject_id: subjectId,
                     topic_id: topicId,
                     question_text: pq.question_text,
                     option_a: pq.option_a,
@@ -442,7 +437,7 @@ export function ImportQuestionsPage() {
             if (result.failed > 0) {
                 showToast(`Failed to import ${result.failed} questions`, 'error');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             showToast(`Import failed: ${error.message}`, 'error');
             setImportResult({ success: 0, failed: 0, errors: [error.message] });
         } finally {
@@ -621,7 +616,7 @@ EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
                                                 <div>EXPLANATION: Why C is correct</div>
                                                 <div className="mt-2">---</div>
                                             </div>
-                                            <p className="mt-2 text-xs font-semibold">Note: Select Subject, Topic, Exam, and Year from the dropdowns below.</p>
+                                            <p className="mt-2 text-xs font-semibold">Note: Select Subject (required) from the dropdown below. Topic is optional.</p>
                                         </div>
                                     ) : (
                                         <p className="text-blue-700 mb-4">
@@ -654,16 +649,19 @@ EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-2">Topic (Required)</label>
+                                <label className="block text-sm font-medium mb-2">Topic (Optional)</label>
                                 <Select
                                     value={selectedTopic}
                                     onChange={(e) => setSelectedTopic(e.target.value)}
                                     options={[
-                                        { value: '', label: 'Select Topic' },
+                                        { value: '', label: 'No Topic (Direct Subject Assignment)' },
                                         ...topics.map(t => ({ value: t.id, label: t.name }))
                                     ]}
                                     disabled={!selectedSubject}
                                 />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Leave empty to assign questions directly to the subject
+                                </p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-2">Exam Type (Optional)</label>

@@ -27,14 +27,14 @@ interface UnifiedQuizProps {
 export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   // Get config from props, location state, or sessionStorage
   const getConfig = (): QuizConfig | undefined => {
     if (propConfig) return propConfig;
-    
+
     const locationConfig = (location.state as { config?: QuizConfig })?.config;
     if (locationConfig) return locationConfig;
-    
+
     const sessionConfig = sessionStorage.getItem('quizConfig');
     if (sessionConfig) {
       try {
@@ -43,10 +43,10 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
         console.error('Failed to parse quiz config from sessionStorage:', error);
       }
     }
-    
+
     return undefined;
   };
-  
+
   const config = getConfig();
 
   const [loading, setLoading] = useState(true);
@@ -67,12 +67,12 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
   // Restore quiz state from localStorage (only once on mount)
   useEffect(() => {
     if (!config) return;
-    
+
     try {
       const savedState = localStorage.getItem('quizState');
       if (savedState) {
         const state = JSON.parse(savedState);
-        
+
         // Check if saved state matches current config
         if (
           state.config &&
@@ -100,7 +100,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
   // Persist state whenever it changes
   useEffect(() => {
     if (!config) return;
-    
+
     try {
       const state = {
         config,
@@ -138,7 +138,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
     const loadQuestions = async () => {
       setLoading(true);
       setError(null);
-      
+
       try {
         let loadedQuestions: any[] = [];
 
@@ -148,21 +148,25 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
             exam_type: config.examType,
             limit: 60
           };
-          
+
           // Add year filter if provided
           if (config.year) {
             filters.exam_year = config.year;
           }
 
+          console.log(`Loading questions for subject: ${config.subjectSlug}, filters:`, filters);
           loadedQuestions = await questionService.getQuestionsBySubjectSlug(
             config.subjectSlug,
             filters
           );
+          console.log(`Loaded ${loadedQuestions.length} questions for ${config.subjectSlug}`);
         } else if (config.selectionMethod === 'year' && config.year) {
           // Load questions by year
           // For year-based selection, we need to get all subjects for the exam type
           // and then filter by year
+          console.log(`Loading questions by year: ${config.year}, exam type: ${config.examType}`);
           const subjects = await subjectService.getSubjectsByExamType(config.examType);
+          console.log(`Found ${subjects.length} subjects for ${config.examType}`);
           const allQuestions: any[] = [];
 
           for (const subject of subjects) {
@@ -175,7 +179,10 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
                   limit: 10 // Limit per subject to avoid too many questions
                 }
               );
-              allQuestions.push(...subjectQuestions);
+              if (subjectQuestions.length > 0) {
+                console.log(`Loaded ${subjectQuestions.length} questions for ${subject.slug}`);
+                allQuestions.push(...subjectQuestions);
+              }
             } catch (subjectError) {
               console.warn(`Failed to load questions for subject ${subject.slug}:`, subjectError);
               // Continue with other subjects
@@ -183,6 +190,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           }
 
           loadedQuestions = allQuestions;
+          console.log(`Total questions loaded: ${loadedQuestions.length}`);
         }
 
         // Normalize questions
@@ -191,14 +199,19 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           exam_year: config.year
         });
 
+        console.log(`Normalized ${normalized.length} questions`);
+
         if (normalized.length === 0) {
-          setError('No questions available for the selected configuration. Please try a different selection.');
+          const errorMsg = 'No questions available for the selected configuration. The database may need to be populated with questions and topics. Please contact support or try importing questions first.';
+          console.error(errorMsg);
+          setError(errorMsg);
         }
 
         setQuestions(normalized);
       } catch (error) {
         console.error('Failed to load questions:', error);
-        setError('Failed to load questions. Please check your connection and try again.');
+        const errorMsg = error instanceof Error ? error.message : 'Failed to load questions. Please check your connection and try again.';
+        setError(errorMsg);
         setQuestions([]);
       } finally {
         setLoading(false);
@@ -219,11 +232,11 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
 
     const initializeTimer = async () => {
       setTimerError(false);
-      
+
       try {
         // Check if there's a persisted timer
         const restoredTime = timerService.restoreTimer();
-        
+
         let duration: number;
         if (restoredTime !== null && restoredTime > 0) {
           // Resume from persisted timer
@@ -291,7 +304,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
       setSelectedAnswer(key);
       setAnswers(prev => ({ ...prev, [currentQuestion.id]: key }));
       setShowFeedback(true);
-      
+
       // Announce feedback to screen readers
       const isCorrect = key === currentQuestion.correct;
       setAnnouncement(isCorrect ? 'Correct answer!' : 'Incorrect answer. Please review the explanation.');
@@ -332,7 +345,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
 
     const saveAndNavigate = async () => {
       setSubmitting(true);
-      
+
       try {
         const timeTaken = Math.floor((Date.now() - startTime) / 1000);
         const calculatedScore = questions.reduce(
@@ -362,7 +375,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           try {
             await analyticsService.saveQuizAttempt({
               subject_id,
-              quiz_mode: quizModeIdentifier as unknown,
+              quiz_mode: quizModeIdentifier as string,
               exam_type: config.examType,
               exam_year: config.year,
               total_questions: questions.length,
@@ -379,7 +392,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           } catch (saveError) {
             saveAttempts++;
             console.error(`Failed to save quiz attempt (attempt ${saveAttempts}):`, saveError);
-            
+
             if (saveAttempts < maxAttempts) {
               // Wait before retrying (exponential backoff)
               await new Promise(resolve => setTimeout(resolve, 1000 * saveAttempts));
@@ -402,11 +415,11 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
                   })),
                   timestamp: Date.now()
                 };
-                
+
                 const queue = JSON.parse(localStorage.getItem('quizAttemptQueue') || '[]');
                 queue.push(queuedAttempt);
                 localStorage.setItem('quizAttemptQueue', JSON.stringify(queue));
-                
+
                 console.log('Quiz attempt queued for later submission');
               } catch (queueError) {
                 console.error('Failed to queue quiz attempt:', queueError);
@@ -503,17 +516,30 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Loading state
-  if (loading || !config) {
+  // Loading state (only show if config exists and questions are loading)
+  if (loading && config) {
     return (
       <div className="container mx-auto px-4 py-6 md:py-8">
         <h1 className="text-2xl md:text-3xl font-extrabold mb-4 md:mb-6">
-          {config ? QuizConfigHelpers.getModeLabel(config.mode) : 'Loading...'}
+          {QuizConfigHelpers.getModeLabel(config.mode)}
         </h1>
         <Card>
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading questions...</p>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  // No config - show redirecting message (while validation effect redirects)
+  if (!config) {
+    return (
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <Card>
+          <div className="text-center py-8">
+            <p className="text-gray-600">No quiz configuration found. Redirecting...</p>
           </div>
         </Card>
       </div>
@@ -614,173 +640,170 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
 
       <div id="quiz-content" tabIndex={-1}>
         <Card>
-        {/* Header with progress and timer */}
-        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-          <div className="text-sm text-gray-600" aria-label={`Question ${currentIndex + 1} of ${questions.length}`}>
-            Question <span className="font-semibold">{currentIndex + 1}</span> of{' '}
-            <span className="font-semibold">{questions.length}</span>
+          {/* Header with progress and timer */}
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+            <div className="text-sm text-gray-600" aria-label={`Question ${currentIndex + 1} of ${questions.length}`}>
+              Question <span className="font-semibold">{currentIndex + 1}</span> of{' '}
+              <span className="font-semibold">{questions.length}</span>
+            </div>
+
+            {/* Timer display for exam mode */}
+            {isExamMode && timeRemaining !== null && (
+              <div
+                className={`text-sm md:text-base font-mono font-semibold ${timeRemaining < 300 ? 'text-red-600' : 'text-gray-700'
+                  }`}
+                role="timer"
+                aria-live="polite"
+                aria-atomic="true"
+                aria-label={`Time remaining: ${formatTime(timeRemaining)}`}
+              >
+                Time: {formatTime(timeRemaining)}
+                {timeRemaining < 300 && (
+                  <span className="sr-only"> Warning: Less than 5 minutes remaining</span>
+                )}
+              </div>
+            )}
+
+            {/* Score display for practice mode */}
+            {isPracticeMode && (
+              <div className="text-sm text-gray-600" aria-label={`Current score: ${score} out of ${currentIndex + 1}`}>
+                Score: <span className="font-semibold">{score}</span>
+              </div>
+            )}
           </div>
 
-          {/* Timer display for exam mode */}
-          {isExamMode && timeRemaining !== null && (
+          <ProgressBar
+            value={currentIndex + 1}
+            max={questions.length}
+            className="mb-5"
+            aria-label={`Quiz progress: ${currentIndex + 1} of ${questions.length} questions`}
+          />
+
+          {/* Question */}
+          <div className="mb-4" role="group" aria-labelledby="question-text">
+            <div id="question-text" className="text-base md:text-lg font-semibold mb-3">
+              {currentQuestion.text}
+            </div>
+
+            {/* Options */}
             <div
-              className={`text-sm md:text-base font-mono font-semibold ${
-                timeRemaining < 300 ? 'text-red-600' : 'text-gray-700'
-              }`}
-              role="timer"
-              aria-live="polite"
-              aria-atomic="true"
-              aria-label={`Time remaining: ${formatTime(timeRemaining)}`}
+              className="grid grid-cols-1 gap-3"
+              role="radiogroup"
+              aria-labelledby="question-text"
+              aria-required="true"
             >
-              Time: {formatTime(timeRemaining)}
-              {timeRemaining < 300 && (
-                <span className="sr-only"> Warning: Less than 5 minutes remaining</span>
-              )}
+              {currentQuestion.options.map((opt) => (
+                <OptionButton
+                  key={opt.key}
+                  optionKey={opt.key}
+                  text={opt.text}
+                  selected={
+                    isPracticeMode
+                      ? selectedAnswer === opt.key
+                      : answers[currentQuestion.id] === opt.key
+                  }
+                  onSelect={handleSelectAnswer}
+                  disabled={isPracticeMode && showFeedback}
+                />
+              ))}
             </div>
-          )}
-
-          {/* Score display for practice mode */}
-          {isPracticeMode && (
-            <div className="text-sm text-gray-600" aria-label={`Current score: ${score} out of ${currentIndex + 1}`}>
-              Score: <span className="font-semibold">{score}</span>
-            </div>
-          )}
-        </div>
-
-        <ProgressBar 
-          value={currentIndex + 1} 
-          max={questions.length} 
-          className="mb-5"
-          aria-label={`Quiz progress: ${currentIndex + 1} of ${questions.length} questions`}
-        />
-
-        {/* Question */}
-        <div className="mb-4" role="group" aria-labelledby="question-text">
-          <div id="question-text" className="text-base md:text-lg font-semibold mb-3">
-            {currentQuestion.text}
           </div>
 
-          {/* Options */}
-          <div 
-            className="grid grid-cols-1 gap-3" 
-            role="radiogroup" 
-            aria-labelledby="question-text"
-            aria-required="true"
-          >
-            {currentQuestion.options.map((opt) => (
-              <OptionButton
-                key={opt.key}
-                optionKey={opt.key}
-                text={opt.text}
-                selected={
-                  isPracticeMode
-                    ? selectedAnswer === opt.key
-                    : answers[currentQuestion.id] === opt.key
-                }
-                onSelect={handleSelectAnswer}
-                disabled={isPracticeMode && showFeedback}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Feedback for practice mode */}
-        {isPracticeMode && showFeedback && (
-          <div
-            className={`mt-6 p-4 rounded-lg border ${
-              isCorrect
+          {/* Feedback for practice mode */}
+          {isPracticeMode && showFeedback && (
+            <div
+              className={`mt-6 p-4 rounded-lg border ${isCorrect
                 ? 'border-green-200 bg-green-50'
                 : 'border-red-200 bg-red-50'
-            }`}
-            role="alert"
-            aria-live="polite"
-          >
-            <div
-              className={`font-semibold ${
-                isCorrect ? 'text-green-700' : 'text-red-700'
-              }`}
+                }`}
+              role="alert"
+              aria-live="polite"
             >
-              {isCorrect ? 'Correct!' : 'Incorrect'}
-            </div>
-            {currentQuestion.explanation && (
-              <p className="text-gray-700 mt-2">{currentQuestion.explanation}</p>
-            )}
-            <div className="mt-4">
-              <Button variant="primary" onClick={handleNext}>
-                {currentIndex < questions.length - 1 ? 'Next Question' : 'Complete Quiz'}
-              </Button>
-            </div>
-          </div>
-        )}
-
-        {/* Navigation controls for exam mode */}
-        {isExamMode && (
-          <nav className="mt-6 flex items-center gap-3 flex-wrap" aria-label="Quiz navigation">
-            <Button
-              variant="ghost"
-              onClick={handlePrevious}
-              disabled={currentIndex === 0}
-              className="px-3"
-              aria-label="Go to previous question"
-            >
-              Previous
-            </Button>
-            <Button
-              variant="ghost"
-              onClick={() => {
-                if (currentIndex < questions.length - 1) {
-                  setCurrentIndex(prev => prev + 1);
-                  setAnnouncement(`Moving to question ${currentIndex + 2} of ${questions.length}`);
-                }
-              }}
-              disabled={currentIndex === questions.length - 1}
-              aria-label="Go to next question"
-            >
-              Next
-            </Button>
-            <div className="ml-auto flex items-center gap-3">
-              <div className="text-sm text-gray-500" aria-live="polite">
-                Selected: <span className="font-semibold">{answers[currentQuestion.id] ?? '—'}</span>
+              <div
+                className={`font-semibold ${isCorrect ? 'text-green-700' : 'text-red-700'
+                  }`}
+              >
+                {isCorrect ? 'Correct!' : 'Incorrect'}
               </div>
+              {currentQuestion.explanation && (
+                <p className="text-gray-700 mt-2">{currentQuestion.explanation}</p>
+              )}
+              <div className="mt-4">
+                <Button variant="primary" onClick={handleNext}>
+                  {currentIndex < questions.length - 1 ? 'Next Question' : 'Complete Quiz'}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation controls for exam mode */}
+          {isExamMode && (
+            <nav className="mt-6 flex items-center gap-3 flex-wrap" aria-label="Quiz navigation">
+              <Button
+                variant="ghost"
+                onClick={handlePrevious}
+                disabled={currentIndex === 0}
+                className="px-3"
+                aria-label="Go to previous question"
+              >
+                Previous
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  if (currentIndex < questions.length - 1) {
+                    setCurrentIndex(prev => prev + 1);
+                    setAnnouncement(`Moving to question ${currentIndex + 2} of ${questions.length}`);
+                  }
+                }}
+                disabled={currentIndex === questions.length - 1}
+                aria-label="Go to next question"
+              >
+                Next
+              </Button>
+              <div className="ml-auto flex items-center gap-3">
+                <div className="text-sm text-gray-500" aria-live="polite">
+                  Selected: <span className="font-semibold">{answers[currentQuestion.id] ?? '—'}</span>
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={handleManualSubmit}
+                  disabled={timeRemaining !== null && timeRemaining > 0 && !timerError}
+                  aria-label={
+                    timerError
+                      ? 'Timer failed - you can submit manually'
+                      : timeRemaining !== null && timeRemaining > 0
+                        ? 'Submit will be enabled when timer expires'
+                        : 'Submit exam'
+                  }
+                  title={
+                    timerError
+                      ? 'Timer failed - you can submit manually'
+                      : timeRemaining !== null && timeRemaining > 0
+                        ? 'Submit will be enabled when timer expires'
+                        : 'Submit exam'
+                  }
+                >
+                  {submitting ? 'Submitting...' : 'Submit Exam'}
+                </Button>
+              </div>
+            </nav>
+          )}
+
+          {/* Manual submit for practice mode (when not showing feedback) */}
+          {isPracticeMode && !showFeedback && (
+            <div className="mt-6 flex justify-end">
               <Button
                 variant="primary"
                 onClick={handleManualSubmit}
-                disabled={timeRemaining !== null && timeRemaining > 0 && !timerError}
-                aria-label={
-                  timerError
-                    ? 'Timer failed - you can submit manually'
-                    : timeRemaining !== null && timeRemaining > 0
-                    ? 'Submit will be enabled when timer expires'
-                    : 'Submit exam'
-                }
-                title={
-                  timerError
-                    ? 'Timer failed - you can submit manually'
-                    : timeRemaining !== null && timeRemaining > 0
-                    ? 'Submit will be enabled when timer expires'
-                    : 'Submit exam'
-                }
+                disabled={submitting}
+                aria-label="Complete quiz and view results"
               >
-                {submitting ? 'Submitting...' : 'Submit Exam'}
+                {submitting ? 'Submitting...' : 'Complete Quiz'}
               </Button>
             </div>
-          </nav>
-        )}
-
-        {/* Manual submit for practice mode (when not showing feedback) */}
-        {isPracticeMode && !showFeedback && (
-          <div className="mt-6 flex justify-end">
-            <Button 
-              variant="primary" 
-              onClick={handleManualSubmit} 
-              disabled={submitting}
-              aria-label="Complete quiz and view results"
-            >
-              {submitting ? 'Submitting...' : 'Complete Quiz'}
-            </Button>
-          </div>
-        )}
-      </Card>
+          )}
+        </Card>
       </div>
     </div>
   );

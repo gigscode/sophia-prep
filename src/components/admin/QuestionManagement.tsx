@@ -1,50 +1,97 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminQuestionService, type QuestionFilters } from '../../services/admin-question-service';
-import type { Question } from '../../integrations/supabase/types';
+import { adminQuestionService, type QuestionFilters, type QuestionInput } from '../../services/admin-question-service';
+import { adminSubjectService } from '../../services/admin-subject-service';
+import { adminTopicService } from '../../services/admin-topic-service';
+import type { Question, Subject, Topic } from '../../integrations/supabase/types';
 import { Table } from '../ui/Table';
 import { Pagination } from '../ui/Pagination';
 import { SearchBar } from '../ui/SearchBar';
 import { Select } from '../ui/Select';
 import { Button } from '../ui/Button';
 import { Dialog } from '../ui/Dialog';
+import { Modal } from '../ui/Modal';
 import { showToast } from '../ui/Toast';
-import { Upload, Trash2 } from 'lucide-react';
+import { Upload, Trash2, Plus, Edit } from 'lucide-react';
+import { QuestionForm } from './QuestionForm';
+
+// Extended question type with subject and topic names for display
+type QuestionWithDetails = Question & {
+  subject_name?: string;
+  topic_name?: string;
+};
 
 export function QuestionManagement() {
   const navigate = useNavigate();
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [questions, setQuestions] = useState<QuestionWithDetails[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<QuestionFilters>({ status: 'all' });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [questionToDelete, setQuestionToDelete] = useState<string | null>(null);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<{
+    total: number;
+    bySubject: Record<string, number>;
+    byExamType: Record<string, number>;
+    byYear: Record<number, number>;
+  } | null>(null);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [topics, setTopics] = useState<Topic[]>([]);
 
   const itemsPerPage = 50;
 
-  useEffect(() => {
-    fetchQuestions();
-    fetchStats();
-  }, [currentPage, filters]);
-
-  const fetchQuestions = async () => {
+  const fetchQuestions = useCallback(async () => {
     setLoading(true);
     const { questions: fetchedQuestions, total: fetchedTotal } = await adminQuestionService.getAllQuestions(
       filters,
       currentPage,
       itemsPerPage
     );
-    setQuestions(fetchedQuestions);
+    
+    // Enrich questions with subject and topic names
+    const enrichedQuestions: QuestionWithDetails[] = fetchedQuestions.map(q => {
+      const subject = subjects.find(s => s.id === q.subject_id);
+      const topic = topics.find(t => t.id === q.topic_id);
+      return {
+        ...q,
+        subject_name: subject?.name,
+        topic_name: topic?.name
+      };
+    });
+    
+    setQuestions(enrichedQuestions);
     setTotal(fetchedTotal);
     setLoading(false);
-  };
+  }, [filters, currentPage, itemsPerPage, subjects, topics]);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     const statistics = await adminQuestionService.getQuestionStatistics();
     setStats(statistics);
-  };
+  }, []);
+
+  const fetchSubjectsAndTopics = useCallback(async () => {
+    const [fetchedSubjects, fetchedTopics] = await Promise.all([
+      adminSubjectService.getAllSubjects(),
+      adminTopicService.getAllTopics()
+    ]);
+    setSubjects(fetchedSubjects);
+    setTopics(fetchedTopics);
+  }, []);
+
+  useEffect(() => {
+    fetchSubjectsAndTopics();
+  }, [fetchSubjectsAndTopics]);
+
+  useEffect(() => {
+    if (subjects.length > 0 || topics.length > 0) {
+      fetchQuestions();
+      fetchStats();
+    }
+  }, [fetchQuestions, fetchStats, subjects.length, topics.length]);
 
   const handleSearch = (search: string) => {
     setFilters({ ...filters, search });
@@ -52,7 +99,19 @@ export function QuestionManagement() {
   };
 
   const handleFilterChange = (key: keyof QuestionFilters, value: string) => {
-    setFilters({ ...filters, [key]: value as any });
+    const newFilters = { ...filters };
+    if (key === 'examType') {
+      newFilters[key] = value === 'all' ? 'all' : value as 'JAMB' | 'WAEC';
+    } else if (key === 'status') {
+      newFilters[key] = value === 'all' ? 'all' : value as 'active' | 'inactive';
+    } else if (key === 'year') {
+      newFilters[key] = value === 'all' ? 'all' : parseInt(value);
+    } else if (key === 'subjectId') {
+      newFilters[key] = value === 'all' ? undefined : value;
+    } else {
+      newFilters[key] = value;
+    }
+    setFilters(newFilters);
     setCurrentPage(1);
   };
 
@@ -75,30 +134,97 @@ export function QuestionManagement() {
     navigate('/admin/import-questions');
   };
 
+  const handleCreate = () => {
+    setEditingQuestion(null);
+    setShowFormModal(true);
+  };
+
+  const handleEdit = async (questionId: string) => {
+    const question = await adminQuestionService.getQuestionById(questionId);
+    if (question) {
+      setEditingQuestion(question);
+      setShowFormModal(true);
+    } else {
+      showToast('Failed to load question', 'error');
+    }
+  };
+
+  const handleFormSubmit = async (data: QuestionInput) => {
+    setIsSubmitting(true);
+    try {
+      if (editingQuestion) {
+        // Update existing question
+        const success = await adminQuestionService.updateQuestion(editingQuestion.id, data);
+        if (success) {
+          showToast('Question updated successfully', 'success');
+          setShowFormModal(false);
+          setEditingQuestion(null);
+          fetchQuestions();
+          fetchStats();
+        } else {
+          showToast('Failed to update question', 'error');
+        }
+      } else {
+        // Create new question
+        const created = await adminQuestionService.createQuestion(data);
+        if (created) {
+          showToast('Question created successfully', 'success');
+          setShowFormModal(false);
+          fetchQuestions();
+          fetchStats();
+        } else {
+          showToast('Failed to create question', 'error');
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'An error occurred';
+      showToast(errorMessage, 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFormCancel = () => {
+    setShowFormModal(false);
+    setEditingQuestion(null);
+  };
+
   const columns = [
     {
       key: 'question_text',
       label: 'Question',
-      render: (q: Question) => (
+      render: (q: QuestionWithDetails) => (
         <div className="max-w-md truncate" title={q.question_text}>
           {q.question_text}
         </div>
       ),
     },
     {
+      key: 'subject',
+      label: 'Subject',
+      render: (q: QuestionWithDetails) => (
+        <div className="text-sm">
+          <div className="font-medium">{q.subject_name || 'N/A'}</div>
+          {q.topic_name && (
+            <div className="text-gray-500 text-xs">{q.topic_name}</div>
+          )}
+        </div>
+      ),
+    },
+    {
       key: 'exam_type',
       label: 'Exam Type',
-      render: (q: Question) => q.exam_type || 'N/A',
+      render: (q: QuestionWithDetails) => q.exam_type || 'N/A',
     },
     {
       key: 'exam_year',
       label: 'Year',
-      render: (q: Question) => q.exam_year || 'N/A',
+      render: (q: QuestionWithDetails) => q.exam_year || 'N/A',
     },
     {
       key: 'is_active',
       label: 'Status',
-      render: (q: Question) => (
+      render: (q: QuestionWithDetails) => (
         <span className={`px-2 py-1 rounded text-xs ${q.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
           {q.is_active ? 'Active' : 'Inactive'}
         </span>
@@ -107,17 +233,26 @@ export function QuestionManagement() {
     {
       key: 'actions',
       label: 'Actions',
-      render: (q: Question) => (
-        <button
-          onClick={() => {
-            setQuestionToDelete(q.id);
-            setShowDeleteDialog(true);
-          }}
-          className="p-1 hover:bg-gray-100 rounded"
-          title="Delete"
-        >
-          <Trash2 className="w-4 h-4 text-red-600" />
-        </button>
+      render: (q: QuestionWithDetails) => (
+        <div className="flex space-x-2">
+          <button
+            onClick={() => handleEdit(q.id)}
+            className="p-1 hover:bg-gray-100 rounded"
+            title="Edit"
+          >
+            <Edit className="w-4 h-4 text-blue-600" />
+          </button>
+          <button
+            onClick={() => {
+              setQuestionToDelete(q.id);
+              setShowDeleteDialog(true);
+            }}
+            className="p-1 hover:bg-gray-100 rounded"
+            title="Delete"
+          >
+            <Trash2 className="w-4 h-4 text-red-600" />
+          </button>
+        </div>
       ),
     },
   ];
@@ -127,10 +262,16 @@ export function QuestionManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Question Management</h2>
-        <Button onClick={handleImport} variant="outline">
-          <Upload className="w-4 h-4 mr-2" />
-          Import Questions
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={handleCreate}>
+            <Plus className="w-4 h-4 mr-2" />
+            Create Question
+          </Button>
+          <Button onClick={handleImport} variant="outline">
+            <Upload className="w-4 h-4 mr-2" />
+            Import Questions
+          </Button>
+        </div>
       </div>
 
       {/* Statistics */}
@@ -152,8 +293,16 @@ export function QuestionManagement() {
       )}
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <SearchBar value={filters.search || ''} onChange={handleSearch} placeholder="Search questions..." className="md:col-span-2" />
+        <Select
+          value={filters.subjectId || 'all'}
+          onChange={(e) => handleFilterChange('subjectId', e.target.value)}
+          options={[
+            { value: 'all', label: 'All Subjects' },
+            ...subjects.map(s => ({ value: s.id, label: s.name }))
+          ]}
+        />
         <Select
           value={filters.examType || 'all'}
           onChange={(e) => handleFilterChange('examType', e.target.value)}
@@ -196,6 +345,21 @@ export function QuestionManagement() {
         type="warning"
         confirmText="Delete"
       />
+
+      {/* Create/Edit Modal */}
+      <Modal
+        isOpen={showFormModal}
+        onClose={handleFormCancel}
+        title={editingQuestion ? 'Edit Question' : 'Create New Question'}
+        size="xl"
+      >
+        <QuestionForm
+          question={editingQuestion}
+          onSubmit={handleFormSubmit}
+          onCancel={handleFormCancel}
+          isSubmitting={isSubmitting}
+        />
+      </Modal>
 
     </div>
   );
