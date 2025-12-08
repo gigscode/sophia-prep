@@ -8,6 +8,7 @@ import PWAInstall from './components/PWAInstall';
 import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
+import { AppUpdateNotification } from './components/AppUpdateNotification';
 
 // Lazy load all pages
 const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
@@ -57,6 +58,7 @@ export function App() {
       <ScrollToTop />
       <WhatsAppButton />
       <PWAInstall />
+      <AppUpdateNotification />
       <ToastContainer />
       <Suspense fallback={<PageLoader />}>
         <Routes>

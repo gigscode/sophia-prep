@@ -1,8 +1,10 @@
-// Sophia Prep Service Worker - Enhanced Caching Strategy
-const CACHE_NAME = 'sophia-prep-v3';
-const RUNTIME_CACHE = 'sophia-prep-runtime-v3';
-const IMAGE_CACHE = 'sophia-prep-images-v3';
-const STATIC_CACHE = 'sophia-prep-static-v3';
+// Sophia Prep Service Worker - Enhanced Caching Strategy with Auto-Update
+// Cache names will be updated when new version is deployed
+const VERSION = '1.0.0'; // This will be updated by build script
+const CACHE_NAME = `sophia-prep-v${VERSION.replace(/\./g, '-')}`;
+const RUNTIME_CACHE = `sophia-prep-runtime-v${VERSION.replace(/\./g, '-')}`;
+const IMAGE_CACHE = `sophia-prep-images-v${VERSION.replace(/\./g, '-')}`;
+const STATIC_CACHE = `sophia-prep-static-v${VERSION.replace(/\./g, '-')}`;
 
 // Cache duration in milliseconds
 const CACHE_DURATION = {
@@ -67,17 +69,17 @@ self.addEventListener('activate', (event) => {
 // Helper function to determine cache strategy
 function getCacheStrategy(request) {
   const url = new URL(request.url);
-  
+
   // Images - long-term cache
   if (url.pathname.match(/\.(png|jpg|jpeg|gif|svg|webp|ico)$/)) {
     return { cacheName: IMAGE_CACHE, duration: CACHE_DURATION.IMAGES };
   }
-  
+
   // Static assets (JS, CSS, fonts) - medium-term cache
   if (url.pathname.match(/\.(js|css|woff|woff2|ttf|eot)$/)) {
     return { cacheName: STATIC_CACHE, duration: CACHE_DURATION.STATIC };
   }
-  
+
   // Runtime cache for everything else
   return { cacheName: RUNTIME_CACHE, duration: CACHE_DURATION.RUNTIME };
 }
@@ -85,10 +87,10 @@ function getCacheStrategy(request) {
 // Helper function to check if cached response is still fresh
 function isCacheFresh(response, duration) {
   if (!response) return false;
-  
+
   const cachedTime = response.headers.get('sw-cache-time');
   if (!cachedTime) return true; // If no timestamp, assume fresh
-  
+
   const age = Date.now() - parseInt(cachedTime, 10);
   return age < duration;
 }
@@ -108,7 +110,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const strategy = getCacheStrategy(event.request);
-      
+
       // Check if cached response is still fresh
       if (cachedResponse && isCacheFresh(cachedResponse, strategy.duration)) {
         return cachedResponse;
@@ -123,11 +125,11 @@ self.addEventListener('fetch', (event) => {
 
         // Clone the response before caching
         const responseToCache = response.clone();
-        
+
         // Add timestamp header for cache freshness check
         const headers = new Headers(response.headers);
         headers.append('sw-cache-time', Date.now().toString());
-        
+
         const modifiedResponse = new Response(responseToCache.body, {
           status: response.status,
           statusText: response.statusText,
@@ -145,7 +147,7 @@ self.addEventListener('fetch', (event) => {
         if (cachedResponse) {
           return cachedResponse;
         }
-        
+
         if (event.request.mode === 'navigate') {
           return caches.match('/index.html');
         }
