@@ -32,23 +32,24 @@ export interface AdminConfig {
  */
 const loadAdminEmails = (): Set<string> => {
   const envEmails = import.meta.env.VITE_ADMIN_EMAILS;
-  
+
   // Default admin emails (normalized)
   const defaultAdmins = [
     'reubensunday1220@gmail.com',
     'sophiareignsacademy@gmail.com',
+    'gigsdev007@gmail.com',
   ];
-  
+
   // If environment variable is set, parse it
   if (envEmails && typeof envEmails === 'string') {
     const emails = envEmails
       .split(',')
       .map(email => normalizeEmail(email.trim()))
       .filter(email => email.length > 0);
-    
+
     return new Set(emails);
   }
-  
+
   // Return normalized default admins
   return new Set(defaultAdmins.map(normalizeEmail));
 };
@@ -60,7 +61,7 @@ const loadAdminEmails = (): Set<string> => {
  */
 export const adminConfig: AdminConfig = {
   emails: loadAdminEmails(),
-  
+
   /**
    * Check if an email belongs to an admin user
    * 
