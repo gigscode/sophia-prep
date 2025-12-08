@@ -95,7 +95,7 @@ export function App() {
           <Route path="/events/:id" element={<Navigate to="/" replace />} />
 
           {/* More Page */}
-          <Route path="/more" element={<Layout showFooter={false}><MorePage /></Layout>} />
+          <Route path="/more" element={<Layout showFooter={true}><MorePage /></Layout>} />
 
           {/* Profile / Auth */}
           <Route path="/profile" element={<Layout showFooter={false}><ProfilePage /></Layout>} />
