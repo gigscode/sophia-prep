@@ -9,6 +9,7 @@ import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
 import { AppUpdateNotification } from './components/AppUpdateNotification';
+import { LegacyQuizRedirect } from './components/quiz/LegacyQuizRedirect';
 
 // Lazy load all pages
 const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
@@ -81,8 +82,8 @@ export function App() {
           <Route path="/quiz/mode-selection" element={<Layout showFooter={false}><ModeSelectionPage /></Layout>} />
           <Route path="/quiz/unified" element={<Layout showFooter={false}><UnifiedQuiz /></Layout>} />
           {/* Legacy routes - redirect to new unified system */}
-          <Route path="/quiz/practice" element={<Navigate to="/quiz/mode-selection" state={{ preselectedMode: 'practice' }} replace />} />
-          <Route path="/quiz/cbt" element={<Navigate to="/quiz/mode-selection" state={{ preselectedMode: 'exam' }} replace />} />
+          <Route path="/quiz/practice" element={<LegacyQuizRedirect mode="practice" />} />
+          <Route path="/quiz/cbt" element={<LegacyQuizRedirect mode="exam" />} />
           <Route path="/quiz/results" element={<Layout showFooter={false}><QuizResultsPage /></Layout>} />
 
           {/* Help & Info */}
