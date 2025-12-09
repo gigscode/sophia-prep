@@ -29,12 +29,12 @@ export class QuestionService {
     if (filters?.limit) q = q.limit(filters.limit);
 
     const { data, error } = await q;
-    
+
     if (error) {
       console.error('Error fetching questions by subject_id:', error);
       return [];
     }
-    
+
     // Handle null/empty results gracefully
     return (data as Question[]) || [];
   }
@@ -53,12 +53,12 @@ export class QuestionService {
       .eq('slug', slug)
       .eq('is_active', true)
       .single();
-    
+
     if (subjectError) {
       console.error('Error fetching subject:', subjectError);
       return [];
     }
-    
+
     if (!subject) {
       console.warn(`Subject not found for slug: ${slug}`);
       return [];
@@ -94,13 +94,12 @@ export class QuestionService {
    * Optimized to apply all filters at database level
    * Requirements: 3.3, 7.3
    */
-  async getQuestionsByFilters(filters: { 
-    exam_type?: 'JAMB' | 'WAEC'; 
-    exam_year?: number; 
+  async getQuestionsByFilters(filters: {
+    exam_type?: 'JAMB' | 'WAEC';
+    exam_year?: number;
     subject_slug?: string;
     subject_id?: string;
-    topic_id?: string;
-    limit?: number 
+    limit?: number
   }): Promise<Question[]> {
     // If subject_slug is provided, use subject-based filtering
     if (filters.subject_slug) {
@@ -120,14 +119,6 @@ export class QuestionService {
       });
     }
 
-    // If topic_id is provided, use topic-based filtering (backward compatibility)
-    if (filters.topic_id) {
-      return this.getQuestionsByTopic(filters.topic_id, {
-        exam_year: filters.exam_year,
-        exam_type: filters.exam_type,
-        limit: filters.limit
-      });
-    }
 
     // If only year is provided, use year-based filtering
     if (filters.exam_year && !filters.exam_type) {
@@ -146,30 +137,6 @@ export class QuestionService {
     if (filters.limit) q = q.limit(filters.limit);
 
     const { data } = await q;
-    return (data as Question[]) || [];
-  }
-
-  async getPastQuestions(slug: string, exam_year: number, exam_type: 'JAMB' | 'WAEC', limit = 50): Promise<Question[]> {
-    return this.getQuestionsBySubjectSlug(slug, { exam_year, exam_type, limit });
-  }
-
-  async getQuestionsByTopic(topicId: string, filters?: { exam_year?: number; exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<Question[]> {
-    let q = supabase
-      .from('questions')
-      .select('*')
-      .eq('topic_id', topicId)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false });
-    if (filters?.exam_year) q = q.eq('exam_year', filters.exam_year);
-    if (filters?.exam_type) q = q.eq('exam_type', filters.exam_type);
-    if (filters?.limit) q = q.limit(filters.limit);
-    const { data, error } = await q;
-    
-    if (error) {
-      console.error(`Error fetching questions for topic ${topicId}:`, error);
-      return [];
-    }
-    
     return (data as Question[]) || [];
   }
 }

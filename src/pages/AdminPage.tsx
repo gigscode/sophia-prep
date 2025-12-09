@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { BookOpen, Users, FileQuestion, BarChart3, FolderTree, Menu, X, Home } from 'lucide-react';
+import { BookOpen, Users, FileQuestion, BarChart3, Menu, X, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserManagement } from '../components/admin/UserManagement';
 import { SubjectManagement } from '../components/admin/SubjectManagement';
-import { TopicManagement } from '../components/admin/TopicManagement';
 import { QuestionManagement } from '../components/admin/QuestionManagement';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
 
-type AdminTab = 'analytics' | 'users' | 'subjects' | 'topics' | 'questions';
+type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions';
 
 export function AdminPage() {
   const { user, loading } = useAuth();
@@ -76,7 +75,6 @@ export function AdminPage() {
     { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3, color: 'text-blue-600', bgColor: 'bg-blue-50' },
     { id: 'users' as AdminTab, label: 'Users', icon: Users, color: 'text-green-600', bgColor: 'bg-green-50' },
     { id: 'subjects' as AdminTab, label: 'Subjects', icon: BookOpen, color: 'text-purple-600', bgColor: 'bg-purple-50' },
-    { id: 'topics' as AdminTab, label: 'Topics', icon: FolderTree, color: '#B78628', bgColor: '#FDF6E8' },
     { id: 'questions' as AdminTab, label: 'Questions', icon: FileQuestion, color: 'text-red-600', bgColor: 'bg-red-50' },
   ];
 
@@ -210,7 +208,6 @@ export function AdminPage() {
             {tab === 'analytics' && <AnalyticsDashboard />}
             {tab === 'users' && <UserManagement />}
             {tab === 'subjects' && <SubjectManagement />}
-            {tab === 'topics' && <TopicManagement />}
             {tab === 'questions' && <QuestionManagement />}
           </motion.div>
         </div>

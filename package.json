@@ -11,8 +11,6 @@
     "preview": "vite preview",
     "db:migrate": "node scripts/run-migrations.js",
     "db:import-questions": "node scripts/import-jamb-waec-questions.js",
-    "update-topics": "node scripts/update-topic-access.js",
-    "update-topics-simple": "node scripts/update-topics-simple.js",
     "update-access": "node scripts/update-access-rules.js",
     "test:email": "node scripts/test-email-delivery.js",
     "test:auth-email": "node scripts/test-auth-email.js",

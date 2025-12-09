@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminQuestionService, type QuestionFilters, type QuestionInput } from '../../services/admin-question-service';
 import { adminSubjectService } from '../../services/admin-subject-service';
-import { adminTopicService } from '../../services/admin-topic-service';
-import type { Question, Subject, Topic } from '../../integrations/supabase/types';
+import type { Question, Subject } from '../../integrations/supabase/types';
 import { Table } from '../ui/Table';
 import { Pagination } from '../ui/Pagination';
 import { SearchBar } from '../ui/SearchBar';
@@ -15,10 +14,9 @@ import { showToast } from '../ui/Toast';
 import { Upload, Trash2, Plus, Edit } from 'lucide-react';
 import { QuestionForm } from './QuestionForm';
 
-// Extended question type with subject and topic names for display
+// Extended question type with subject name for display
 type QuestionWithDetails = Question & {
   subject_name?: string;
-  topic_name?: string;
 };
 
 export function QuestionManagement() {
@@ -40,7 +38,6 @@ export function QuestionManagement() {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
 
   const itemsPerPage = 50;
 
@@ -51,47 +48,41 @@ export function QuestionManagement() {
       currentPage,
       itemsPerPage
     );
-    
-    // Enrich questions with subject and topic names
+
+    // Enrich questions with subject names
     const enrichedQuestions: QuestionWithDetails[] = fetchedQuestions.map(q => {
       const subject = subjects.find(s => s.id === q.subject_id);
-      const topic = topics.find(t => t.id === q.topic_id);
       return {
         ...q,
-        subject_name: subject?.name,
-        topic_name: topic?.name
+        subject_name: subject?.name
       };
     });
-    
+
     setQuestions(enrichedQuestions);
     setTotal(fetchedTotal);
     setLoading(false);
-  }, [filters, currentPage, itemsPerPage, subjects, topics]);
+  }, [filters, currentPage, itemsPerPage, subjects]);
 
   const fetchStats = useCallback(async () => {
     const statistics = await adminQuestionService.getQuestionStatistics();
     setStats(statistics);
   }, []);
 
-  const fetchSubjectsAndTopics = useCallback(async () => {
-    const [fetchedSubjects, fetchedTopics] = await Promise.all([
-      adminSubjectService.getAllSubjects(),
-      adminTopicService.getAllTopics()
-    ]);
+  const fetchSubjects = useCallback(async () => {
+    const fetchedSubjects = await adminSubjectService.getAllSubjects();
     setSubjects(fetchedSubjects);
-    setTopics(fetchedTopics);
   }, []);
 
   useEffect(() => {
-    fetchSubjectsAndTopics();
-  }, [fetchSubjectsAndTopics]);
+    fetchSubjects();
+  }, [fetchSubjects]);
 
   useEffect(() => {
-    if (subjects.length > 0 || topics.length > 0) {
+    if (subjects.length > 0) {
       fetchQuestions();
       fetchStats();
     }
-  }, [fetchQuestions, fetchStats, subjects.length, topics.length]);
+  }, [fetchQuestions, fetchStats, subjects.length]);
 
   const handleSearch = (search: string) => {
     setFilters({ ...filters, search });
@@ -205,9 +196,6 @@ export function QuestionManagement() {
       render: (q: QuestionWithDetails) => (
         <div className="text-sm">
           <div className="font-medium">{q.subject_name || 'N/A'}</div>
-          {q.topic_name && (
-            <div className="text-gray-500 text-xs">{q.topic_name}</div>
-          )}
         </div>
       ),
     },

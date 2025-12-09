@@ -3,8 +3,7 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { Select } from '../ui/Select';
 import { adminSubjectService } from '../../services/admin-subject-service';
-import { adminTopicService } from '../../services/admin-topic-service';
-import type { Subject, Topic, Question } from '../../integrations/supabase/types';
+import type { Subject, Question } from '../../integrations/supabase/types';
 import type { QuestionInput } from '../../services/admin-question-service';
 
 interface QuestionFormProps {
@@ -16,13 +15,10 @@ interface QuestionFormProps {
 
 export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = false }: QuestionFormProps) {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [loadingTopics, setLoadingTopics] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [formData, setFormData] = useState<QuestionInput>({
     subject_id: question?.subject_id || null,
-    topic_id: question?.topic_id || null,
     question_text: question?.question_text || '',
     option_a: question?.option_a || '',
     option_b: question?.option_b || '',
@@ -40,24 +36,9 @@ export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = fals
     loadSubjects();
   }, []);
 
-  useEffect(() => {
-    if (formData.subject_id) {
-      loadTopics(formData.subject_id);
-    } else {
-      setTopics([]);
-    }
-  }, [formData.subject_id]);
-
   const loadSubjects = async () => {
     const fetchedSubjects = await adminSubjectService.getAllSubjects({ status: 'active' });
     setSubjects(fetchedSubjects);
-  };
-
-  const loadTopics = async (subjectId: string) => {
-    setLoadingTopics(true);
-    const fetchedTopics = await adminTopicService.getAllTopics(subjectId);
-    setTopics(fetchedTopics);
-    setLoadingTopics(false);
   };
 
   const handleChange = (field: keyof QuestionInput, value: any) => {
@@ -72,19 +53,14 @@ export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = fals
     }
   };
 
-  const handleSubjectChange = (subjectId: string) => {
-    handleChange('subject_id', subjectId || null);
-    // Clear topic when subject changes
-    handleChange('topic_id', null);
-  };
+
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    // Validate that either subject_id or topic_id is provided
-    if (!formData.subject_id && !formData.topic_id) {
-      newErrors.subject_id = 'Either subject or topic must be selected';
-      newErrors.topic_id = 'Either subject or topic must be selected';
+    // Validate that subject_id is provided
+    if (!formData.subject_id) {
+      newErrors.subject_id = 'Subject must be selected';
     }
 
     // Validate required fields
@@ -113,7 +89,7 @@ export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = fals
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validate()) {
       return;
     }
@@ -123,50 +99,23 @@ export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = fals
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Subject and Topic Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Subject <span className="text-red-500">*</span>
-          </label>
-          <Select
-            value={formData.subject_id || ''}
-            onChange={(e) => handleSubjectChange(e.target.value)}
-            options={[
-              { value: '', label: 'Select a subject' },
-              ...subjects.map(s => ({ value: s.id, label: s.name }))
-            ]}
-            className={errors.subject_id ? 'border-red-500' : ''}
-          />
-          {errors.subject_id && (
-            <p className="mt-1 text-sm text-red-600">{errors.subject_id}</p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">
-            Required if topic is not selected
-          </p>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Topic <span className="text-gray-400">(Optional)</span>
-          </label>
-          <Select
-            value={formData.topic_id || ''}
-            onChange={(e) => handleChange('topic_id', e.target.value || null)}
-            options={[
-              { value: '', label: 'No topic (subject only)' },
-              ...topics.map(t => ({ value: t.id, label: t.name }))
-            ]}
-            disabled={!formData.subject_id || loadingTopics}
-            className={errors.topic_id ? 'border-red-500' : ''}
-          />
-          {errors.topic_id && (
-            <p className="mt-1 text-sm text-red-600">{errors.topic_id}</p>
-          )}
-          <p className="mt-1 text-xs text-gray-500">
-            Optional - leave empty for subject-only questions
-          </p>
-        </div>
+      {/* Subject Selection */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          Subject <span className="text-red-500">*</span>
+        </label>
+        <Select
+          value={formData.subject_id || ''}
+          onChange={(e) => handleChange('subject_id', e.target.value || null)}
+          options={[
+            { value: '', label: 'Select a subject' },
+            ...subjects.map(s => ({ value: s.id, label: s.name }))
+          ]}
+          className={errors.subject_id ? 'border-red-500' : ''}
+        />
+        {errors.subject_id && (
+          <p className="mt-1 text-sm text-red-600">{errors.subject_id}</p>
+        )}
       </div>
 
       {/* Question Text */}
@@ -178,9 +127,8 @@ export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = fals
           value={formData.question_text}
           onChange={(e) => handleChange('question_text', e.target.value)}
           rows={4}
-          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.question_text ? 'border-red-500' : 'border-gray-300'
-          }`}
+          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.question_text ? 'border-red-500' : 'border-gray-300'
+            }`}
           placeholder="Enter the question text..."
         />
         {errors.question_text && (

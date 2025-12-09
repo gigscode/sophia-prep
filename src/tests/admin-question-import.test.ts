@@ -13,7 +13,6 @@ describe('Admin Question Import - Exam Metadata Support', () => {
   it('should accept exam_type field with JAMB value', () => {
     const question: QuestionInput = {
       subject_id: 'test-subject-id',
-      topic_id: 'test-topic-id',
       question_text: 'What is 2 + 2?',
       option_a: '2',
       option_b: '3',
@@ -78,7 +77,7 @@ describe('Admin Question Import - Exam Metadata Support', () => {
 
   it('should accept various year values', () => {
     const years = [2020, 2021, 2022, 2023, 2024];
-    
+
     years.forEach(year => {
       const question: QuestionInput = {
         subject_id: 'test-subject-id',
@@ -207,99 +206,26 @@ describe('Admin Question Import - Exam Metadata Support', () => {
   });
 });
 
-describe('Admin Question Import - Subject/Topic Validation', () => {
-  /**
-   * Requirement 5.2, 5.4: Questions can have subject_id without topic_id
-   */
-  it('should accept questions with only subject_id (no topic_id)', () => {
-    const question: QuestionInput = {
-      subject_id: 'test-subject-id',
-      topic_id: null,
-      question_text: 'What is 2 + 2?',
-      option_a: '2',
-      option_b: '3',
-      option_c: '4',
-      option_d: '5',
-      correct_answer: 'C',
-      explanation: 'Direct subject assignment',
-      exam_type: 'JAMB',
-      exam_year: 2023,
-      is_active: true,
-    };
-
-    // Verify the question is valid with only subject_id
-    expect(question.subject_id).toBe('test-subject-id');
-    expect(question.topic_id).toBeNull();
-    expect(question.question_text).toBe('What is 2 + 2?');
-  });
-
-  it('should accept questions with only topic_id (no subject_id)', () => {
-    const question: QuestionInput = {
-      subject_id: null,
-      topic_id: 'test-topic-id',
-      question_text: 'What is 2 + 2?',
-      option_a: '2',
-      option_b: '3',
-      option_c: '4',
-      option_d: '5',
-      correct_answer: 'C',
-      explanation: 'Topic-based assignment',
-      exam_type: 'WAEC',
-      exam_year: 2023,
-      is_active: true,
-    };
-
-    // Verify the question is valid with only topic_id
-    expect(question.subject_id).toBeNull();
-    expect(question.topic_id).toBe('test-topic-id');
-    expect(question.question_text).toBe('What is 2 + 2?');
-  });
-
-  it('should accept questions with both subject_id and topic_id', () => {
-    const question: QuestionInput = {
-      subject_id: 'test-subject-id',
-      topic_id: 'test-topic-id',
-      question_text: 'What is 2 + 2?',
-      option_a: '2',
-      option_b: '3',
-      option_c: '4',
-      option_d: '5',
-      correct_answer: 'C',
-      explanation: 'Both subject and topic',
-      exam_type: 'JAMB',
-      exam_year: 2023,
-      is_active: true,
-    };
-
-    // Verify the question is valid with both IDs
-    expect(question.subject_id).toBe('test-subject-id');
-    expect(question.topic_id).toBe('test-topic-id');
-    expect(question.question_text).toBe('What is 2 + 2?');
-  });
-});
-
 describe('Admin Question Import - Validation Logic (Requirements 5.2, 5.4)', () => {
   /**
-   * Requirement 5.2: Validate that either subject_id or topic_id is provided
+   * Requirement 5.2: Validate that subject_id is required
    */
-  it('should reject questions with neither subject_id nor topic_id', () => {
+  it('should reject questions without subject_id', () => {
     const question: QuestionInput = {
       subject_id: null,
-      topic_id: null,
       question_text: 'What is 2 + 2?',
       option_a: '2',
       option_b: '3',
       option_c: '4',
       option_d: '5',
       correct_answer: 'C',
-      explanation: 'Invalid - no subject or topic',
+      explanation: 'Invalid - no subject',
       is_active: true,
     };
 
     // This question should be considered invalid
     // The validation should catch this during import
     expect(question.subject_id).toBeNull();
-    expect(question.topic_id).toBeNull();
   });
 
   /**
@@ -308,7 +234,6 @@ describe('Admin Question Import - Validation Logic (Requirements 5.2, 5.4)', () 
   it('should validate all required fields are present', () => {
     const validQuestion: QuestionInput = {
       subject_id: 'test-subject-id',
-      topic_id: null,
       question_text: 'What is 2 + 2?',
       option_a: '2',
       option_b: '3',
@@ -330,7 +255,7 @@ describe('Admin Question Import - Validation Logic (Requirements 5.2, 5.4)', () 
 
   it('should validate correct_answer is one of A, B, C, D', () => {
     const validAnswers = ['A', 'B', 'C', 'D'];
-    
+
     validAnswers.forEach(answer => {
       const question: QuestionInput = {
         subject_id: 'test-subject-id',
@@ -354,7 +279,6 @@ describe('Admin Question Import - Validation Logic (Requirements 5.2, 5.4)', () 
   it('should handle direct subject assignment without topic', () => {
     const question: QuestionInput = {
       subject_id: 'mathematics-id',
-      topic_id: null,
       question_text: 'Solve: 2x + 5 = 15',
       option_a: '3',
       option_b: '5',
@@ -369,7 +293,6 @@ describe('Admin Question Import - Validation Logic (Requirements 5.2, 5.4)', () 
 
     // Verify direct subject assignment is valid
     expect(question.subject_id).toBe('mathematics-id');
-    expect(question.topic_id).toBeNull();
     expect(question.question_text).toBeTruthy();
   });
 
@@ -422,10 +345,10 @@ describe('Admin Question Import - Validation Logic (Requirements 5.2, 5.4)', () 
    */
   it('should format validation error messages clearly', () => {
     const questionPreview = 'What is 2 + 2?';
-    
+
     // Test various error message formats
     const errorMessages = [
-      `Validation Error: Either subject_id or topic_id must be provided. Question: "${questionPreview.substring(0, 50)}..."`,
+      `Validation Error: subject_id must be provided. Question: "${questionPreview.substring(0, 50)}..."`,
       `Validation failed: Missing required fields [question_text]. Question: "${questionPreview.substring(0, 50)}..."`,
       `Validation failed: correct_answer must be A, B, C, or D (got "E"). Question: "${questionPreview.substring(0, 50)}..."`,
     ];

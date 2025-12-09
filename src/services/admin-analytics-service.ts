@@ -111,7 +111,7 @@ export class AdminAnalyticsService {
       // Get all attempts for calculations
       const { data: attempts } = await supabase
         .from('quiz_attempts')
-        .select('score_percentage, subject_id, topic_id');
+        .select('score_percentage, subject_id');
 
       let totalScore = 0;
       const attemptsBySubject: Record<string, number> = {};
@@ -170,14 +170,12 @@ export class AdminAnalyticsService {
         .from('subjects')
         .select('*', { count: 'exact', head: true });
 
-      const { count: totalTopics } = await supabase
-        .from('topics')
-        .select('*', { count: 'exact', head: true });
 
-      // Questions by difficulty
+
+      // Get questions by exam type
       const { data: questions } = await supabase
         .from('questions')
-        .select('exam_type, topic_id');
+        .select('exam_type');
 
       const questionsByExamType: Record<string, number> = { JAMB: 0, WAEC: 0 };
 
@@ -188,8 +186,8 @@ export class AdminAnalyticsService {
       return {
         totalQuestions: totalQuestions || 0,
         totalSubjects: totalSubjects || 0,
-        totalTopics: totalTopics || 0,
-        questionsBySubject: {}, // Would need join with topics
+        totalTopics: 0, // Topics feature removed
+        questionsBySubject: {}, // Would need join with subjects
         questionsByExamType,
       };
     } catch (err) {

@@ -42,9 +42,9 @@ export class AdminQuestionService {
     const errors: string[] = [];
     const questionPreview = question.question_text?.substring(0, 50) || 'Unknown question';
 
-    // Validate that either subject_id or topic_id is provided
-    if (!question.subject_id && !question.topic_id) {
-      errors.push(`Either subject_id or topic_id must be provided. Question: "${questionPreview}..."`);
+    // Validate that subject_id is provided
+    if (!question.subject_id) {
+      errors.push(`subject_id must be provided. Question: "${questionPreview}..."`);
     }
 
     // Validate required fields
@@ -266,7 +266,7 @@ export class AdminQuestionService {
       // Get all questions for statistics
       const { data: questions } = await supabase
         .from('questions')
-        .select('topic_id, exam_type, exam_year');
+        .select('exam_type, exam_year');
 
       const byExamType: Record<string, number> = { JAMB: 0, WAEC: 0 };
       const byYear: Record<number, number> = {};

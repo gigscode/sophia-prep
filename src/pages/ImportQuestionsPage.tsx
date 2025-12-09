@@ -5,9 +5,8 @@ import { Select } from '../components/ui/Select';
 import { showToast } from '../components/ui/Toast';
 import { adminQuestionService, type QuestionInput } from '../services/admin-question-service';
 import { adminSubjectService } from '../services/admin-subject-service';
-import { adminTopicService } from '../services/admin-topic-service';
 import { Upload, FileText, Download, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
-import type { Subject, Topic } from '../integrations/supabase/types';
+import type { Subject } from '../integrations/supabase/types';
 import { Card } from '../components/ui/Card';
 
 type ImportFormat = 'json' | 'csv' | 'simple';
@@ -59,9 +58,7 @@ export function ImportQuestionsPage() {
     const [file, setFile] = useState<File | null>(null);
     const [importing, setImporting] = useState(false);
     const [subjects, setSubjects] = useState<Subject[]>([]);
-    const [topics, setTopics] = useState<Topic[]>([]);
     const [selectedSubject, setSelectedSubject] = useState<string>('');
-    const [selectedTopic, setSelectedTopic] = useState<string>('');
     const [selectedExamType, setSelectedExamType] = useState<'JAMB' | 'WAEC' | ''>('');
     const [selectedExamYear, setSelectedExamYear] = useState<string>('');
     const [importResult, setImportResult] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
@@ -86,18 +83,6 @@ export function ImportQuestionsPage() {
 
     const handleSubjectChange = async (subjectId: string) => {
         setSelectedSubject(subjectId);
-        setSelectedTopic('');
-        if (subjectId) {
-            try {
-                const fetchedTopics = await adminTopicService.getAllTopics(subjectId);
-                setTopics(fetchedTopics);
-            } catch (error) {
-                console.error('Failed to load topics:', error);
-                showToast('Failed to load topics', 'error');
-            }
-        } else {
-            setTopics([]);
-        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -327,18 +312,14 @@ export function ImportQuestionsPage() {
                 parsedQuestions = parseJSON(text);
             }
 
-            // Fetch all topics grouped by subject for global lookup
-            const groupedTopics = await adminTopicService.getTopicsGroupedBySubject();
-
-            // Convert to QuestionInput format
+            // Convert to QuestionInput format  
             const questionsToImport: QuestionInput[] = [];
             const errors: string[] = [];
 
             for (const pq of parsedQuestions) {
-                let topicId = selectedTopic || null;
                 let subjectId = selectedSubject;
 
-                // 1. Resolve Subject (if not already selected)
+                // Resolve Subject (if not already selected)
                 if (!subjectId) {
                     if (pq.subject) {
                         const foundSubject = subjects.find(s =>
@@ -356,53 +337,8 @@ export function ImportQuestionsPage() {
                     continue;
                 }
 
-                // 2. Resolve Topic (if not already selected and if topic is provided in data)
-                if (!topicId && pq.topic) {
-                    // Look up in groupedTopics
-                    const subjectTopics = groupedTopics[subjectId] || [];
-                    let foundTopic = subjectTopics.find(t => t.name.toLowerCase().trim() === pq.topic?.toLowerCase().trim());
-
-                    if (!foundTopic) {
-                        // Create new topic
-                        try {
-                            console.log(`Creating new topic: ${pq.topic} for subject: ${subjectId}`);
-                            const newTopic = await adminTopicService.createTopic({
-                                subject_id: subjectId,
-                                name: pq.topic.trim(),
-                                description: `Auto-created from import`,
-                                order_index: 0,
-                                is_active: true,
-                            });
-
-                            if (newTopic) {
-                                foundTopic = newTopic;
-                                // Update local cache
-                                if (!groupedTopics[subjectId]) groupedTopics[subjectId] = [];
-                                groupedTopics[subjectId].push(newTopic);
-                            } else {
-                                errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}..."`);
-                                continue;
-                            }
-                        } catch (e: unknown) {
-                            console.error('Failed to create topic', e);
-                            errors.push(`Failed to create topic "${pq.topic}" for question: "${pq.question_text.substring(0, 30)}...". Error: ${e.message || JSON.stringify(e)}`);
-                            continue;
-                        }
-                    }
-                    topicId = foundTopic?.id || null;
-                }
-
-                // Build question input with either subject_id or topic_id (or both)
-                // topic_id can be null for direct subject assignment
-                // Validate that at least one of subject_id or topic_id is provided
-                if (!subjectId && !topicId) {
-                    errors.push(`Validation Error: Either subject_id or topic_id must be provided for question: "${pq.question_text.substring(0, 30)}..."`);
-                    continue;
-                }
-
                 questionsToImport.push({
                     subject_id: subjectId,
-                    topic_id: topicId,
                     question_text: pq.question_text,
                     option_a: pq.option_a,
                     option_b: pq.option_b,
@@ -438,8 +374,8 @@ export function ImportQuestionsPage() {
                 showToast(`Failed to import ${result.failed} questions`, 'error');
             }
         } catch (error: unknown) {
-            showToast(`Import failed: ${error.message}`, 'error');
-            setImportResult({ success: 0, failed: 0, errors: [error.message] });
+            showToast(`Import failed: ${(error as Error).message}`, 'error');
+            setImportResult({ success: 0, failed: 0, errors: [(error as Error).message] });
         } finally {
             setImporting(false);
         }
@@ -647,21 +583,6 @@ EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
                                         ...subjects.map(s => ({ value: s.id, label: s.name }))
                                     ]}
                                 />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Topic (Optional)</label>
-                                <Select
-                                    value={selectedTopic}
-                                    onChange={(e) => setSelectedTopic(e.target.value)}
-                                    options={[
-                                        { value: '', label: 'No Topic (Direct Subject Assignment)' },
-                                        ...topics.map(t => ({ value: t.id, label: t.name }))
-                                    ]}
-                                    disabled={!selectedSubject}
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Leave empty to assign questions directly to the subject
-                                </p>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-2">Exam Type (Optional)</label>

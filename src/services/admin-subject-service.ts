@@ -81,8 +81,8 @@ export class AdminSubjectService {
 
   async createSubject(input: SubjectInput): Promise<Subject | null> {
     try {
-      const { data, error } = await supabase
-        .from('subjects')
+      const { data, error } = await (supabase
+        .from('subjects') as any)
         .insert([input])
         .select()
         .single();
@@ -101,8 +101,8 @@ export class AdminSubjectService {
 
   async updateSubject(id: string, updates: Partial<SubjectInput>): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('subjects')
+      const { error } = await (supabase
+        .from('subjects') as any)
         .update(updates)
         .eq('id', id);
 
@@ -122,12 +122,12 @@ export class AdminSubjectService {
     try {
       // Check if subject has questions
       const { count } = await supabase
-        .from('topics')
+        .from('questions')
         .select('id', { count: 'exact', head: true })
         .eq('subject_id', id);
 
       if (count && count > 0) {
-        throw new Error('Cannot delete subject with existing topics');
+        throw new Error('Cannot delete subject with existing questions');
       }
 
       const { error } = await supabase
@@ -149,8 +149,8 @@ export class AdminSubjectService {
 
   async bulkUpdateStatus(ids: string[], isActive: boolean): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('subjects')
+      const { error } = await (supabase
+        .from('subjects') as any)
         .update({ is_active: isActive })
         .in('id', ids);
 

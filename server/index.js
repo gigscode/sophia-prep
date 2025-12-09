@@ -185,14 +185,10 @@ app.get('/api/questions', async (req, res) => {
     if (subErr || !subjectRow) return res.status(404).json({ error: 'subject not found' });
 
     const subjectId = subjectRow.id;
-    const { data: topics } = await supabase.from('topics').select('id').eq('subject_id', subjectId);
-    const topicIds = (topics || []).map(t => t.id);
-    if (topicIds.length === 0) return res.json([]);
-
     const { data: questions } = await supabase
       .from('questions')
-      .select('id,question_text,option_a,option_b,option_c,option_d,correct_answer,explanation,topic_id,exam_year,exam_type')
-      .in('topic_id', topicIds)
+      .select('id,question_text,option_a,option_b,option_c,option_d,correct_answer,explanation,exam_year,exam_type')
+      .eq('subject_id', subjectId)
       .limit(1000);
 
     // shuffle and slice
@@ -274,7 +270,7 @@ app.post('/api/import-quizzes', async (req, res) => {
     });
     extra.forEach(e => rows.push(normalizeExtraEntry(e)));
 
-    // Resolve subjects and topics and prepare rows with topic_id
+    // Resolve subjects and prepare rows with subject_id
     const resolvedRows = [];
     for (const r of rows) {
       // find subject by slug
@@ -292,28 +288,14 @@ app.post('/api/import-quizzes', async (req, res) => {
         }
       }
 
-      let topicId = null;
-      if (subjectRow && r.topic) {
-        // try find existing topic
-        const { data: existing } = await supabase.from('topics').select('id').eq('subject_id', subjectRow.id).eq('name', r.topic).maybeSingle();
-        if (existing && existing.id) {
-          topicId = existing.id;
-        } else {
-          // create topic
-          const { data: newTopic, error: tErr } = await supabase.from('topics').insert({ subject_id: subjectRow.id, name: r.topic, slug: r.topic.toLowerCase().replace(/\s+/g,'-'), description: `${r.topic} questions`, order_index: 0, is_active: true }).select('id').maybeSingle();
-          if (newTopic && newTopic.id) topicId = newTopic.id;
-          if (tErr) console.error('Failed to create topic', tErr.message || tErr);
-        }
-      }
-
-      if (!topicId) {
-        // skip row if we can't find or create a topic
-        console.warn('Skipping question because topic_id could not be resolved', r.id, r.topic, r.subject);
+      if (!subjectRow) {
+        // skip row if we can't find or create a subject
+        console.warn('Skipping question because subject could not be resolved', r.id, r.subject);
         continue;
       }
 
       resolvedRows.push({
-        topic_id: topicId,
+        subject_id: subjectRow.id,
         question_text: r.question_text,
         option_a: r.option_a,
         option_b: r.option_b,
@@ -355,44 +337,6 @@ app.post('/api/admin-login', (req, res) => {
   res.json({ token, expiresIn: 3600 });
 });
 
-// Topics endpoints (read-only proxy)
-app.get('/api/topics', async (req, res) => {
-  try {
-    const { subject_id } = req.query;
-    if (!subject_id) return res.status(400).json({ error: 'subject_id required' });
-    const { data, error } = await supabase.from('topics').select('*').eq('subject_id', String(subject_id)).eq('is_active', true).order('order_index', { ascending: true });
-    if (error) return res.status(500).json({ error: error.message || error });
-    return res.json(data || []);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'internal error' });
-  }
-});
-
-app.get('/api/topics/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { data, error } = await supabase.from('topics').select('*').eq('id', id).single();
-    if (error) return res.status(404).json({ error: 'not found' });
-    return res.json(data);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'internal error' });
-  }
-});
-
-app.get('/api/topics/count', async (req, res) => {
-  try {
-    const { subject_id } = req.query;
-    if (!subject_id) return res.status(400).json({ error: 'subject_id required' });
-    const { count, error } = await supabase.from('topics').select('*', { count: 'exact', head: true }).eq('subject_id', String(subject_id)).eq('is_active', true);
-    if (error) return res.status(500).json({ error: error.message || error });
-    return res.json({ count: count || 0 });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'internal error' });
-  }
-});
 
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Supabase proxy server listening on http://localhost:${port}`));

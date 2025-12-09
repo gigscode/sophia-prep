@@ -11,7 +11,7 @@ vi.mock('../integrations/supabase/client', () => ({
 
 describe('QuestionService', () => {
   let questionService: QuestionService;
-  
+
   beforeEach(() => {
     questionService = new QuestionService();
     vi.clearAllMocks();
@@ -51,7 +51,7 @@ describe('QuestionService', () => {
       });
 
       const result = await questionService.getQuestionsBySubjectSlug('mathematics');
-      
+
       expect(result).toHaveLength(2);
       expect(result[0].id).toBe('q1');
     });
@@ -75,7 +75,7 @@ describe('QuestionService', () => {
       });
 
       const result = await questionService.getQuestionsByYear(2023);
-      
+
       expect(result).toHaveLength(2);
       expect(supabase.from).toHaveBeenCalledWith('questions');
     });
@@ -104,7 +104,7 @@ describe('QuestionService', () => {
       });
 
       const result = await questionService.getQuestionsByYear(2023, { exam_type: 'JAMB' });
-      
+
       expect(result).toBeDefined();
     });
   });
@@ -112,13 +112,13 @@ describe('QuestionService', () => {
   describe('getQuestionsByFilters', () => {
     it('should use subject-based filtering when subject_slug is provided', async () => {
       const spy = vi.spyOn(questionService, 'getQuestionsBySubjectSlug').mockResolvedValue([]);
-      
+
       await questionService.getQuestionsByFilters({
         subject_slug: 'mathematics',
         exam_year: 2023,
         exam_type: 'JAMB'
       });
-      
+
       expect(spy).toHaveBeenCalledWith('mathematics', {
         exam_year: 2023,
         exam_type: 'JAMB',
@@ -128,13 +128,13 @@ describe('QuestionService', () => {
 
     it('should use subject_id filtering when subject_id is provided', async () => {
       const spy = vi.spyOn(questionService, 'getQuestionsBySubjectId').mockResolvedValue([]);
-      
+
       await questionService.getQuestionsByFilters({
         subject_id: 'subject-123',
         exam_year: 2023,
         exam_type: 'JAMB'
       });
-      
+
       expect(spy).toHaveBeenCalledWith('subject-123', {
         exam_year: 2023,
         exam_type: 'JAMB',
@@ -142,29 +142,14 @@ describe('QuestionService', () => {
       });
     });
 
-    it('should use topic-based filtering when topic_id is provided (backward compatibility)', async () => {
-      const spy = vi.spyOn(questionService, 'getQuestionsByTopic').mockResolvedValue([]);
-      
-      await questionService.getQuestionsByFilters({
-        topic_id: 'topic-456',
-        exam_year: 2023,
-        exam_type: 'WAEC'
-      });
-      
-      expect(spy).toHaveBeenCalledWith('topic-456', {
-        exam_year: 2023,
-        exam_type: 'WAEC',
-        limit: undefined
-      });
-    });
 
     it('should use year-based filtering when only year is provided', async () => {
       const spy = vi.spyOn(questionService, 'getQuestionsByYear').mockResolvedValue([]);
-      
+
       await questionService.getQuestionsByFilters({
         exam_year: 2023
       });
-      
+
       expect(spy).toHaveBeenCalledWith(2023, { limit: undefined });
     });
 
@@ -189,7 +174,7 @@ describe('QuestionService', () => {
         exam_type: 'JAMB',
         exam_year: 2023
       });
-      
+
       expect(result).toBeDefined();
     });
   });
@@ -212,7 +197,7 @@ describe('QuestionService', () => {
       ];
 
       const result = normalizeQuestions(rawQuestions);
-      
+
       expect(result).toHaveLength(1);
       expect(result[0].text).toBe('What is 2+2?');
       expect(result[0].options).toHaveLength(4);
@@ -242,7 +227,7 @@ describe('QuestionService', () => {
       ];
 
       const result = normalizeQuestions(rawQuestions, { exam_year: 2023 });
-      
+
       expect(result).toHaveLength(1);
       expect(result[0].exam_year).toBe(2023);
     });
@@ -268,7 +253,7 @@ describe('QuestionService', () => {
       ];
 
       const result = normalizeQuestions(rawQuestions, { exam_type: 'JAMB' });
-      
+
       expect(result).toHaveLength(1);
       expect(result[0].exam_type).toBe('JAMB');
     });
@@ -302,7 +287,7 @@ describe('QuestionService', () => {
       ];
 
       const result = normalizeQuestions(rawQuestions, { exam_year: 2023, exam_type: 'JAMB' });
-      
+
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('q1');
       expect(result[0].exam_year).toBe(2023);

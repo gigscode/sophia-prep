@@ -3,14 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { subjectService } from '../services/subject-service';
 import * as LucideIcons from 'lucide-react';
 import { BookOpen } from 'lucide-react';
-import { topicService } from '../services/topic-service';
-import type { Subject, Topic } from '../integrations/supabase/types';
+import type { Subject } from '../integrations/supabase/types';
 
 export function SubjectDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [subject, setSubject] = useState<Subject | null>(null);
-  const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +27,6 @@ export function SubjectDetailPage() {
         setError('Subject not found');
       } else {
         setSubject(data);
-        // Load topics for this subject
-        await loadTopics(data.id);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load subject');
@@ -39,15 +35,7 @@ export function SubjectDetailPage() {
     }
   };
 
-  const loadTopics = async (subjectId: string) => {
-    try {
-      const data = await topicService.getTopicsBySubject(subjectId);
-      setTopics(data);
-    } catch (err) {
-      console.error('Failed to load topics:', err);
-      // Don't set error state, just log it
-    }
-  };
+
 
   const getExamTypeBadgeColor = (examType: string): string => {
     switch (examType) {
@@ -145,45 +133,38 @@ export function SubjectDetailPage() {
         </div>
       </div>
 
-      {/* Topics Section */}
-      <div className="bg-white rounded-lg shadow-lg p-8">
-        <h2 className="text-2xl font-bold mb-4">Topics</h2>
-        {topics.length === 0 ? (
-          <p className="text-gray-600">
-            No topics available for this subject yet.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {topics.map((topic, index) => (
-              <div
-                key={topic.id}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold">
-                    {index + 1}
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg mb-1">{topic.name}</h3>
-                    <p className="text-gray-600 text-sm">{topic.description}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+
 
       {/* Action Buttons */}
       <div className="mt-8 flex gap-4 justify-center md:justify-end">
         <button
-          onClick={() => navigate(`/quiz/practice?subject=${subject.slug}`)}
+          onClick={() => {
+            // Store quiz config and navigate directly to unified quiz
+            const config = {
+              examType: subject.exam_type === 'BOTH' ? 'JAMB' : subject.exam_type,
+              mode: 'practice' as const,
+              selectionMethod: 'subject' as const,
+              subjectSlug: subject.slug,
+            };
+            sessionStorage.setItem('quizConfig', JSON.stringify(config));
+            navigate('/quiz/unified');
+          }}
           className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
           Start Practice
         </button>
         <button
-          onClick={() => navigate(`/quiz/cbt?subject=${subject.slug}`)}
+          onClick={() => {
+            // Store quiz config and navigate directly to unified quiz
+            const config = {
+              examType: subject.exam_type === 'BOTH' ? 'JAMB' : subject.exam_type,
+              mode: 'exam' as const,
+              selectionMethod: 'subject' as const,
+              subjectSlug: subject.slug,
+            };
+            sessionStorage.setItem('quizConfig', JSON.stringify(config));
+            navigate('/quiz/unified');
+          }}
           className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
         >
           Take Quiz
