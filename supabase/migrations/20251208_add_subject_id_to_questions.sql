@@ -10,40 +10,40 @@
 -- ============================================================================
 
 -- Step 1: Add subject_id column (nullable initially for backfill)
-ALTER TABLE questions 
-ADD COLUMN IF NOT EXISTS subject_id UUID REFERENCES subjects(id) ON DELETE SET NULL;
+ALTER TABLE public.questions 
+ADD COLUMN IF NOT EXISTS subject_id UUID REFERENCES public.subjects(id) ON DELETE SET NULL;
 
 -- Step 2: Create index on subject_id for query performance
-CREATE INDEX IF NOT EXISTS idx_questions_subject_id ON questions(subject_id);
+CREATE INDEX IF NOT EXISTS idx_questions_subject_id ON public.questions(subject_id);
 
 -- Step 3: Backfill subject_id from existing topic relationships
 -- This populates subject_id for all questions that have a valid topic_id
-UPDATE questions q
+UPDATE public.questions q
 SET subject_id = t.subject_id
-FROM topics t
+FROM public.topics t
 WHERE q.topic_id = t.id
   AND q.subject_id IS NULL;
 
 -- Step 4: Make topic_id nullable (was previously NOT NULL)
 -- First, drop the existing foreign key constraint
-ALTER TABLE questions
+ALTER TABLE public.questions
 DROP CONSTRAINT IF EXISTS questions_topic_id_fkey;
 
 -- Make the column nullable
-ALTER TABLE questions 
+ALTER TABLE public.questions 
 ALTER COLUMN topic_id DROP NOT NULL;
 
 -- Re-add the foreign key constraint with ON DELETE SET NULL
-ALTER TABLE questions
+ALTER TABLE public.questions
 ADD CONSTRAINT questions_topic_id_fkey 
   FOREIGN KEY (topic_id) 
-  REFERENCES topics(id) 
+  REFERENCES public.topics(id) 
   ON DELETE SET NULL;
 
 -- Step 5: Add check constraint to ensure either subject_id or topic_id is provided
 -- This ensures data integrity - every question must be associated with at least
 -- a subject or a topic
-ALTER TABLE questions
+ALTER TABLE public.questions
 ADD CONSTRAINT questions_subject_or_topic_check
 CHECK (subject_id IS NOT NULL OR topic_id IS NOT NULL);
 

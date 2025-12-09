@@ -2,62 +2,34 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { UnifiedQuiz } from './UnifiedQuiz';
 import type { QuizConfig } from '../types/quiz-config';
+import { questionService } from '../services/question-service';
+import { subjectService } from '../services/subject-service';
 
 // Mock services
-const mockGetQuestionsBySubjectSlug = vi.fn();
-const mockGetSubjectsByExamType = vi.fn();
-const mockGetSubjectBySlug = vi.fn();
-
-vi.mock('../services/question-service', () => ({
-  questionService: {
-    getQuestionsBySubjectSlug: mockGetQuestionsBySubjectSlug
-  },
-  normalizeQuestions: vi.fn((questions) => questions.map((q: any) => ({
-    id: q.id,
-    text: q.question_text,
-    options: [
-      { key: 'A', text: q.option_a },
-      { key: 'B', text: q.option_b },
-      { key: 'C', text: q.option_c },
-      { key: 'D', text: q.option_d }
-    ],
-    correct: q.correct_answer,
-    explanation: q.explanation,
-    examYear: q.exam_year,
-    examType: q.exam_type
-  })))
-}));
-
-vi.mock('../services/subject-service', () => ({
-  subjectService: {
-    getSubjectsByExamType: mockGetSubjectsByExamType,
-    getSubjectBySlug: mockGetSubjectBySlug
-  }
-}));
-
-vi.mock('../services/analytics-service', () => ({
-  analyticsService: {
-    saveQuizAttempt: vi.fn().mockResolvedValue({})
-  }
-}));
-
-vi.mock('../services/timer-service', () => ({
-  timerService: {
-    getDuration: vi.fn().mockResolvedValue(3600),
-    startTimer: vi.fn().mockReturnValue({
-      id: 'timer-1',
-      pause: vi.fn(),
-      resume: vi.fn(),
-      getRemaining: vi.fn().mockReturnValue(3600)
-    }),
-    stopTimer: vi.fn(),
-    restoreTimer: vi.fn().mockReturnValue(null)
-  }
-}));
+vi.mock('../services/question-service');
+vi.mock('../services/subject-service');
+vi.mock('../services/analytics-service');
+vi.mock('../services/timer-service');
 
 describe('UnifiedQuiz - Explanation Visibility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([
+      {
+        id: '1',
+        question_text: 'Test question 1?',
+        option_a: 'Option A',
+        option_b: 'Option B',
+        option_c: 'Option C',
+        option_d: 'Option D',
+        correct_answer: 'A',
+        explanation: 'This is the explanation for question 1',
+        exam_type: 'JAMB',
+        exam_year: 2023
+      } as any
+    ]);
+    vi.mocked(subjectService.getSubjectBySlug).mockResolvedValue({ id: 'subject-1', name: 'Mathematics' } as any);
+    vi.mocked(subjectService.getSubjectsByExamType).mockResolvedValue([]);
   });
 
   it('should show explanations immediately in practice mode after answering', async () => {
@@ -206,6 +178,416 @@ describe('UnifiedQuiz - Explanation Visibility', () => {
       const nextButton = screen.getByText(/Next Question|Complete Quiz/i);
       expect(nextButton).toBeInTheDocument();
       expect(nextButton).not.toBeDisabled();
+    });
+  });
+});
+
+/**
+ * Tests for UnifiedQuiz compatibility with updated Question Service
+ * Verifies Requirements: 1.3, 1.4, 7.4
+ */
+describe('UnifiedQuiz - Question Service Compatibility', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(subjectService.getSubjectBySlug).mockResolvedValue({ 
+      id: 'subject-1', 
+      name: 'Mathematics', 
+      slug: 'mathematics' 
+    } as any);
+  });
+
+  describe('Subject-based quiz flow', () => {
+    it('should load questions by subject using updated Question Service', async () => {
+      // Mock questions returned by the updated service (with subject_id)
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([
+        {
+          id: 'q1',
+          subject_id: 'subject-1',
+          topic_id: null, // Questions can now have null topic_id
+          question_text: 'What is 2 + 2?',
+          option_a: '3',
+          option_b: '4',
+          option_c: '5',
+          option_d: '6',
+          correct_answer: 'B',
+          explanation: 'Basic addition',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        },
+        {
+          id: 'q2',
+          subject_id: 'subject-1',
+          topic_id: 'topic-1', // Some questions may still have topics
+          question_text: 'What is 3 + 3?',
+          option_a: '5',
+          option_b: '6',
+          option_c: '7',
+          option_d: '8',
+          correct_answer: 'B',
+          explanation: 'More addition',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        }
+      ] as any);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics'
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      // Verify questions load successfully
+      await waitFor(() => {
+        expect(screen.getByText(/What is 2 \+ 2\?/i)).toBeInTheDocument();
+      });
+
+      // Verify the service was called with correct parameters
+      expect(questionService.getQuestionsBySubjectSlug).toHaveBeenCalledWith(
+        'mathematics',
+        expect.objectContaining({
+          exam_type: 'JAMB',
+          limit: 60
+        })
+      );
+    });
+
+    it('should apply exam_year filter when provided', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([
+        {
+          id: 'q1',
+          subject_id: 'subject-1',
+          topic_id: null,
+          question_text: '2023 question',
+          option_a: 'A',
+          option_b: 'B',
+          option_c: 'C',
+          option_d: 'D',
+          correct_answer: 'A',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        }
+      ] as any);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics',
+        year: 2023
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/2023 question/i)).toBeInTheDocument();
+      });
+
+      // Verify year filter was passed
+      expect(questionService.getQuestionsBySubjectSlug).toHaveBeenCalledWith(
+        'mathematics',
+        expect.objectContaining({
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          limit: 60
+        })
+      );
+    });
+  });
+
+  describe('Year-based quiz flow', () => {
+    it('should load questions by year across multiple subjects', async () => {
+      // Mock multiple subjects
+      vi.mocked(subjectService.getSubjectsByExamType).mockResolvedValue([
+        { id: 'subject-1', name: 'Mathematics', slug: 'mathematics' },
+        { id: 'subject-2', name: 'English', slug: 'english' }
+      ] as any);
+
+      // Mock questions for each subject
+      vi.mocked(questionService.getQuestionsBySubjectSlug)
+        .mockResolvedValueOnce([
+          {
+            id: 'q1',
+            subject_id: 'subject-1',
+            topic_id: null,
+            question_text: 'Math question 2023',
+            option_a: 'A',
+            option_b: 'B',
+            option_c: 'C',
+            option_d: 'D',
+            correct_answer: 'A',
+            exam_type: 'JAMB',
+            exam_year: 2023,
+            is_active: true
+          }
+        ] as any)
+        .mockResolvedValueOnce([
+          {
+            id: 'q2',
+            subject_id: 'subject-2',
+            topic_id: null,
+            question_text: 'English question 2023',
+            option_a: 'A',
+            option_b: 'B',
+            option_c: 'C',
+            option_d: 'D',
+            correct_answer: 'B',
+            exam_type: 'JAMB',
+            exam_year: 2023,
+            is_active: true
+          }
+        ] as any);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'year',
+        year: 2023
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      // Verify questions from both subjects load
+      await waitFor(() => {
+        expect(screen.getByText(/Math question 2023|English question 2023/i)).toBeInTheDocument();
+      });
+
+      // Verify service was called for each subject with year filter
+      expect(questionService.getQuestionsBySubjectSlug).toHaveBeenCalledWith(
+        'mathematics',
+        expect.objectContaining({
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          limit: 10
+        })
+      );
+
+      expect(questionService.getQuestionsBySubjectSlug).toHaveBeenCalledWith(
+        'english',
+        expect.objectContaining({
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          limit: 10
+        })
+      );
+    });
+  });
+
+  describe('Error handling for empty question sets', () => {
+    it('should display error message when no questions are available', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([]);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics'
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      // Wait for error message to appear
+      await waitFor(() => {
+        expect(screen.getByText(/No questions available/i)).toBeInTheDocument();
+      });
+
+      // Verify navigation options are available
+      expect(screen.getByText(/Back to Mode Selection/i)).toBeInTheDocument();
+    });
+
+    it('should handle service errors gracefully', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockRejectedValue(
+        new Error('Database connection failed')
+      );
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics'
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      // Wait for error message
+      await waitFor(() => {
+        expect(screen.getByText(/Database connection failed/i)).toBeInTheDocument();
+      });
+
+      // Verify retry option is available
+      expect(screen.getByText(/Retry/i)).toBeInTheDocument();
+    });
+
+    it('should show appropriate message when subject has no questions for selected year', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([]);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics',
+        year: 2020
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/No questions available/i)).toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Backward compatibility', () => {
+    it('should work with questions that have both subject_id and topic_id', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([
+        {
+          id: 'q1',
+          subject_id: 'subject-1',
+          topic_id: 'topic-1', // Has topic
+          question_text: 'Question with topic',
+          option_a: 'A',
+          option_b: 'B',
+          option_c: 'C',
+          option_d: 'D',
+          correct_answer: 'A',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        }
+      ] as any);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics'
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Question with topic/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should work with questions that have only subject_id (null topic_id)', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([
+        {
+          id: 'q1',
+          subject_id: 'subject-1',
+          topic_id: null, // No topic
+          question_text: 'Question without topic',
+          option_a: 'A',
+          option_b: 'B',
+          option_c: 'C',
+          option_d: 'D',
+          correct_answer: 'A',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        }
+      ] as any);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics'
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText(/Question without topic/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should work with mixed questions (some with topics, some without)', async () => {
+      vi.mocked(questionService.getQuestionsBySubjectSlug).mockResolvedValue([
+        {
+          id: 'q1',
+          subject_id: 'subject-1',
+          topic_id: 'topic-1',
+          question_text: 'With topic',
+          option_a: 'A',
+          option_b: 'B',
+          option_c: 'C',
+          option_d: 'D',
+          correct_answer: 'A',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        },
+        {
+          id: 'q2',
+          subject_id: 'subject-1',
+          topic_id: null,
+          question_text: 'Without topic',
+          option_a: 'A',
+          option_b: 'B',
+          option_c: 'C',
+          option_d: 'D',
+          correct_answer: 'B',
+          exam_type: 'JAMB',
+          exam_year: 2023,
+          is_active: true
+        }
+      ] as unknown);
+
+      const config: QuizConfig = {
+        examType: 'JAMB',
+        mode: 'practice',
+        selectionMethod: 'subject',
+        subjectSlug: 'mathematics'
+      };
+
+      render(
+        <BrowserRouter>
+          <UnifiedQuiz config={config} />
+        </BrowserRouter>
+      );
+
+      // First question should be visible
+      await waitFor(() => {
+        expect(screen.getByText(/With topic/i)).toBeInTheDocument();
+      });
     });
   });
 });
