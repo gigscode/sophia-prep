@@ -87,7 +87,9 @@
   - Ensure all tests pass, ask the user if questions arise.
 
 
-- [-] 5. Test end-to-end navigation flows
+- [x] 5. Test end-to-end navigation flows
+
+
 
 
 
