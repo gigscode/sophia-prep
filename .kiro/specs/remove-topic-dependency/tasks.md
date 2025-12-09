@@ -232,7 +232,9 @@
 
 
 
-- [ ] 10. Deploy and monitor
+- [x] 10. Deploy and monitor
+
+
 
 
 
