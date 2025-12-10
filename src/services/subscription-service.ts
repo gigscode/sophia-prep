@@ -63,7 +63,7 @@ class SubscriptionService {
         .from('user_subscriptions')
         .select(`
           *,
-          subscription_plans (
+          subscription_plans!inner (
             name,
             description,
             price_ngn,
@@ -75,7 +75,7 @@ class SubscriptionService {
         .gte('end_date', new Date().toISOString())
         .order('end_date', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (error) {
         if (error.code === 'PGRST116') {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, BarChart3, Settings, Crown, Calendar, CreditCard, ArrowRight } from 'lucide-react';
+import { User, BarChart3, Settings, Crown, Calendar, CreditCard, ArrowRight, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
 import { subscriptionService, UserSubscription } from '../services/subscription-service';
@@ -95,6 +95,33 @@ export function ProfilePage() {
       {/* Tab Content */}
       {activeTab === 'profile' ? (
         <div className="space-y-6">
+          {/* Admin Dashboard Access Card - Only for Admin Users */}
+          {user.isAdmin && (
+            <Card className="p-6 bg-gradient-to-br from-indigo-50 to-blue-50 border-2 border-indigo-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-indigo-600 rounded-lg">
+                    <Shield className="w-8 h-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900">Admin Dashboard</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Manage users, subjects, questions, and view analytics
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={() => navigate('/7351/admin')}
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700"
+                >
+                  Open Dashboard
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </div>
+            </Card>
+          )}
+
           {/* Subscription Status Card */}
           {loadingSubscription ? (
             <Card className="p-6">

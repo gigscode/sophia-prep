@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { User, Calendar, Newspaper, ShoppingBag } from 'lucide-react';
+import { User, Calendar, Newspaper, ShoppingBag, Shield } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 interface MoreOption {
   id: string;
@@ -52,6 +53,23 @@ const moreOptions: MoreOption[] = [
 
 export function MorePage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Create dynamic options array including admin option if user is admin
+  const dynamicOptions = [...moreOptions];
+
+  if (user?.isAdmin) {
+    // Add admin option at the beginning
+    dynamicOptions.unshift({
+      id: 'admin',
+      title: 'Admin Dashboard',
+      icon: Shield,
+      route: '/7351/admin',
+      bgColor: 'bg-indigo-50',
+      iconBgColor: 'bg-indigo-600',
+      iconColor: 'text-white',
+    });
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20 m-2">
@@ -64,7 +82,7 @@ export function MorePage() {
       {/* Options Grid */}
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {moreOptions.map((option) => {
+          {dynamicOptions.map((option) => {
             const Icon = option.icon;
             return (
               <button
