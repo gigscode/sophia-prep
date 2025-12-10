@@ -238,6 +238,8 @@ export function ImportQuestionsPage() {
                             break;
                         case 'ANSWER':
                         case 'CORRECT':
+                        case 'CORRECT ANSWER':
+                        case 'CORRECT_ANSWER':
                             question.correct_answer = value.toUpperCase();
                             break;
                         case 'EXPLANATION':
@@ -396,16 +398,16 @@ A: 2
 B: 3
 C: 4
 D: 5
-ANSWER: C
-EXPLANATION: Addition of two numbers
+Correct Answer: C
+Explanation: Addition of two numbers
 ---
 Q: Solve: x + 5 = 10
 A: 3
 B: 4
 C: 5
 D: 6
-ANSWER: C
-EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
+Answer: C
+Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
 ---`;
             filename = 'questions_template.txt';
         } else {
@@ -548,8 +550,8 @@ EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
                                                 <div>B: Second option</div>
                                                 <div>C: Third option</div>
                                                 <div>D: Fourth option</div>
-                                                <div>ANSWER: C</div>
-                                                <div>EXPLANATION: Why C is correct</div>
+                                                <div>Correct Answer: C</div>
+                                                <div>Explanation: Why C is correct</div>
                                                 <div className="mt-2">---</div>
                                             </div>
                                             <p className="mt-2 text-xs font-semibold">Note: Select Subject (required) from the dropdown below. Topic is optional.</p>
@@ -648,7 +650,7 @@ EXPLANATION: Subtract 5 from both sides: x = 10 - 5 = 5
                                     value={textInput}
                                     onChange={(e) => setTextInput(e.target.value)}
                                     placeholder={format === 'simple'
-                                        ? `Q: Your question here?\nA: First option\nB: Second option\nC: Third option\nD: Fourth option\nANSWER: C\nEXPLANATION: Why C is correct\n---\n(Add more questions separated by ---)`
+                                        ? `Q: Your question here?\nA: First option\nB: Second option\nC: Third option\nD: Fourth option\nCorrect Answer: C\nExplanation: Why C is correct\n---\n(Add more questions separated by ---)`
                                         : `Paste your ${format.toUpperCase()} content here...`}
                                     className="w-full h-64 p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#B78628] focus:border-transparent font-mono text-sm"
                                 />

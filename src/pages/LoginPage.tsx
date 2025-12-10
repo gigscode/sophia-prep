@@ -23,8 +23,10 @@ export function LoginPage() {
     try {
       await login(email, password);
       navigate('/');
-    } catch (err) {
-      setError('Failed to log in');
+    } catch (err: any) {
+      // The useAuth hook already shows categorized error messages via toast
+      // We can optionally show a generic message here as well
+      setError(err?.message || 'Login failed. Please try again.');
     }
   };
 
