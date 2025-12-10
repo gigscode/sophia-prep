@@ -106,14 +106,26 @@ export function ModeSelectionPage() {
   }, [state.examType, state.step, loadAvailableYears]);
 
   const handleExamTypeSelect = (examType: ExamType) => {
-    setState({
-      step: 'mode',
-      examType,
-      mode: null,
-      selectionMethod: null,
-      subjectSlug: null,
-      year: null,
-    });
+    // If mode is preselected, skip the mode selection step
+    if (preselectedMode) {
+      setState({
+        step: 'method',
+        examType,
+        mode: preselectedMode,
+        selectionMethod: null,
+        subjectSlug: null,
+        year: null,
+      });
+    } else {
+      setState({
+        step: 'mode',
+        examType,
+        mode: null,
+        selectionMethod: null,
+        subjectSlug: null,
+        year: null,
+      });
+    }
   };
 
   const handleModeSelect = (mode: QuizMode) => {

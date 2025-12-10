@@ -66,7 +66,35 @@ export class QuestionService {
 
     // Query questions directly by subject_id using the new method
     // This removes the topic lookup step and applies all filters in a single database query
-    return this.getQuestionsBySubjectId((subject as Subject).id, filters);
+    const questions = await this.getQuestionsBySubjectId((subject as Subject).id, filters);
+
+    // FALLBACK: If no questions found with subject_id, try querying without subject_id filter
+    // This handles cases where questions exist but haven't been associated with subjects yet
+    if (questions.length === 0 && filters?.exam_type) {
+      console.warn(`No questions found for subject ${slug} with subject_id. Trying fallback query by exam_type only.`);
+
+      let fallbackQuery = supabase
+        .from('questions')
+        .select('*')
+        .eq('exam_type', filters.exam_type)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false });
+
+      if (filters.exam_year) fallbackQuery = fallbackQuery.eq('exam_year', filters.exam_year);
+      if (filters.limit) fallbackQuery = fallbackQuery.limit(filters.limit);
+
+      const { data: fallbackData, error: fallbackError } = await fallbackQuery;
+
+      if (fallbackError) {
+        console.error('Error in fallback query:', fallbackError);
+        return [];
+      }
+
+      console.log(`Fallback query returned ${fallbackData?.length || 0} questions`);
+      return (fallbackData as Question[]) || [];
+    }
+
+    return questions;
   }
 
   /**
