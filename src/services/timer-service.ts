@@ -4,6 +4,7 @@ export interface TimerConfig {
   examType: 'JAMB' | 'WAEC';
   subjectSlug?: string;
   year?: number;
+  questionCount?: number; // For proportional timing calculation
 }
 
 export interface TimerHandle {
@@ -29,14 +30,57 @@ class TimerService {
   private static readonly STORAGE_CONFIG_KEY = 'quiz_timer_config';
 
   /**
+   * Calculate proportional duration for single-subject quizzes
+   * Based on exam type and actual question count
+   *
+   * JAMB: 2.5 hours (9000s) for 4 subjects, ~40 questions each
+   * WAEC: 3 hours (10800s) for 9 subjects, ~40 questions each
+   */
+  calculateProportionalDuration(config: {
+    examType: 'JAMB' | 'WAEC';
+    questionCount: number;
+  }): number {
+    // Base configurations for full exams
+    const baseConfig = {
+      JAMB: {
+        totalTime: 9000,      // 2.5 hours in seconds
+        subjects: 4,          // Typical JAMB has 4 subjects
+        questionsPerSubject: 40
+      },
+      WAEC: {
+        totalTime: 10800,     // 3 hours in seconds
+        subjects: 9,          // WAEC can have up to 9 subjects
+        questionsPerSubject: 40
+      }
+    };
+
+    const base = baseConfig[config.examType];
+
+    // Calculate time per subject in full exam
+    const timePerSubject = base.totalTime / base.subjects;
+
+    // Calculate time per question
+    const timePerQuestion = timePerSubject / base.questionsPerSubject;
+
+    // Calculate duration based on actual question count
+    const calculatedDuration = timePerQuestion * config.questionCount;
+
+    // Round to nearest 5 minutes (300 seconds) for user-friendliness
+    const roundedDuration = Math.ceil(calculatedDuration / 300) * 300;
+
+    // Ensure minimum of 5 minutes (300s) and maximum of full exam time
+    return Math.max(300, Math.min(roundedDuration, base.totalTime));
+  }
+
+  /**
    * Get timer duration for a specific configuration
-   * Falls back to default duration if specific config not found
+   * Falls back to proportional calculation if specific config not found
    */
   async getDuration(config: TimerConfig): Promise<number> {
     try {
       // Try to find most specific configuration first
       // Priority: exam_type + subject + year > exam_type + subject > exam_type + year > exam_type
-      
+
       // Most specific: exam_type + subject + year
       if (config.subjectSlug && config.year) {
         const { data, error } = await supabase
@@ -95,10 +139,28 @@ class TimerService {
         return (data as { duration_seconds: number }).duration_seconds;
       }
 
-      // Fallback to hardcoded defaults if database query fails
+      // If no database config found and questionCount is provided, use proportional calculation
+      if (config.questionCount && config.questionCount > 0) {
+        console.log(`No timer config found, calculating proportional duration for ${config.questionCount} questions`);
+        return this.calculateProportionalDuration({
+          examType: config.examType,
+          questionCount: config.questionCount
+        });
+      }
+
+      // Fallback to hardcoded defaults if database query fails and no question count
       return config.examType === 'JAMB' ? 2100 : 3600;
     } catch (error) {
       console.error('Error fetching timer duration:', error);
+
+      // Try proportional calculation as fallback
+      if (config.questionCount && config.questionCount > 0) {
+        return this.calculateProportionalDuration({
+          examType: config.examType,
+          questionCount: config.questionCount
+        });
+      }
+
       // Return default durations on error
       return config.examType === 'JAMB' ? 2100 : 3600;
     }

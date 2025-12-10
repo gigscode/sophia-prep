@@ -22,6 +22,7 @@ const NovelsPage = lazy(() => import('./pages/NovelsPage').then(module => ({ def
 const VideosPage = lazy(() => import('./pages/VideosPage').then(module => ({ default: module.VideosPage })));
 const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
 const ModeSelectionPage = lazy(() => import('./pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
+const ClassCategorySelectorPage = lazy(() => import('./pages/ClassCategorySelectorPage').then(module => ({ default: module.ClassCategorySelectorPage })));
 const UnifiedQuiz = lazy(() => import('./pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
 const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('./pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
@@ -80,6 +81,7 @@ export function App() {
           {/* Quiz Routes */}
           <Route path="/quiz" element={<Layout showFooter={false}><QuizModeSelectorPage /></Layout>} />
           <Route path="/quiz/mode-selection" element={<Layout showFooter={false}><ModeSelectionPage /></Layout>} />
+          <Route path="/quiz/class-category" element={<Layout showFooter={false}><ClassCategorySelectorPage /></Layout>} />
           <Route path="/quiz/unified" element={<Layout showFooter={false}><UnifiedQuiz /></Layout>} />
           {/* Legacy routes - redirect to new unified system */}
           <Route path="/quiz/practice" element={<LegacyQuizRedirect mode="practice" />} />

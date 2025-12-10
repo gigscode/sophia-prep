@@ -25,8 +25,14 @@ export type QuizMode = 'practice' | 'exam';
  * Selection method for quiz questions
  * - subject: Filter questions by subject
  * - year: Filter questions by specific exam year
+ * - category: Filter questions by class category (Science/Arts/Commercial)
  */
-export type SelectionMethod = 'subject' | 'year';
+export type SelectionMethod = 'subject' | 'year' | 'category';
+
+/**
+ * Class category for JAMB/WAEC exams
+ */
+export type ClassCategory = 'SCIENCE' | 'ARTS' | 'COMMERCIAL';
 
 /**
  * Quiz configuration interface
@@ -35,18 +41,24 @@ export type SelectionMethod = 'subject' | 'year';
 export interface QuizConfig {
   /** Exam type (WAEC or JAMB) */
   examType: ExamType;
-  
+
   /** Quiz mode (practice or exam simulation) */
   mode: QuizMode;
-  
+
   /** Method for selecting questions (by subject or year) */
   selectionMethod: SelectionMethod;
-  
+
   /** Subject slug for subject-based quizzes (optional) */
   subjectSlug?: string;
-  
+
   /** Exam year for year-based quizzes (optional) */
   year?: number;
+
+  /** Class category for category-based quizzes (optional) */
+  classCategory?: ClassCategory;
+
+  /** Array of subject slugs for multi-subject quizzes (optional) */
+  subjectSlugs?: string[];
 }
 
 /**
@@ -56,24 +68,30 @@ export interface QuizConfig {
 export interface QuizQuestion {
   /** Unique question identifier */
   id: string;
-  
+
   /** Question text */
   text: string;
-  
+
   /** Answer options */
   options: QuizOption[];
-  
+
   /** Correct answer key (A, B, C, or D) */
   correct?: string;
-  
+
   /** Explanation text (shown in practice mode or after completion) */
   explanation?: string;
-  
+
   /** Exam year this question is from (optional) */
   examYear?: number;
-  
+
   /** Exam type this question is for (optional) */
   examType?: ExamType;
+
+  /** Subject slug this question belongs to (optional, for multi-subject quizzes) */
+  subjectSlug?: string;
+
+  /** Subject name this question belongs to (optional, for multi-subject quizzes) */
+  subjectName?: string;
 }
 
 /**
@@ -258,8 +276,8 @@ export const QuizConfigHelpers = {
     }
 
     // Check selection method
-    if (!['subject', 'year'].includes(config.selectionMethod)) {
-      return 'Invalid selection method. Must be subject or year.';
+    if (!['subject', 'year', 'category'].includes(config.selectionMethod)) {
+      return 'Invalid selection method. Must be subject, year, or category.';
     }
 
     // Check subject-based configuration
@@ -270,6 +288,19 @@ export const QuizConfigHelpers = {
     // Check year-based configuration
     if (config.selectionMethod === 'year' && !config.year) {
       return 'Year is required for year-based quizzes.';
+    }
+
+    // Check category-based configuration
+    if (config.selectionMethod === 'category') {
+      if (!config.classCategory) {
+        return 'Class category is required for category-based quizzes.';
+      }
+      if (!['SCIENCE', 'ARTS', 'COMMERCIAL'].includes(config.classCategory)) {
+        return 'Invalid class category. Must be SCIENCE, ARTS, or COMMERCIAL.';
+      }
+      if (!config.subjectSlugs || config.subjectSlugs.length === 0) {
+        return 'Subject slugs are required for category-based quizzes.';
+      }
     }
 
     // Validate year range if provided

@@ -117,6 +117,107 @@ export class QuestionService {
   }
 
   /**
+   * Get questions by multiple subject slugs (for class category quizzes)
+   * Returns questions from all specified subjects with subject information attached
+   * Requirements: Phase 4 - Multi-subject CBT Exam
+   */
+  async getQuestionsBySubjectSlugs(
+    subjectSlugs: string[],
+    filters?: {
+      exam_year?: number;
+      exam_type?: 'JAMB' | 'WAEC';
+      questionsPerSubject?: number;
+    }
+  ): Promise<(Question & { subject_slug?: string; subject_name?: string })[]> {
+    if (subjectSlugs.length === 0) {
+      console.warn('No subject slugs provided');
+      return [];
+    }
+
+    // First, get all subjects by slugs
+    const { data: subjects, error: subjectsError } = await supabase
+      .from('subjects')
+      .select('*')
+      .in('slug', subjectSlugs)
+      .eq('is_active', true);
+
+    if (subjectsError) {
+      console.error('Error fetching subjects:', subjectsError);
+      return [];
+    }
+
+    if (!subjects || subjects.length === 0) {
+      console.warn('No subjects found for provided slugs');
+      return [];
+    }
+
+    // Get subject IDs
+    const subjectIds = subjects.map((s) => s.id);
+
+    // Build query for questions from all subjects
+    let q = supabase
+      .from('questions')
+      .select('*')
+      .in('subject_id', subjectIds)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    // Apply filters
+    if (filters?.exam_year) q = q.eq('exam_year', filters.exam_year);
+    if (filters?.exam_type) q = q.eq('exam_type', filters.exam_type);
+
+    const { data: questions, error: questionsError } = await q;
+
+    if (questionsError) {
+      console.error('Error fetching questions:', questionsError);
+      return [];
+    }
+
+    if (!questions || questions.length === 0) {
+      console.warn('No questions found for provided subjects');
+      return [];
+    }
+
+    // Attach subject information to each question
+    const questionsWithSubjects = (questions as Question[]).map((question) => {
+      const subject = subjects.find((s) => s.id === question.subject_id);
+      return {
+        ...question,
+        subject_slug: subject?.slug,
+        subject_name: subject?.name,
+      };
+    });
+
+    // If questionsPerSubject is specified, limit questions per subject
+    if (filters?.questionsPerSubject) {
+      const questionsBySubject = new Map<string, typeof questionsWithSubjects>();
+
+      // Group questions by subject
+      questionsWithSubjects.forEach((q) => {
+        const subjectId = q.subject_id;
+        if (!questionsBySubject.has(subjectId)) {
+          questionsBySubject.set(subjectId, []);
+        }
+        questionsBySubject.get(subjectId)!.push(q);
+      });
+
+      // Take specified number of questions from each subject
+      const limitedQuestions: typeof questionsWithSubjects = [];
+      questionsBySubject.forEach((subjectQuestions) => {
+        // Shuffle questions for variety
+        const shuffled = subjectQuestions.sort(() => Math.random() - 0.5);
+        limitedQuestions.push(...shuffled.slice(0, filters.questionsPerSubject));
+      });
+
+      // Shuffle all questions together
+      return limitedQuestions.sort(() => Math.random() - 0.5);
+    }
+
+    // Shuffle questions for variety
+    return questionsWithSubjects.sort(() => Math.random() - 0.5);
+  }
+
+  /**
    * Get questions with combined filters (exam_type and/or exam_year)
    * Supports both subject_id and topic_id based queries for backward compatibility
    * Optimized to apply all filters at database level
@@ -179,6 +280,8 @@ export type QuizQuestion = {
   explanation?: string;
   exam_year?: number | null;
   exam_type?: 'JAMB' | 'WAEC' | null;
+  subject_slug?: string;
+  subject_name?: string;
 };
 
 export function normalizeQuestions(rows: any[], filters?: { exam_year?: number | 'ALL'; exam_type?: 'JAMB' | 'WAEC' | 'ALL' }): QuizQuestion[] {
@@ -202,6 +305,8 @@ export function normalizeQuestions(rows: any[], filters?: { exam_year?: number |
       explanation: r.explanation || undefined,
       exam_year: r.exam_year ?? null,
       exam_type: r.exam_type ?? null,
+      subject_slug: r.subject_slug || undefined,
+      subject_name: r.subject_name || undefined,
     };
   });
   const filtered = list.filter(q => (q.options?.length ?? 0) >= 2);

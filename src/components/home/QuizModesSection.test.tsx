@@ -12,8 +12,8 @@ function renderWithRouter(component: React.ReactElement) {
 describe('QuizModesSection', () => {
   it('renders section header with title', () => {
     renderWithRouter(<QuizModesSection />);
-    
-    expect(screen.getByText('Quiz Modes')).toBeInTheDocument();
+
+    expect(screen.getByText('CBT Exam Modes')).toBeInTheDocument();
   });
 
   it('renders both Practice Mode and CBT Quiz cards (Requirement 3.2)', () => {

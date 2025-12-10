@@ -1,20 +1,28 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { BookOpen } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { BookOpen, Clock } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { PageHeader } from '../components/layout';
 import { subjectService } from '../services/subject-service';
+import { YearSelectionModal } from '../components/quiz/YearSelectionModal';
 import type { Subject, ExamType, SubjectCategory } from '../integrations/supabase/types';
 
 type CategoryFilter = SubjectCategory | 'ALL';
 
 export function SubjectsPage() {
+  const navigate = useNavigate();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
   const [selectedExamType, setSelectedExamType] = useState<ExamType | 'ALL'>('ALL');
   const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Year selection modal state
+  const [yearModalOpen, setYearModalOpen] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedMode, setSelectedMode] = useState<'practice' | 'exam'>('practice');
+  const [modalExamType, setModalExamType] = useState<ExamType>('JAMB');
 
   useEffect(() => {
     loadSubjects();
@@ -84,6 +92,41 @@ export function SubjectsPage() {
       case 'BOTH':
         return 'bg-purple-100 text-purple-800';
     }
+  };
+
+  const handlePracticeClick = (subject: Subject) => {
+    setSelectedSubject(subject);
+    setSelectedMode('practice');
+    // Determine exam type: if subject supports both, default to JAMB, otherwise use subject's exam_type
+    const examType = subject.exam_type === 'BOTH' ? 'JAMB' : subject.exam_type;
+    setModalExamType(examType);
+    setYearModalOpen(true);
+  };
+
+  const handleQuizClick = (subject: Subject) => {
+    setSelectedSubject(subject);
+    setSelectedMode('exam');
+    // Determine exam type: if subject supports both, default to JAMB, otherwise use subject's exam_type
+    const examType = subject.exam_type === 'BOTH' ? 'JAMB' : subject.exam_type;
+    setModalExamType(examType);
+    setYearModalOpen(true);
+  };
+
+  const handleYearSelect = (year: number | 'ALL') => {
+    if (!selectedSubject) return;
+
+    // Navigate to quiz with config
+    navigate('/quiz/unified', {
+      state: {
+        examType: modalExamType,
+        mode: selectedMode,
+        selectionMethod: 'subject',
+        subjectSlug: selectedSubject.slug,
+        year: year === 'ALL' ? undefined : year
+      }
+    });
+
+    setYearModalOpen(false);
   };
 
   if (loading) {
@@ -276,8 +319,22 @@ export function SubjectsPage() {
                 {subject.subject_category.toLowerCase()}
               </span>
               <div className="flex items-center gap-2">
-                <Link to={`/quiz/practice?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 bg-blue-600 text-white rounded text-xs">Practice</Link>
-                <Link to={`/quiz/cbt?subject=${encodeURIComponent(subject.slug)}&year=ALL&type=ALL`} className="px-3 py-2 text-white rounded text-xs" style={{ backgroundColor: '#95db83ff' }}>Quiz</Link>
+                <button
+                  onClick={() => handlePracticeClick(subject)}
+                  className="px-3 py-2 bg-blue-600 text-white rounded text-xs hover:bg-blue-700 transition-colors flex items-center gap-1"
+                  title="Practice mode - Untimed with immediate feedback"
+                >
+                  <BookOpen size={14} />
+                  Practice
+                </button>
+                <button
+                  onClick={() => handleQuizClick(subject)}
+                  className="px-3 py-2 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors flex items-center gap-1"
+                  title="Quiz mode - Timed with feedback at end"
+                >
+                  <Clock size={14} />
+                  Quiz
+                </button>
               </div>
             </div>
           </div>
@@ -290,6 +347,18 @@ export function SubjectsPage() {
         </div>
       )}
       </div>
+
+      {/* Year Selection Modal */}
+      {yearModalOpen && selectedSubject && (
+        <YearSelectionModal
+          isOpen={yearModalOpen}
+          onClose={() => setYearModalOpen(false)}
+          subject={selectedSubject}
+          examType={modalExamType}
+          mode={selectedMode}
+          onYearSelect={handleYearSelect}
+        />
+      )}
     </>
   );
 }

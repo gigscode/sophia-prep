@@ -34,12 +34,12 @@ const navItems: NavItem[] = [
     route: '/subjects', 
     description: 'Browse all available subjects' 
   },
-  { 
-    id: 'quiz', 
-    label: 'Quiz', 
-    icon: ClipboardList, 
-    route: '/quiz', 
-    description: 'Take practice tests and CBT quizzes' 
+  {
+    id: 'quiz',
+    label: 'CBT Exam',
+    icon: ClipboardList,
+    route: '/quiz',
+    description: 'Take full CBT exam simulations'
   },
   { 
     id: 'study', 

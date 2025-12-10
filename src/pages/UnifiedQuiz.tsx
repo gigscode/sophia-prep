@@ -32,8 +32,24 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
   const getConfig = (): QuizConfig | undefined => {
     if (propConfig) return propConfig;
 
-    const locationConfig = (location.state as { config?: QuizConfig })?.config;
-    if (locationConfig) return locationConfig;
+    // Check if location state has a full config object
+    const locationState = location.state as any;
+    if (locationState?.config) {
+      return locationState.config as QuizConfig;
+    }
+
+    // Check if location state has individual config fields (from ClassCategorySelector)
+    if (locationState?.examType && locationState?.mode && locationState?.selectionMethod) {
+      return {
+        examType: locationState.examType,
+        mode: locationState.mode,
+        selectionMethod: locationState.selectionMethod,
+        subjectSlug: locationState.subjectSlug,
+        year: locationState.year,
+        classCategory: locationState.classCategory,
+        subjectSlugs: locationState.subjectSlugs,
+      } as QuizConfig;
+    }
 
     const sessionConfig = sessionStorage.getItem('quizConfig');
     if (sessionConfig) {
@@ -80,7 +96,9 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           state.config.mode === config.mode &&
           state.config.selectionMethod === config.selectionMethod &&
           state.config.subjectSlug === config.subjectSlug &&
-          state.config.year === config.year
+          state.config.year === config.year &&
+          state.config.classCategory === config.classCategory &&
+          JSON.stringify(state.config.subjectSlugs) === JSON.stringify(config.subjectSlugs)
         ) {
           // Restore state if it's recent (within 24 hours)
           const age = Date.now() - state.timestamp;
@@ -160,6 +178,23 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
             filters
           );
           console.log(`Loaded ${loadedQuestions.length} questions for ${config.subjectSlug}`);
+        } else if (config.selectionMethod === 'category' && config.subjectSlugs) {
+          // Load questions by class category (multi-subject)
+          console.log(`Loading questions for category: ${config.classCategory}, subjects:`, config.subjectSlugs);
+
+          // For JAMB: 40 questions per subject (4 subjects = 160 total)
+          // For WAEC: 40 questions per subject (can vary by category)
+          const questionsPerSubject = config.examType === 'JAMB' ? 40 : 40;
+
+          loadedQuestions = await questionService.getQuestionsBySubjectSlugs(
+            config.subjectSlugs,
+            {
+              exam_type: config.examType,
+              exam_year: config.year,
+              questionsPerSubject
+            }
+          );
+          console.log(`Loaded ${loadedQuestions.length} questions for ${config.classCategory} category`);
         } else if (config.selectionMethod === 'year' && config.year) {
           // Load questions by year
           // For year-based selection, we need to get all subjects for the exam type
@@ -243,11 +278,25 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           duration = restoredTime;
         } else {
           // Get timer duration from configuration
-          duration = await timerService.getDuration({
-            examType: config.examType,
-            subjectSlug: config.subjectSlug,
-            year: config.year
-          });
+          // For category-based quizzes (full CBT exam), use full exam time
+          // For single-subject quizzes, use proportional timing
+          if (config.selectionMethod === 'category') {
+            // Full exam time for CBT exam
+            duration = await timerService.getDuration({
+              examType: config.examType,
+              subjectSlug: undefined,
+              year: config.year,
+              questionCount: undefined // Don't pass questionCount to get full exam time
+            });
+          } else {
+            // Proportional time for single-subject quizzes
+            duration = await timerService.getDuration({
+              examType: config.examType,
+              subjectSlug: config.subjectSlug,
+              year: config.year,
+              questionCount: questions.length
+            });
+          }
         }
 
         setTimeRemaining(duration);
@@ -617,6 +666,25 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
         {config.examType} - {QuizConfigHelpers.getModeLabel(config.mode)}
       </h1>
 
+      {/* Timer Info Banner for Exam Mode */}
+      {isExamMode && timeRemaining !== null && currentIndex === 0 && (
+        <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div className="flex items-start gap-3">
+            <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div className="flex-1">
+              <p className="text-blue-900 text-sm font-semibold mb-1">Quiz Timer Information</p>
+              <p className="text-blue-800 text-sm">
+                Total Time: <span className="font-semibold">{formatTime(timeRemaining)}</span> ({questions.length} questions)
+                {' • '}
+                ~{Math.ceil(timeRemaining / questions.length / 60)} min per question
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Error Banner */}
       {error && (
         <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
@@ -681,6 +749,15 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
 
           {/* Question */}
           <div className="mb-4" role="group" aria-labelledby="question-text">
+            {/* Subject badge for multi-subject quizzes */}
+            {config.selectionMethod === 'category' && currentQuestion.subjectName && (
+              <div className="mb-3">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                  {currentQuestion.subjectName}
+                </span>
+              </div>
+            )}
+
             <div id="question-text" className="text-base md:text-lg font-semibold mb-3">
               {currentQuestion.text}
             </div>

@@ -42,7 +42,7 @@ export function QuizModesSection({
     <section className={`space-y-4 ${className}`.trim()}>
       {/* Section Header */}
       <SectionHeader
-        title="Quiz Modes"
+        title="CBT Exam Modes"
         actionIcon={onExpandClick ? <ChevronRight size={24} /> : undefined}
         onActionClick={onExpandClick}
       />
