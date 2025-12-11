@@ -20,12 +20,15 @@ export function NotFoundPage() {
   // Log 404 errors for monitoring
   useEffect(() => {
     console.warn(`[404] Page not found: ${location.pathname}`);
-    
+
     // Report to analytics if available
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'page_not_found', {
-        page_path: location.pathname
-      });
+    if (typeof window !== 'undefined' && 'gtag' in window) {
+      const gtag = (window as any).gtag;
+      if (typeof gtag === 'function') {
+        gtag('event', 'page_not_found', {
+          page_path: location.pathname
+        });
+      }
     }
   }, [location.pathname]);
 
@@ -35,7 +38,7 @@ export function NotFoundPage() {
 
   const handleGoBack = () => {
     if (window.history.length > 1) {
-      navigate(-1);
+      window.history.back();
     } else {
       handleGoHome();
     }
@@ -91,7 +94,7 @@ export function NotFoundPage() {
         <p className="text-gray-600 mb-2">
           Sorry, we couldn't find the page you're looking for.
         </p>
-        
+
         {/* Show the attempted URL */}
         <p className="text-sm text-gray-500 mb-6 font-mono bg-gray-100 px-3 py-2 rounded">
           {location.pathname}

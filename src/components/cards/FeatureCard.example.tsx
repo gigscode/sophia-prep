@@ -5,7 +5,7 @@
  * according to the modern UI redesign specifications.
  */
 
-import React from 'react';
+
 import { FeatureCard } from './FeatureCard';
 
 // Example icons (in real usage, these would come from a library like lucide-react)

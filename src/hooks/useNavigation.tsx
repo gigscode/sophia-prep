@@ -51,7 +51,7 @@ export function useNavigation(): NavigationContextValue {
 
   // Create stable navigate function with error handling
   const navigate = useCallback(async (
-    path: string, 
+    path: string,
     options?: { replace?: boolean; state?: any; preserveParams?: boolean }
   ): Promise<boolean> => {
     try {
@@ -105,7 +105,7 @@ export function useNavigation(): NavigationContextValue {
     // This functionality is now handled by the NavigationManager
     // Log a deprecation warning
     console.warn('setNavigationError is deprecated in unified navigation system');
-    
+
     // For backward compatibility, we could potentially add this to NavigationManager
     // For now, just log the error
     if (error) {
@@ -156,7 +156,7 @@ export function useNavigation(): NavigationContextValue {
     navigationError: unified.navigationError,
     preservedParams: unified.preservedParams,
     routeParams: unified.routeParams,
-    
+
     // Stable function references
     navigate,
     goBack,
@@ -177,7 +177,7 @@ export function useNavigation(): NavigationContextValue {
     unified.navigationError,
     unified.preservedParams,
     unified.routeParams,
-    
+
     // Function dependencies (these are stable due to useCallback)
     navigate,
     goBack,
@@ -197,4 +197,3 @@ export function useNavigation(): NavigationContextValue {
 // NavigationStateProvider has been removed - use UnifiedNavigationProvider instead
 
 // Export types for backward compatibility
-export type { NavigationContextValue };

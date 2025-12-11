@@ -4,7 +4,7 @@
  * Tests for bookmark and share functionality components
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { BookmarkButton, ShareButton, DeepLinkNavigator, BookmarkList, DeepLinkActions } from './DeepLinkHandler';
@@ -102,7 +102,7 @@ describe('BookmarkButton', () => {
 
   it('should create bookmark when clicked', async () => {
     const onBookmarkCreated = vi.fn();
-    
+
     render(
       <TestWrapper>
         <BookmarkButton onBookmarkCreated={onBookmarkCreated} />
@@ -137,11 +137,11 @@ describe('BookmarkButton', () => {
     );
 
     const button = screen.getByRole('button', { name: /bookmark this page/i });
-    
+
     // The loading state is very brief since createBookmark is synchronous
     // We'll just verify the final state
     fireEvent.click(button);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Bookmarked!')).toBeInTheDocument();
     });
@@ -150,7 +150,7 @@ describe('BookmarkButton', () => {
   it('should use custom title and description', async () => {
     render(
       <TestWrapper>
-        <BookmarkButton 
+        <BookmarkButton
           customTitle="Custom Title"
           customDescription="Custom Description"
         />
@@ -194,7 +194,7 @@ describe('ShareButton', () => {
 
   it('should use Web Share API when available', async () => {
     const onShare = vi.fn();
-    
+
     render(
       <TestWrapper>
         <ShareButton onShare={onShare} />
@@ -238,7 +238,7 @@ describe('ShareButton', () => {
   });
 
   it('should show loading state while sharing', async () => {
-    mockNavigator.share.mockImplementation(() => 
+    mockNavigator.share.mockImplementation(() =>
       new Promise(resolve => setTimeout(resolve, 100))
     );
 
@@ -252,7 +252,7 @@ describe('ShareButton', () => {
     fireEvent.click(button);
 
     expect(button).toBeDisabled();
-    
+
     await waitFor(() => {
       expect(button).not.toBeDisabled();
     });
@@ -289,7 +289,7 @@ describe('DeepLinkNavigator', () => {
   });
 
   it('should show loading state while navigating', () => {
-    mockDeepLinking.handleDeepLink.mockImplementation(() => 
+    mockDeepLinking.handleDeepLink.mockImplementation(() =>
       new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
     );
 
@@ -320,9 +320,9 @@ describe('DeepLinkNavigator', () => {
   it('should handle navigation errors', async () => {
     const onNavigationComplete = vi.fn();
     const errors = ['Navigation failed'];
-    mockDeepLinking.handleDeepLink.mockResolvedValue({ 
-      success: false, 
-      errors 
+    mockDeepLinking.handleDeepLink.mockResolvedValue({
+      success: false,
+      errors
     });
 
     render(
@@ -339,9 +339,9 @@ describe('DeepLinkNavigator', () => {
   });
 
   it('should provide navigation options on error', async () => {
-    mockDeepLinking.handleDeepLink.mockResolvedValue({ 
-      success: false, 
-      errors: ['Test error'] 
+    mockDeepLinking.handleDeepLink.mockResolvedValue({
+      success: false,
+      errors: ['Test error']
     });
 
     render(
@@ -511,7 +511,7 @@ describe('DeepLinkActions', () => {
   it('should pass custom props to bookmark button', async () => {
     render(
       <TestWrapper>
-        <DeepLinkActions 
+        <DeepLinkActions
           bookmarkTitle="Custom Title"
           bookmarkDescription="Custom Description"
         />
@@ -569,7 +569,7 @@ describe('Error Handling', () => {
     );
 
     const button = screen.getByRole('button', { name: /bookmark this page/i });
-    
+
     // Should not throw error
     expect(() => {
       fireEvent.click(button);
@@ -586,7 +586,7 @@ describe('Error Handling', () => {
     );
 
     const button = screen.getByRole('button', { name: /share this page/i });
-    
+
     // Should not throw error
     expect(() => {
       fireEvent.click(button);

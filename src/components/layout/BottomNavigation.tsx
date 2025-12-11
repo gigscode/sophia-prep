@@ -21,19 +21,19 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { 
-    id: 'home', 
-    label: 'Home', 
-    icon: Home, 
-    route: '/', 
-    description: 'Go to home page with quiz modes and quick links' 
+  {
+    id: 'home',
+    label: 'Home',
+    icon: Home,
+    route: '/',
+    description: 'Go to home page with quiz modes and quick links'
   },
-  { 
-    id: 'subjects', 
-    label: 'Subjects', 
-    icon: Layers, 
-    route: '/subjects', 
-    description: 'Browse all available subjects' 
+  {
+    id: 'subjects',
+    label: 'Subjects',
+    icon: Layers,
+    route: '/subjects',
+    description: 'Browse all available subjects'
   },
   {
     id: 'quiz',
@@ -42,19 +42,19 @@ const navItems: NavItem[] = [
     route: '/quiz',
     description: 'Take full CBT exam simulations'
   },
-  { 
-    id: 'study', 
-    label: 'Study', 
-    icon: BookOpen, 
-    route: '/study', 
-    description: 'Access study materials and learning resources' 
+  {
+    id: 'study',
+    label: 'Study',
+    icon: BookOpen,
+    route: '/study',
+    description: 'Access study materials and learning resources'
   },
-  { 
-    id: 'more', 
-    label: 'More', 
-    icon: MoreHorizontal, 
-    route: '/more', 
-    description: 'Access profile and additional options' 
+  {
+    id: 'more',
+    label: 'More',
+    icon: MoreHorizontal,
+    route: '/more',
+    description: 'Access profile and additional options'
   },
 ];
 
@@ -80,7 +80,7 @@ export function BottomNavigation() {
       aria-label="Primary navigation"
     >
       <div className="flex items-center justify-around h-full px-2">
-        {navItems.map((item, index) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.route);
 
@@ -131,8 +131,8 @@ export function BottomNavigation() {
                 </span>
 
                 {/* Hidden description for screen readers */}
-                <span 
-                  id={`nav-item-${item.id}-description`} 
+                <span
+                  id={`nav-item-${item.id}-description`}
                   className="sr-only"
                 >
                   {item.description}
@@ -144,9 +144,9 @@ export function BottomNavigation() {
       </div>
 
       {/* Live region for navigation announcements */}
-      <div 
-        aria-live="polite" 
-        aria-atomic="true" 
+      <div
+        aria-live="polite"
+        aria-atomic="true"
         className="sr-only"
         id="navigation-announcements"
       />

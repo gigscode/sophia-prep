@@ -33,14 +33,14 @@ export function QuickLinkCard({
   backgroundColor,
   iconColor,
   onClick,
-  aspectRatio = '1:1',
+
   className = '',
 }: QuickLinkCardProps) {
   const cardId = React.useId();
   const titleId = `${cardId}-title`;
 
-  // Aspect ratio classes
-  const aspectRatioClass = aspectRatio === '1:1' ? 'aspect-square' : 'aspect-[4/3]';
+
+
 
   return (
     <article

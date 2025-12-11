@@ -5,7 +5,7 @@
  * to ensure consistent user experience when logging in/out from different tabs.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigation } from '../../hooks/useNavigation';
 import { authStateManager, AuthStateChangeEvent } from '../../utils/auth-state-manager';
@@ -23,7 +23,7 @@ export function CrossTabAuthSync({
 }: CrossTabAuthSyncProps) {
   const { user, logout } = useAuth();
   const { navigate, currentPath } = useNavigation();
-  const [lastSyncEvent, setLastSyncEvent] = useState<AuthStateChangeEvent | null>(null);
+  // const [lastSyncEvent, setLastSyncEvent] = useState<AuthStateChangeEvent | null>(null);
 
   // Set up navigation handler
   useEffect(() => {
@@ -38,7 +38,7 @@ export function CrossTabAuthSync({
       // Only handle remote events (from other tabs)
       if (event.source !== 'remote') return;
 
-      setLastSyncEvent(event);
+      // setLastSyncEvent(event);
 
       switch (event.type) {
         case 'login':
@@ -54,7 +54,7 @@ export function CrossTabAuthSync({
     });
 
     return unsubscribe;
-  }, [enableAutoSync, user, logout]);
+  }, [enableAutoSync, user, logout, enableNotifications]);
 
   /**
    * Handle login from another tab
@@ -114,7 +114,7 @@ export function CrossTabAuthSync({
       if (!document.hidden && enableAutoSync) {
         // Page became visible, check for any missed sync events
         // This helps catch events that might have been missed while tab was inactive
-        
+
         // Update activity to refresh session if needed
         if (user) {
           authStateManager.updateActivity();
@@ -151,7 +151,7 @@ export function CrossTabAuthSync({
       // Broadcast current login state to other tabs
       authStateManager.handleLogin(user, 'local');
     }
-  }, []); // Only run on mount
+  }, [user, enableAutoSync]);
 
   // This component doesn't render anything visible
   return null;

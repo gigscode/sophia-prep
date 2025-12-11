@@ -5,7 +5,7 @@
  * for Practice Mode and CBT Quiz according to the modern UI redesign specifications.
  */
 
-import React from 'react';
+
 import { QuizModeCard } from './QuizModeCard';
 
 // Example icons (in real usage, these would come from lucide-react)

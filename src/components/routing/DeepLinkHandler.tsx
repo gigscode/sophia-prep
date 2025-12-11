@@ -39,7 +39,7 @@ export function BookmarkButton({
 
   const handleCreateBookmark = async () => {
     setIsCreating(true);
-    
+
     try {
       const routeConfig = getRouteConfig(location.pathname);
       const bookmarkData = createBookmark(
@@ -52,15 +52,15 @@ export function BookmarkButton({
         customTitle,
         customDescription
       );
-      
+
       setBookmark(bookmarkData);
       onBookmarkCreated?.(bookmarkData);
-      
+
       // Store bookmark in localStorage for persistence
       const existingBookmarks = JSON.parse(localStorage.getItem('userBookmarks') || '[]');
       const updatedBookmarks = [...existingBookmarks, bookmarkData];
       localStorage.setItem('userBookmarks', JSON.stringify(updatedBookmarks));
-      
+
     } catch (error) {
       console.error('Failed to create bookmark:', error);
     } finally {
@@ -108,11 +108,10 @@ export function ShareButton({
   const location = useLocation();
   const { createShareUrl } = useDeepLinking();
   const [isSharing, setIsSharing] = useState(false);
-  const [shareData, setShareData] = useState<{ url: string; title: string; description?: string } | null>(null);
 
   const handleShare = async () => {
     setIsSharing(true);
-    
+
     try {
       const shareUrlData = createShareUrl(
         {
@@ -122,10 +121,10 @@ export function ShareButton({
         },
         config
       );
-      
-      setShareData(shareUrlData);
+
+
       onShare?.(shareUrlData);
-      
+
       // Use Web Share API if available
       if (navigator.share) {
         await navigator.share({
@@ -137,7 +136,7 @@ export function ShareButton({
         // Fallback: copy to clipboard
         const fullUrl = window.location.origin + shareUrlData.url;
         await navigator.clipboard.writeText(fullUrl);
-        
+
         // Show temporary feedback
         const button = document.activeElement as HTMLButtonElement;
         const originalText = button.textContent;
@@ -146,7 +145,7 @@ export function ShareButton({
           button.textContent = originalText;
         }, 2000);
       }
-      
+
     } catch (error) {
       console.error('Failed to share:', error);
     } finally {
@@ -200,13 +199,13 @@ export function DeepLinkNavigator({
   useEffect(() => {
     const navigateToDeepLink = async () => {
       if (!url) return;
-      
+
       setIsNavigating(true);
       setError(null);
-      
+
       try {
         const result = await handleDeepLink(url, navigate, user);
-        
+
         if (result.success) {
           if (result.redirectPath) {
             navigate(result.redirectPath);
@@ -301,12 +300,12 @@ export function BookmarkList({
       try {
         const stored = localStorage.getItem('userBookmarks');
         const allBookmarks: BookmarkData[] = stored ? JSON.parse(stored) : [];
-        
+
         // Sort by timestamp (newest first) and limit
         const sortedBookmarks = allBookmarks
           .sort((a, b) => b.timestamp - a.timestamp)
           .slice(0, maxItems);
-        
+
         setBookmarks(sortedBookmarks);
       } catch (error) {
         console.error('Failed to load bookmarks:', error);
@@ -321,7 +320,7 @@ export function BookmarkList({
 
   const handleBookmarkNavigation = async (bookmark: BookmarkData) => {
     onBookmarkClick?.(bookmark);
-    
+
     try {
       const result = await handleDeepLink(bookmark.url, navigate, user);
       if (!result.success && result.errors) {

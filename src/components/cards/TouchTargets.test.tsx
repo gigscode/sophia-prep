@@ -4,7 +4,7 @@ import '@testing-library/jest-dom';
 import { QuizModeCard } from './QuizModeCard';
 import { QuickLinkCard } from './QuickLinkCard';
 import { EventCard } from './EventCard';
-import React from 'react';
+// React import removed as it is unused
 
 // Mock Lucide icons
 vi.mock('lucide-react', () => ({
@@ -21,10 +21,10 @@ describe('Property 20: Touch targets meet minimum size', () => {
         icon={<div />}
         title="Test Mode"
         description="Test Description"
-        onClick={() => {}}
+        onClick={() => { }}
       />
     );
-    
+
     const card = screen.getByRole('button');
     // Cards have padding (p-6 = 24px on all sides) which ensures minimum touch target size
     expect(card).toHaveClass('p-6');
@@ -37,10 +37,10 @@ describe('Property 20: Touch targets meet minimum size', () => {
         title="Test Link"
         icon={<div />}
         backgroundColor="#ffffff"
-        onClick={() => {}}
+        onClick={() => { }}
       />
     );
-    
+
     const card = screen.getByRole('button');
     // Cards have padding (p-3 = 12px on all sides) and min dimensions which ensures minimum touch target size
     expect(card).toHaveClass('p-3');
@@ -55,10 +55,10 @@ describe('Property 20: Touch targets meet minimum size', () => {
         title="Test Event"
         date={new Date()}
         type="exam"
-        onClick={() => {}}
+        onClick={() => { }}
       />
     );
-    
+
     const card = screen.getByRole('button');
     // Cards have padding (p-4 = 16px on all sides) which ensures minimum touch target size
     expect(card).toHaveClass('p-4');
@@ -73,7 +73,7 @@ describe('Property 20: Touch targets meet minimum size', () => {
         type="exam"
       />
     );
-    
+
     // When not clickable, it should not have cursor-pointer class
     const card = container.firstChild as HTMLElement;
     expect(card.className).not.toContain('cursor-pointer');

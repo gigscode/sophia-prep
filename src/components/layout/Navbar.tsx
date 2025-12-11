@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Home, BookOpen, Target, GraduationCap, HelpCircle, User, ServerCog, LogOut } from 'lucide-react';
+import { Menu, X, HelpCircle, User, ServerCog, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigation } from '../../hooks/useNavigation';
 
@@ -11,14 +11,20 @@ export function Navbar() {
   const { user, logout, loading } = useAuth();
   const { navigate, isNavigating } = useNavigation();
 
-  const navLinks = [
+  interface NavLink {
+    to: string;
+    label: string;
+    icon: React.ElementType;
+  }
+
+  const navLinks: NavLink[] = [
     { to: '/help', label: 'Help', icon: HelpCircle },
   ];
 
   // Add admin link for admin users
   if (user?.isAdmin) {
     console.log('Adding Admin link to navbar for user:', user.email);
-    navLinks.push({ to: '/7351/admin', label: 'Admin', icon: ServerCog as any });
+    navLinks.push({ to: '/7351/admin', label: 'Admin', icon: ServerCog });
   } else if (user) {
     console.log('User is not admin:', user.email, 'isAdmin:', user.isAdmin);
   }

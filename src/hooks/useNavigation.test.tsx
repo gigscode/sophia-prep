@@ -57,7 +57,7 @@ function TestComponent() {
   );
 }
 
-function renderWithProviders(initialPath = '/') {
+function renderWithProviders() {
   return render(
     <BrowserRouter>
       <UnifiedNavigationProvider enableDebugMode={false}>
@@ -75,7 +75,7 @@ describe('useNavigation with UnifiedNavigationProvider', () => {
 
   it('should initialize with current path', () => {
     renderWithProviders();
-    
+
     expect(screen.getByTestId('current-path')).toHaveTextContent('/');
     expect(screen.getByTestId('previous-path')).toHaveTextContent('none');
     expect(screen.getByTestId('is-navigating')).toHaveTextContent('false');
@@ -83,11 +83,11 @@ describe('useNavigation with UnifiedNavigationProvider', () => {
 
   it('should handle pending redirects', () => {
     renderWithProviders();
-    
+
     act(() => {
       screen.getByTestId('set-pending-btn').click();
     });
-    
+
     // The pending redirect should be set (using unified navigation storage)
     expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
       'nav_unified_pendingRedirect',
@@ -97,11 +97,11 @@ describe('useNavigation with UnifiedNavigationProvider', () => {
 
   it('should preserve state in sessionStorage', () => {
     renderWithProviders();
-    
+
     act(() => {
       screen.getByTestId('set-pending-btn').click();
     });
-    
+
     expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
       'nav_unified_pendingRedirect',
       JSON.stringify('/pending')
@@ -119,9 +119,9 @@ describe('useNavigation with UnifiedNavigationProvider', () => {
       }
       return null;
     });
-    
+
     renderWithProviders();
-    
+
     // The unified navigation system handles state restoration differently
     // We just verify that the mechanism attempts to load from storage
     expect(mockSessionStorage.getItem).toHaveBeenCalledWith('nav_unified_currentState');
@@ -129,7 +129,7 @@ describe('useNavigation with UnifiedNavigationProvider', () => {
 
   it('should handle navigation errors gracefully', () => {
     renderWithProviders();
-    
+
     // The navigate function should handle errors internally
     // This test verifies the error handling mechanism exists
     expect(screen.getByTestId('navigation-error')).toHaveTextContent('none');
@@ -137,7 +137,7 @@ describe('useNavigation with UnifiedNavigationProvider', () => {
 
   it('should provide navigation controls', () => {
     renderWithProviders();
-    
+
     // Verify all navigation controls are available
     expect(screen.getByTestId('navigate-btn')).toBeInTheDocument();
     expect(screen.getByTestId('back-btn')).toBeInTheDocument();

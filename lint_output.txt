@@ -1,0 +1,31 @@
+
+C:\Users\ICT 500\Documents\GigsSec\DEV__Setup Must\Gigsdev_Inc\Gigs_Github_Repo\sophia-prep\src\pages\LoginPage.tsx
+  10:11  warning  'navigate' is assigned a value but never used. Allowed unused vars must match /^_/u                                 unused-imports/no-unused-vars
+  26:6   warning  React Hook useEffect has a missing dependency: 'formPersistence'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  41:19  warning  Unexpected any. Specify a different type                                                                            @typescript-eslint/no-explicit-any
+
+C:\Users\ICT 500\Documents\GigsSec\DEV__Setup Must\Gigsdev_Inc\Gigs_Github_Repo\sophia-prep\src\pages\NotFoundPage.tsx
+  25:53  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  26:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\ICT 500\Documents\GigsSec\DEV__Setup Must\Gigsdev_Inc\Gigs_Github_Repo\sophia-prep\src\pages\PracticeModeQuiz.tsx
+   98:17  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  101:67  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+  192:6   warning  React Hook useEffect has a missing dependency: 'next'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  244:11  warning  'examTypeColor' is assigned a value but never used. Allowed unused vars must match /^_/u                 unused-imports/no-unused-vars
+  406:36  warning  Unexpected any. Specify a different type                                                                 @typescript-eslint/no-explicit-any
+
+C:\Users\ICT 500\Documents\GigsSec\DEV__Setup Must\Gigsdev_Inc\Gigs_Github_Repo\sophia-prep\src\pages\UnifiedQuiz.test.tsx
+   29:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   31:110  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  196:10   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  233:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  279:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  317:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  336:14   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  352:14   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  486:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  522:12   warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+✖ 20 problems (0 errors, 20 warnings)
+

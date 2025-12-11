@@ -2,12 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useNavigation } from '../hooks/useNavigation';
 import { createFormPersistence } from '../utils/form-state-persistence';
 
 export function LoginPage() {
   const { login, user, loading } = useAuth();
-  const { navigate } = useNavigation();
+  // const { navigate } = useNavigation(); // Copilot: unused
   const location = useLocation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,7 +22,7 @@ export function LoginPage() {
     if (savedState) {
       if (savedState.email) setEmail(savedState.email);
     }
-  }, []);
+  }, [formPersistence]);
 
   useEffect(() => {
     if (user && !loading) {
@@ -38,10 +37,11 @@ export function LoginPage() {
     try {
       await login(email, password);
       // Navigation will be handled by the useEffect hook above
-    } catch (err: any) {
+    } catch (err: unknown) {
       // The useAuth hook already shows categorized error messages via toast
       // We can optionally show a generic message here as well
-      setError(err?.message || 'Login failed. Please try again.');
+      const message = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      setError(message);
     }
   };
 

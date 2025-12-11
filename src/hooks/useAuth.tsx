@@ -35,10 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       try {
         console.log('Initializing authentication state...');
-        
+
         // Check for existing session
         const { data: { session }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error('Error retrieving session:', error.message);
           if (isMounted) {
@@ -93,19 +93,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!isMounted) return;
 
       console.log(`Auth state change: ${event}`);
-      
+
       try {
         if (session?.user) {
           console.log(`User authenticated: ${redactEmail(session.user.email)}`);
           const mappedUser = await mapUser(session.user);
           setUser(mappedUser);
-          
+
           // Notify auth state manager of login
           authStateManager.handleLogin(mappedUser, 'local');
         } else {
           console.log('User signed out or session expired');
           setUser(null);
-          
+
           // Notify auth state manager of logout
           authStateManager.handleLogout('local');
         }
@@ -114,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         authStateManager.handleLogout('local');
       }
-      
+
       // Ensure loading is false after any auth state change
       setLoading(false);
     });
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const ensureUserProfile = async (supabaseUser: any): Promise<void> => {
     console.log(`Checking profile for user: ${redactEmail(supabaseUser.email)}`);
-    
+
     try {
       // Check if profile exists
       const { data: existingProfile, error: fetchError } = await supabase
@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Profile doesn't exist, create it
       console.log(`Creating profile for user: ${redactEmail(supabaseUser.email)}`);
-      
+
       const { error: insertError } = await (supabase
         .from('user_profiles')
         .insert as any)({
@@ -187,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (parts.length !== 2) return '[invalid email]';
     const localPart = parts[0];
     const domain = parts[1];
-    const redacted = localPart.length > 3 
+    const redacted = localPart.length > 3
       ? `${localPart.substring(0, 3)}***@${domain}`
       : `***@${domain}`;
     return redacted;
@@ -208,25 +208,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       return data;
     }
-    
+
     if (typeof data !== 'object' || data === null) {
       return data;
     }
-    
+
     if (Array.isArray(data)) {
       return data.map(redactSensitiveData);
     }
-    
+
     const redacted: any = {};
     for (const [key, value] of Object.entries(data)) {
       const lowerKey = key.toLowerCase();
-      
+
       // Redact sensitive fields
-      if (lowerKey.includes('password') || 
-          lowerKey.includes('token') || 
-          lowerKey.includes('secret') ||
-          lowerKey.includes('key') ||
-          lowerKey.includes('auth')) {
+      if (lowerKey.includes('password') ||
+        lowerKey.includes('token') ||
+        lowerKey.includes('secret') ||
+        lowerKey.includes('key') ||
+        lowerKey.includes('auth')) {
         redacted[key] = '[REDACTED]';
       } else if (lowerKey.includes('email')) {
         redacted[key] = typeof value === 'string' ? redactEmail(value) : value;
@@ -234,7 +234,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         redacted[key] = redactSensitiveData(value);
       }
     }
-    
+
     return redacted;
   };
 
@@ -247,31 +247,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const categorizeError = (error: any): string => {
     const errorMessage = error?.message || '';
-    
+
     // Invalid credentials
-    if (errorMessage.includes('Invalid login credentials') || 
-        errorMessage.includes('Invalid email or password')) {
+    if (errorMessage.includes('Invalid login credentials') ||
+      errorMessage.includes('Invalid email or password')) {
       return 'Invalid email or password';
     }
-    
+
     // Network errors
-    if (errorMessage.includes('network') || 
-        errorMessage.includes('fetch') || 
-        errorMessage.includes('Failed to fetch') ||
-        errorMessage.includes('NetworkError') ||
-        errorMessage.includes('timeout')) {
+    if (errorMessage.includes('network') ||
+      errorMessage.includes('fetch') ||
+      errorMessage.includes('Failed to fetch') ||
+      errorMessage.includes('NetworkError') ||
+      errorMessage.includes('timeout')) {
       return 'Network error. Please check your connection';
     }
-    
+
     // Database errors
-    if (errorMessage.includes('database') || 
-        errorMessage.includes('relation') || 
-        errorMessage.includes('column') ||
-        errorMessage.includes('table') ||
-        errorMessage.includes('query')) {
+    if (errorMessage.includes('database') ||
+      errorMessage.includes('relation') ||
+      errorMessage.includes('column') ||
+      errorMessage.includes('table') ||
+      errorMessage.includes('query')) {
       return 'System error. Please try again later';
     }
-    
+
     // Generic fallback
     return 'An unexpected error occurred. Please try again';
   };
@@ -280,31 +280,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Normalize email and check admin status using centralized configuration
     const normalizedEmail = normalizeEmail(supabaseUser.email || '');
     const isAdmin = adminConfig.isAdmin(normalizedEmail);
-    
+
     console.log(`Admin status check for ${redactEmail(supabaseUser.email)}: ${isAdmin}`);
 
     // Ensure user profile exists (non-blocking)
-    try {
-      await ensureUserProfile(supabaseUser);
-    } catch (error: any) {
-      console.error('Profile verification failed:', error?.message || error);
-      // Continue with login even if profile operations fail
-    }
+    // We don't await this anymore to speed up login
+    ensureUserProfile(supabaseUser).catch(error => {
+      console.error('Background profile verification failed:', error?.message || error);
+    });
 
     // Update last_login timestamp in user_profiles (non-blocking)
-    try {
-      const { error: updateError } = await (supabase
-        .from('user_profiles')
-        .update as any)({ last_login: new Date().toISOString() })
-        .eq('id', supabaseUser.id);
+    // We don't await this anymore to speed up login
+    (async () => {
+      try {
+        const { error: updateError } = await (supabase
+          .from('user_profiles')
+          .update as any)({ last_login: new Date().toISOString() })
+          .eq('id', supabaseUser.id);
 
-      if (updateError) {
-        console.error(`Failed to update last_login for user ${supabaseUser.id}:`, updateError.message);
+        if (updateError) {
+          console.error(`Failed to update last_login for user ${supabaseUser.id}:`, updateError.message);
+        }
+      } catch (error: any) {
+        console.error('Last login update failed:', error?.message || error);
       }
-    } catch (error: any) {
-      console.error('Last login update failed:', error?.message || error);
-      // Don't block login if this fails
-    }
+    })();
 
     return {
       id: supabaseUser.id,
@@ -318,7 +318,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     console.log(`Login attempt for: ${redactEmail(email)}`);
     setLoading(true);
-    
+
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: normalizeEmail(email),
@@ -357,7 +357,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signup = async (email: string, password: string, name?: string) => {
     console.log(`Signup attempt for: ${redactEmail(email)}`);
     setLoading(true);
-    
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -378,7 +378,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data.user) {
         console.log(`Signup successful for: ${redactEmail(email)}`);
-        
+
         // Immediately ensure user profile exists (fallback mechanism)
         try {
           await ensureUserProfile(data.user);
@@ -388,7 +388,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error(`[FALLBACK_PROFILE_CREATION_FAILED] User ${data.user.id}:`, profileError?.message || profileError);
           // Continue with signup flow - profile will be created on next login
         }
-        
+
         const u = await mapUser(data.user);
         // Note: loading will be set to false by the auth state change listener
         return u;
@@ -405,11 +405,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     console.log('Logout initiated');
     setLoading(true);
-    
+
     try {
       // Notify auth state manager before logout
       authStateManager.handleLogout('manual');
-      
+
       await supabase.auth.signOut();
       // Note: user will be set to null by the auth state change listener
       console.log('Logout successful');

@@ -1,15 +1,7 @@
 import { supabase } from '../integrations/supabase/client';
+import type { Database } from '../integrations/supabase/types';
 
-export type AdminUser = {
-  id: string;
-  email: string;
-  full_name?: string;
-  subscription_plan?: string;
-  created_at: string;
-  last_login?: string;
-  is_active: boolean;
-  exam_type?: 'JAMB' | 'WAEC' | 'BOTH';
-};
+export type AdminUser = Database['public']['Tables']['user_profiles']['Row'];
 
 export type UserFilters = {
   search?: string;
@@ -88,7 +80,7 @@ export class AdminUserService {
     }
   }
 
-  async updateUser(id: string, updates: Partial<AdminUser>): Promise<boolean> {
+  async updateUser(id: string, updates: Database['public']['Tables']['user_profiles']['Update']): Promise<boolean> {
     try {
       const { error } = await supabase
         .from('user_profiles')
@@ -136,7 +128,7 @@ export class AdminUserService {
 
   async exportUsersToCSV(filters?: UserFilters): Promise<string> {
     const { users } = await this.getAllUsers(filters, 1, 10000);
-    
+
     const headers = ['ID', 'Email', 'Name', 'Subscription', 'Registration Date', 'Last Login', 'Status'];
     const rows = users.map(user => [
       user.id,

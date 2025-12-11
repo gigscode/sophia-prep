@@ -15,8 +15,8 @@ export function UserManagement() {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState<UserFilters>({ status: 'all' });
-  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
+  // const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  // const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [userToDelete, setUserToDelete] = useState<string | null>(null);
 
@@ -49,8 +49,9 @@ export function UserManagement() {
   };
 
   const handleEdit = (user: AdminUser) => {
-    setSelectedUser(user);
-    setShowEditModal(true);
+    // setSelectedUser(user);
+    // setShowEditModal(true);
+    console.log('Edit user:', user);
   };
 
   const handleSuspend = async (userId: string, isActive: boolean) => {

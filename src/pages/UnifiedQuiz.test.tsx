@@ -4,6 +4,7 @@ import { UnifiedQuiz } from './UnifiedQuiz';
 import type { QuizConfig } from '../types/quiz-config';
 import { questionService } from '../services/question-service';
 import { subjectService } from '../services/subject-service';
+import type { Subject, Question } from '../integrations/supabase/types';
 
 // Mock services
 vi.mock('../services/question-service');
@@ -26,9 +27,9 @@ describe('UnifiedQuiz - Explanation Visibility', () => {
         explanation: 'This is the explanation for question 1',
         exam_type: 'JAMB',
         exam_year: 2023
-      } as any
+      } as unknown as Question
     ]);
-    vi.mocked(subjectService.getSubjectBySlug).mockResolvedValue({ id: 'subject-1', name: 'Mathematics' } as any);
+    vi.mocked(subjectService.getSubjectBySlug).mockResolvedValue({ id: 'subject-1', name: 'Mathematics' } as Subject);
     vi.mocked(subjectService.getSubjectsByExamType).mockResolvedValue([]);
   });
 
@@ -189,11 +190,11 @@ describe('UnifiedQuiz - Explanation Visibility', () => {
 describe('UnifiedQuiz - Question Service Compatibility', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(subjectService.getSubjectBySlug).mockResolvedValue({ 
-      id: 'subject-1', 
-      name: 'Mathematics', 
-      slug: 'mathematics' 
-    } as any);
+    vi.mocked(subjectService.getSubjectBySlug).mockResolvedValue({
+      id: 'subject-1',
+      name: 'Mathematics',
+      slug: 'mathematics'
+    } as Subject);
   });
 
   describe('Subject-based quiz flow', () => {
@@ -276,7 +277,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
           exam_year: 2023,
           is_active: true
         }
-      ] as any);
+      ] as unknown as Question[]);
 
       const config: QuizConfig = {
         examType: 'JAMB',
@@ -314,7 +315,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
       vi.mocked(subjectService.getSubjectsByExamType).mockResolvedValue([
         { id: 'subject-1', name: 'Mathematics', slug: 'mathematics' },
         { id: 'subject-2', name: 'English', slug: 'english' }
-      ] as any);
+      ] as Subject[]);
 
       // Mock questions for each subject
       vi.mocked(questionService.getQuestionsBySubjectSlug)
@@ -333,7 +334,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
             exam_year: 2023,
             is_active: true
           }
-        ] as any)
+        ] as unknown as Question[])
         .mockResolvedValueOnce([
           {
             id: 'q2',
@@ -349,7 +350,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
             exam_year: 2023,
             is_active: true
           }
-        ] as any);
+        ] as unknown as Question[]);
 
       const config: QuizConfig = {
         examType: 'JAMB',
@@ -483,7 +484,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
           exam_year: 2023,
           is_active: true
         }
-      ] as any);
+      ] as unknown as Question[]);
 
       const config: QuizConfig = {
         examType: 'JAMB',
@@ -519,7 +520,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
           exam_year: 2023,
           is_active: true
         }
-      ] as any);
+      ] as unknown as Question[]);
 
       const config: QuizConfig = {
         examType: 'JAMB',
@@ -569,7 +570,7 @@ describe('UnifiedQuiz - Question Service Compatibility', () => {
           exam_year: 2023,
           is_active: true
         }
-      ] as unknown);
+      ] as unknown as Question[]);
 
       const config: QuizConfig = {
         examType: 'JAMB',

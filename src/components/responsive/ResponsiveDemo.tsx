@@ -7,8 +7,8 @@
  * Requirements: 11.1, 11.2, 11.3, 11.4, 11.5
  */
 
-import React from 'react';
-import { BookOpen, Clock, Video, GraduationCap, BookMarked } from 'lucide-react';
+
+import { BookOpen } from 'lucide-react';
 import { QuizModesSection } from '../home/QuizModesSection';
 import { QuickLinksSection } from '../home/QuickLinksSection';
 import { UpcomingEventsSection, EventData } from '../home/UpcomingEventsSection';
@@ -56,7 +56,7 @@ export function ResponsiveDemo() {
         <p className="text-gray-600">
           Test responsive behavior by resizing your browser window or using developer tools.
         </p>
-        
+
         {/* Breakpoint indicators */}
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
           <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full block sm:hidden">
@@ -120,17 +120,17 @@ export function ResponsiveDemo() {
           <p className="text-sm text-gray-600 mb-4">
             All interactive elements should be at least 44px × 44px for accessibility
           </p>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Small touch targets for testing */}
             <button className="min-h-[44px] min-w-[44px] bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600 transition-colors">
               44px Min Button
             </button>
-            
+
             <button className="min-h-[44px] min-w-[44px] bg-green-500 text-white rounded-full p-2 hover:bg-green-600 transition-colors flex items-center justify-center">
               <BookOpen size={20} />
             </button>
-            
+
             <button className="min-h-[44px] min-w-[44px] bg-purple-500 text-white rounded-lg px-6 py-3 hover:bg-purple-600 transition-colors">
               Larger Button
             </button>
@@ -145,7 +145,7 @@ export function ResponsiveDemo() {
           <p className="text-sm text-gray-600 mb-4">
             Test different grid configurations
           </p>
-          
+
           {/* 1-2-4 Grid */}
           <div className="mb-6">
             <h3 className="text-lg font-medium mb-2">1-2-4 Grid (Quick Links Pattern)</h3>
@@ -200,7 +200,7 @@ export function ResponsiveDemo() {
           <p className="text-sm text-gray-600 mb-4">
             Verify consistent spacing and sizing across components
           </p>
-          
+
           <div className="space-y-4">
             <div className="p-4 bg-gray-100 rounded-lg">
               <span className="text-sm font-medium">gap-4 (16px)</span>

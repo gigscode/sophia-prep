@@ -97,6 +97,38 @@ export interface Database {
         Insert: Omit<TimerConfiguration, 'id' | 'created_at' | 'updated_at'>;
         Update: Partial<Omit<TimerConfiguration, 'id' | 'created_at' | 'updated_at'>>;
       };
+      user_profiles: {
+        Row: {
+          id: string;
+          email: string;
+          full_name: string | null;
+          subscription_plan: string | null;
+          created_at: string;
+          last_login: string | null;
+          is_active: boolean;
+          exam_type: 'JAMB' | 'WAEC' | 'BOTH' | null;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          full_name?: string | null;
+          subscription_plan?: string | null;
+          created_at?: string;
+          last_login?: string | null;
+          is_active?: boolean;
+          exam_type?: 'JAMB' | 'WAEC' | 'BOTH' | null;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          full_name?: string | null;
+          subscription_plan?: string | null;
+          created_at?: string;
+          last_login?: string | null;
+          is_active?: boolean;
+          exam_type?: 'JAMB' | 'WAEC' | 'BOTH' | null;
+        };
+      };
     };
   };
 }

@@ -6,10 +6,7 @@
  * and navigation events.
  */
 
-import { 
-  preserveUrlState, 
-  getPreservedUrlState, 
-  clearPreservedUrlState,
+import {
   extractQueryParams,
   buildPathWithParams,
   normalizePath
@@ -68,9 +65,9 @@ export class UrlStateManager {
     routePath?: string
   ): UrlStateSnapshot {
     const queryParams = extractQueryParams(location.pathname + location.search);
-    
+
     // Filter query params if specific ones are configured to preserve
-    const filteredQueryParams = this.config.preserveAllQueryParams 
+    const filteredQueryParams = this.config.preserveAllQueryParams
       ? queryParams
       : this.filterQueryParams(queryParams);
 
@@ -104,17 +101,17 @@ export class UrlStateManager {
     try {
       const storageKey = `${this.storagePrefix}_${key}`;
       const stored = sessionStorage.getItem(storageKey);
-      
+
       if (!stored) return null;
-      
+
       const snapshot: UrlStateSnapshot = JSON.parse(stored);
-      
+
       // Check if snapshot is expired
       if (Date.now() - snapshot.timestamp > this.config.maxAge) {
         this.clearSnapshot(key);
         return null;
       }
-      
+
       return snapshot;
     } catch (error) {
       console.warn('Failed to load URL state snapshot:', error);
@@ -139,23 +136,23 @@ export class UrlStateManager {
    */
   restoreFromSnapshot(
     snapshot: UrlStateSnapshot,
-    navigate: (path: string, options?: any) => void,
+    navigate: (path: string, options?: { replace?: boolean }) => void,
     options: { replace?: boolean; preserveCurrent?: boolean } = {}
   ): boolean {
     try {
       // Build the complete URL from snapshot
       let restoredPath = snapshot.pathname;
-      
+
       // Add query parameters if they exist
       if (Object.keys(snapshot.queryParams).length > 0) {
         restoredPath = buildPathWithParams(restoredPath, snapshot.queryParams);
       }
-      
+
       // Add hash if preserved
       if (snapshot.hash) {
         restoredPath += snapshot.hash;
       }
-      
+
       // Save current state before navigating if requested
       if (options.preserveCurrent) {
         const currentLocation = {
@@ -166,7 +163,7 @@ export class UrlStateManager {
         const currentSnapshot = this.createSnapshot(currentLocation);
         this.saveSnapshot(currentSnapshot, 'previous');
       }
-      
+
       navigate(restoredPath, { replace: options.replace });
       return true;
     } catch (error) {
@@ -192,18 +189,18 @@ export class UrlStateManager {
    * Restores preserved URL state
    */
   restorePreservedState(
-    navigate: (path: string, options?: any) => void,
+    navigate: (path: string, options?: { replace?: boolean }) => void,
     key: string = 'preserved',
     options: { replace?: boolean } = {}
   ): boolean {
     const snapshot = this.loadSnapshot(key);
     if (!snapshot) return false;
-    
+
     const success = this.restoreFromSnapshot(snapshot, navigate, options);
     if (success) {
       this.clearSnapshot(key); // Clear after successful restoration
     }
-    
+
     return success;
   }
 
@@ -216,7 +213,7 @@ export class UrlStateManager {
   ): Record<string, string> {
     const snapshot = this.loadSnapshot(key);
     if (!snapshot) return newParams;
-    
+
     return { ...snapshot.queryParams, ...newParams };
   }
 
@@ -226,11 +223,11 @@ export class UrlStateManager {
   shouldRestoreOnPageLoad(currentLocation: { pathname: string; search: string }): boolean {
     const snapshot = this.loadSnapshot('current');
     if (!snapshot) return false;
-    
+
     // Don't restore if we're already on the same page with same params
     const currentPath = normalizePath(currentLocation.pathname);
     const currentParams = extractQueryParams(currentLocation.pathname + currentLocation.search);
-    
+
     return !(
       snapshot.pathname === currentPath &&
       JSON.stringify(snapshot.queryParams) === JSON.stringify(currentParams)
@@ -242,7 +239,7 @@ export class UrlStateManager {
    */
   handlePageRefresh(
     currentLocation: { pathname: string; search: string; hash: string },
-    navigate: (path: string, options?: any) => void,
+    navigate: (path: string, options?: { replace?: boolean }) => void,
     routeParams: Record<string, string> = {},
     routePath?: string
   ): void {
@@ -252,7 +249,7 @@ export class UrlStateManager {
       this.restoreFromSnapshot(preservedSnapshot, navigate, { replace: true });
       return;
     }
-    
+
     // Otherwise, preserve current state for future use
     this.preserveCurrentState(currentLocation, routeParams, routePath, 'current');
   }
@@ -262,7 +259,7 @@ export class UrlStateManager {
    */
   handleNavigationWithPersistence(
     targetPath: string,
-    navigate: (path: string, options?: any) => void,
+    navigate: (path: string, options?: { replace?: boolean }) => void,
     options: {
       preserveQuery?: boolean;
       preserveRoute?: boolean;
@@ -272,15 +269,15 @@ export class UrlStateManager {
   ): void {
     try {
       let finalPath = targetPath;
-      
+
       // Merge with preserved query parameters if requested
       if (options.preserveQuery) {
         const currentSnapshot = this.loadSnapshot('current');
         if (currentSnapshot && Object.keys(currentSnapshot.queryParams).length > 0) {
-          const mergedParams = options.mergeParams 
+          const mergedParams = options.mergeParams
             ? { ...currentSnapshot.queryParams, ...options.mergeParams }
             : currentSnapshot.queryParams;
-          
+
           const url = new URL(targetPath, window.location.origin);
           Object.entries(mergedParams).forEach(([key, value]) => {
             if (value && !url.searchParams.has(key)) {
@@ -290,7 +287,7 @@ export class UrlStateManager {
           finalPath = url.pathname + url.search + url.hash;
         }
       }
-      
+
       navigate(finalPath, { replace: options.replace });
     } catch (error) {
       console.warn('Failed to handle navigation with persistence:', error);
@@ -310,10 +307,10 @@ export class UrlStateManager {
     }
   ): { isValid: boolean; errors: string[]; sanitizedSnapshot?: UrlStateSnapshot } {
     const errors: string[] = [];
-    
+
     try {
       const snapshot = this.createSnapshot(location, routeParams);
-      
+
       // Validate query parameters
       if (validators?.queryValidators) {
         Object.entries(validators.queryValidators).forEach(([key, validator]) => {
@@ -323,7 +320,7 @@ export class UrlStateManager {
           }
         });
       }
-      
+
       // Validate route parameters
       if (validators?.routeValidators) {
         Object.entries(validators.routeValidators).forEach(([key, validator]) => {
@@ -333,13 +330,13 @@ export class UrlStateManager {
           }
         });
       }
-      
+
       // If validation passes, preserve the snapshot
       if (errors.length === 0) {
         this.saveSnapshot(snapshot);
         return { isValid: true, errors: [], sanitizedSnapshot: snapshot };
       }
-      
+
       return { isValid: false, errors };
     } catch (error) {
       console.warn('Failed to validate and preserve parameters:', error);
@@ -354,18 +351,18 @@ export class UrlStateManager {
     if (this.config.preserveAllQueryParams) {
       return queryParams;
     }
-    
+
     if (this.config.preserveQueryParams.length === 0) {
       return {};
     }
-    
+
     const filtered: Record<string, string> = {};
     this.config.preserveQueryParams.forEach(paramName => {
       if (queryParams[paramName] !== undefined) {
         filtered[paramName] = queryParams[paramName];
       }
     });
-    
+
     return filtered;
   }
 
@@ -411,7 +408,7 @@ export const defaultUrlStateManager = new UrlStateManager({
  */
 export function useUrlStateManager(config?: UrlStateConfig) {
   const manager = config ? new UrlStateManager(config) : defaultUrlStateManager;
-  
+
   return {
     createSnapshot: manager.createSnapshot.bind(manager),
     saveSnapshot: manager.saveSnapshot.bind(manager),
@@ -425,6 +422,8 @@ export function useUrlStateManager(config?: UrlStateConfig) {
     handlePageRefresh: manager.handlePageRefresh.bind(manager),
     clearAllState: manager.clearAllState.bind(manager),
     getConfig: manager.getConfig.bind(manager),
-    updateConfig: manager.updateConfig.bind(manager)
+    updateConfig: manager.updateConfig.bind(manager),
+    handleNavigationWithPersistence: manager.handleNavigationWithPersistence.bind(manager),
+    validateAndPreserveParams: manager.validateAndPreserveParams.bind(manager)
   };
 }

@@ -7,16 +7,15 @@
 
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { 
-  BookmarkButton, 
-  ShareButton, 
-  BookmarkList, 
-  DeepLinkActions 
+import {
+  BookmarkButton,
+  ShareButton,
+  BookmarkList,
+  DeepLinkActions
 } from '../routing/DeepLinkHandler';
-import { 
-  useDeepLinking, 
-  isSafeUrl, 
-  generateRouteDeepLink 
+import {
+  useDeepLinking,
+  isSafeUrl
 } from '../../utils/deep-linking';
 
 export function DeepLinkingDemo() {
@@ -45,7 +44,7 @@ export function DeepLinkingDemo() {
     <div className="max-w-4xl mx-auto p-6 space-y-8">
       <div className="bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-6">Deep Linking Demo</h1>
-        
+
         {/* Current Page Actions */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Current Page Actions</h2>
@@ -54,14 +53,14 @@ export function DeepLinkingDemo() {
               Current URL: <code className="bg-gray-200 px-2 py-1 rounded">{location.pathname + location.search}</code>
             </p>
           </div>
-          
+
           <DeepLinkActions
             bookmarkTitle="Demo Page Bookmark"
             bookmarkDescription="This is a demonstration of the deep linking functionality"
             shareConfig={{ includeQueryParams: true, includeHash: false }}
             className="mb-4"
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <BookmarkButton
               customTitle="Custom Bookmark Title"
@@ -69,8 +68,8 @@ export function DeepLinkingDemo() {
               className="w-full"
             />
             <ShareButton
-              config={{ 
-                includeQueryParams: false, 
+              config={{
+                includeQueryParams: false,
                 customTitle: "Check out this page!",
                 customDescription: "Shared from the deep linking demo"
               }}
@@ -82,7 +81,7 @@ export function DeepLinkingDemo() {
         {/* URL Validation Testing */}
         <div className="mb-8">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">URL Validation Testing</h2>
-          
+
           <div className="space-y-4">
             <div>
               <label htmlFor="test-url" className="block text-sm font-medium text-gray-700 mb-2">
@@ -132,37 +131,37 @@ export function DeepLinkingDemo() {
                     <span className={`inline-block w-3 h-3 rounded-full ${validationResult.isValid ? 'bg-green-500' : 'bg-red-500'}`}></span>
                     <span>Valid: {validationResult.isValid ? 'Yes' : 'No'}</span>
                   </div>
-                  
+
                   {validationResult.routeConfig && (
                     <div>
                       <strong>Route:</strong> {validationResult.routeConfig.path}
                     </div>
                   )}
-                  
+
                   {validationResult.routeParams && Object.keys(validationResult.routeParams).length > 0 && (
                     <div>
                       <strong>Route Params:</strong> {JSON.stringify(validationResult.routeParams)}
                     </div>
                   )}
-                  
+
                   {validationResult.queryParams && Object.keys(validationResult.queryParams).length > 0 && (
                     <div>
                       <strong>Query Params:</strong> {JSON.stringify(validationResult.queryParams)}
                     </div>
                   )}
-                  
+
                   {validationResult.requiresAuth && (
                     <div className="text-orange-600">
                       <strong>⚠️ Requires Authentication</strong>
                     </div>
                   )}
-                  
+
                   {validationResult.requiresAdmin && (
                     <div className="text-red-600">
                       <strong>🔒 Requires Admin Privileges</strong>
                     </div>
                   )}
-                  
+
                   {validationResult.errors && validationResult.errors.length > 0 && (
                     <div>
                       <strong className="text-red-600">Errors:</strong>

@@ -34,24 +34,24 @@ export function useUrlParams() {
   // Set a single query parameter
   const setQueryParam = useCallback((key: string, value: string | null, options?: { replace?: boolean; preserve?: boolean }) => {
     const newParams = new URLSearchParams(searchParams);
-    
+
     if (value === null || value === undefined) {
       newParams.delete(key);
     } else {
       newParams.set(key, value);
     }
-    
+
     if (options?.preserve) {
       preserveCurrentParams([key]);
     }
-    
+
     setSearchParams(newParams, { replace: options?.replace });
   }, [searchParams, setSearchParams, preserveCurrentParams]);
 
   // Set multiple query parameters
   const setQueryParams = useCallback((params: Record<string, string | null>, options?: { replace?: boolean; preserve?: boolean; merge?: boolean }) => {
     const newParams = options?.merge ? new URLSearchParams(searchParams) : new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value === null || value === undefined) {
         newParams.delete(key);
@@ -59,11 +59,11 @@ export function useUrlParams() {
         newParams.set(key, value);
       }
     });
-    
+
     if (options?.preserve) {
       preserveCurrentParams(Object.keys(params));
     }
-    
+
     setSearchParams(newParams, { replace: options?.replace });
   }, [searchParams, setSearchParams, preserveCurrentParams]);
 
@@ -80,8 +80,8 @@ export function useUrlParams() {
 
   // Navigate with parameters using URL state manager
   const navigateWithParams = useCallback((
-    path: string, 
-    params?: Record<string, string>, 
+    path: string,
+    params?: Record<string, string>,
     options?: { replace?: boolean; preserveQuery?: boolean; preserveRoute?: boolean }
   ) => {
     urlStateManager.handleNavigationWithPersistence(
@@ -102,7 +102,7 @@ export function useUrlParams() {
     options?: { replace?: boolean; preserve?: boolean }
   ) => {
     const currentUrl = new URL(window.location.href);
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value === null || value === undefined) {
         currentUrl.searchParams.delete(key);
@@ -110,13 +110,13 @@ export function useUrlParams() {
         currentUrl.searchParams.set(key, value);
       }
     });
-    
+
     const newPath = currentUrl.pathname + currentUrl.search + currentUrl.hash;
-    
+
     if (options?.preserve) {
       preserveCurrentParams(Object.keys(params));
     }
-    
+
     navigate(newPath, { replace: options?.replace });
   }, [navigate, preserveCurrentParams]);
 
@@ -132,7 +132,7 @@ export function useUrlParams() {
       routeParams as Record<string, string>
     );
     urlStateManager.saveSnapshot(snapshot, key);
-    
+
     if (paramsToPreserve) {
       preserveCurrentParams(paramsToPreserve);
     }
@@ -196,27 +196,27 @@ export function useUrlParams() {
     setQueryParams,
     clearQueryParams,
     hasQueryParam,
-    
+
     // Route parameters
     routeParams: routeParams as Record<string, string>,
     getRouteParam,
     hasRouteParam,
-    
+
     // Navigation with parameters
     navigateWithParams,
     updateUrl,
-    
+
     // Parameter persistence
     preserveParams,
     restoreParams,
     mergeWithPreserved,
-    
+
     // Validation
     isValidParam,
     validateCurrentParams,
     getParamValidationErrors,
     areParamsValid,
-    
+
     // Current location info
     pathname: location.pathname,
     search: location.search,
@@ -244,53 +244,51 @@ export function useTypedUrlParams<T extends Record<string, any>>(
     routeParams,
     getQueryParam,
     getRouteParam,
-    setQueryParam,
-    setQueryParams,
-    updateUrl
+    setQueryParams
   } = useUrlParams();
 
   // Get typed parameters
   const getTypedParams = useCallback((): Partial<T> => {
     const result: Partial<T> = {};
-    
+
     Object.entries(paramConfig).forEach(([key, config]) => {
-      const rawValue = config.type === 'query' 
-        ? getQueryParam(key) 
+      const rawValue = config.type === 'query'
+        ? getQueryParam(key)
         : getRouteParam(key);
-      
+
       if (rawValue) {
         if (config.validator && !config.validator(rawValue)) {
           return; // Skip invalid values
         }
-        
-        result[key as keyof T] = config.parser 
+
+        result[key as keyof T] = config.parser
           ? config.parser(rawValue)
           : rawValue as T[keyof T];
       } else if (config.defaultValue !== undefined) {
         result[key as keyof T] = config.defaultValue;
       }
     });
-    
+
     return result;
   }, [paramConfig, getQueryParam, getRouteParam]);
 
   // Set typed parameters
   const setTypedParams = useCallback((params: Partial<T>, options?: { replace?: boolean; preserve?: boolean }) => {
     const serializedParams: Record<string, string | null> = {};
-    
+
     Object.entries(params).forEach(([key, value]) => {
       const config = paramConfig[key as keyof T];
       if (!config || config.type !== 'query') return; // Only handle query params
-      
+
       if (value === null || value === undefined) {
         serializedParams[key] = null;
       } else {
-        serializedParams[key] = config.serializer 
+        serializedParams[key] = config.serializer
           ? config.serializer(value)
           : String(value);
       }
     });
-    
+
     if (Object.keys(serializedParams).length > 0) {
       setQueryParams(serializedParams, { ...options, merge: true });
     }
@@ -302,7 +300,7 @@ export function useTypedUrlParams<T extends Record<string, any>>(
     params: typedParams,
     setParams: setTypedParams,
     getTypedParams,
-    
+
     // Raw access
     queryParams,
     routeParams

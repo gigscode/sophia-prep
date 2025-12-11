@@ -46,8 +46,8 @@ export function PracticeModeQuiz() {
   const [subjectSel, setSubjectSel] = useState<string | undefined>(initialSubject);
   const [yearSel, setYearSel] = useState<'ALL' | number>(initialYearParam === 'ALL' ? 'ALL' : (initialYearParam ? Number(initialYearParam) : 'ALL'));
   const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(
-    initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' || initialTypeParam === 'ALL' 
-      ? (initialTypeParam as 'ALL' | 'JAMB' | 'WAEC') 
+    initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' || initialTypeParam === 'ALL'
+      ? (initialTypeParam as 'ALL' | 'JAMB' | 'WAEC')
       : 'ALL'
   );
   const [showSelectionPage, setShowSelectionPage] = useState(!initialSubject);
@@ -98,7 +98,7 @@ export function PracticeModeQuiz() {
         let qs: any[] = [];
         if (subject) {
           const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type, limit: 50 });
-          qs = normalizeQuestions(rows, { exam_year: exam_year as any, exam_type: exam_type });
+          qs = normalizeQuestions(rows, { exam_year: exam_year, exam_type: exam_type });
         } else {
           const local = await quizService.getRandomQuestions(10);
           qs = normalizeQuestions(local, { exam_year: 'ALL', exam_type: 'ALL' });
@@ -124,7 +124,7 @@ export function PracticeModeQuiz() {
     if (key === (q.correct || '')) setScore(s => s + 1);
   }, [q, showFeedback]);
 
-  const next = async () => {
+  const next = useCallback(async () => {
     setSelected(null);
     setShowFeedback(false);
     if (index < pool.length - 1) {
@@ -132,7 +132,7 @@ export function PracticeModeQuiz() {
     } else {
       // Quiz completed - save attempt and navigate to results
       const timeTaken = Math.floor((Date.now() - Date.now()) / 1000); // Approximate time
-      
+
       // Get subject_id from slug
       let subject_id: string | undefined;
       if (subjectSel) {
@@ -171,7 +171,7 @@ export function PracticeModeQuiz() {
         },
       });
     }
-  };
+  }, [index, pool, subjectSel, yearSel, score, answers, navigate]);
 
   const isCorrect = !!selected && q && selected === (q.correct || '');
 
@@ -189,7 +189,7 @@ export function PracticeModeQuiz() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [onSelect, pool.length, showFeedback]);
+  }, [onSelect, pool.length, showFeedback, next]);
 
   // Exam Type Selection Screen
   if (typeSel === 'ALL') {
@@ -231,7 +231,7 @@ export function PracticeModeQuiz() {
             </div>
             <p className="text-gray-600 text-lg">
               Immediate feedback after each answer with explanations.
-Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
+              Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
             </p>
           </button>
         </div>
@@ -241,7 +241,7 @@ Prepare for the Joint Admissions and Matriculation Board examination with our co
 
   // Subject and Year Selection Screen
   if (showSelectionPage && (typeSel === 'JAMB' || typeSel === 'WAEC')) {
-    const examTypeColor = typeSel === 'WAEC' ? 'green' : 'blue';
+    // const examTypeColor = typeSel === 'WAEC' ? 'green' : 'blue'; // Unused
     const examTypeBg = typeSel === 'WAEC' ? 'bg-green-50' : 'bg-blue-50';
     const examTypeBorder = typeSel === 'WAEC' ? 'border-green-500' : 'border-blue-500';
     const examTypeText = typeSel === 'WAEC' ? 'text-green-700' : 'text-blue-700';
@@ -280,11 +280,10 @@ Prepare for the Joint Admissions and Matriculation Board examination with our co
                   <select
                     value={subjectSel || ''}
                     onChange={(e) => setSubjectSel(e.target.value || undefined)}
-                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${
-                      typeSel === 'WAEC'
-                        ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                        : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                    }`}
+                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
+                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                      }`}
                   >
                     <option value="">Select a subject</option>
                     {availableSubjects.map((subject) => (
@@ -307,11 +306,10 @@ Prepare for the Joint Admissions and Matriculation Board examination with our co
                     const value = e.target.value;
                     setYearSel(value === 'ALL' ? 'ALL' : Number(value));
                   }}
-                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${
-                    typeSel === 'WAEC'
-                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                  }`}
+                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
+                    ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
+                    : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
+                    }`}
                 >
                   <option value="ALL">All Years</option>
                   <option value="2024">2024</option>
@@ -403,7 +401,7 @@ Prepare for the Joint Admissions and Matriculation Board examination with our co
           <div className="mb-4">
             <div className="text-base md:text-lg font-semibold mb-3">{q.text}</div>
             <div className="grid grid-cols-1 gap-3">
-              {q.options.map((opt: any) => (
+              {q.options.map((opt) => (
                 <OptionButton key={opt.key} optionKey={opt.key} text={opt.text} selected={selected === opt.key} onSelect={onSelect} disabled={!!showFeedback} />
               ))}
             </div>

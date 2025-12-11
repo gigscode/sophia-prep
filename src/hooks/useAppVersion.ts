@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 /**
  * Version information from version.json
@@ -82,7 +82,6 @@ const VERSION_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const STORAGE_KEY = 'app-version-info';
 const STORAGE_BACKUP_KEY = 'app-version-info-backup';
 const UPDATE_QUEUE_KEY = 'app-update-queue';
-const UPDATE_STATE_KEY = 'app-update-state';
 
 /**
  * Default configuration for silent updates
@@ -108,35 +107,35 @@ class VersionStorageManager {
      */
     public async storeVersion(version: VersionInfo): Promise<boolean> {
         let lastError: Error | null = null;
-        
+
         for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             try {
                 // Store primary version
                 const versionData = JSON.stringify(version);
                 localStorage.setItem(STORAGE_KEY, versionData);
-                
+
                 // Store backup copy
                 localStorage.setItem(STORAGE_BACKUP_KEY, versionData);
-                
+
                 // Verify storage was successful
                 const stored = localStorage.getItem(STORAGE_KEY);
                 if (stored !== versionData) {
                     throw new Error('Version storage verification failed');
                 }
-                
+
                 console.log('Version stored successfully:', version.version);
                 return true;
-                
+
             } catch (error) {
                 lastError = error instanceof Error ? error : new Error(String(error));
                 console.warn(`Version storage attempt ${attempt}/${this.maxRetries} failed:`, error);
-                
+
                 if (attempt < this.maxRetries) {
                     await new Promise(resolve => setTimeout(resolve, this.retryDelayMs * attempt));
                 }
             }
         }
-        
+
         console.error('Failed to store version after all retries:', lastError);
         return false;
     }
@@ -154,7 +153,7 @@ class VersionStorageManager {
                     return version;
                 }
             }
-            
+
             // Fallback to backup storage
             const backupVersionStr = localStorage.getItem(STORAGE_BACKUP_KEY);
             if (backupVersionStr) {
@@ -166,9 +165,9 @@ class VersionStorageManager {
                     return version;
                 }
             }
-            
+
             return null;
-            
+
         } catch (error) {
             console.error('Failed to retrieve stored version:', error);
             return null;
@@ -179,11 +178,11 @@ class VersionStorageManager {
      * Validate version info structure
      */
     private isValidVersionInfo(obj: any): obj is VersionInfo {
-        return obj && 
-               typeof obj.version === 'string' &&
-               typeof obj.buildTime === 'string' &&
-               typeof obj.buildId === 'string' &&
-               typeof obj.cacheName === 'string';
+        return obj &&
+            typeof obj.version === 'string' &&
+            typeof obj.buildTime === 'string' &&
+            typeof obj.buildId === 'string' &&
+            typeof obj.cacheName === 'string';
     }
 
     /**
@@ -204,7 +203,6 @@ class VersionStorageManager {
  */
 class UpdateQueueManager {
     private maxRetries = 3;
-    private processingTimeout: number | null = null;
 
     /**
      * Add update to queue
@@ -213,7 +211,7 @@ class UpdateQueueManager {
         try {
             const queue = this.getQueue();
             const updateId = `update-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-            
+
             const queuedUpdate: QueuedUpdate = {
                 id: updateId,
                 version,
@@ -221,22 +219,22 @@ class UpdateQueueManager {
                 priority: Date.now(), // Higher timestamp = higher priority
                 retryCount: 0
             };
-            
+
             // Remove any existing updates for the same version
             queue.updates = queue.updates.filter(u => u.version.buildId !== version.buildId);
-            
+
             // Add new update
             queue.updates.push(queuedUpdate);
-            
+
             // Sort by priority (newest first)
             queue.updates.sort((a, b) => b.priority - a.priority);
-            
+
             // Persist queue
             await this.persistQueue(queue);
-            
+
             console.log('Update queued:', updateId, version.version);
             return updateId;
-            
+
         } catch (error) {
             console.error('Failed to queue update:', error);
             throw error;
@@ -278,13 +276,13 @@ class UpdateQueueManager {
         try {
             const queue = this.getQueue();
             const update = queue.updates.find(u => u.id === updateId);
-            
+
             if (!update) {
                 return false;
             }
-            
+
             update.retryCount++;
-            
+
             if (update.retryCount >= this.maxRetries) {
                 // Remove failed update after max retries
                 queue.updates = queue.updates.filter(u => u.id !== updateId);
@@ -327,7 +325,7 @@ class UpdateQueueManager {
         } catch (error) {
             console.error('Failed to parse update queue:', error);
         }
-        
+
         // Return empty queue if parsing fails
         return {
             updates: [],
@@ -340,30 +338,30 @@ class UpdateQueueManager {
      */
     private async persistQueue(queue: UpdateQueue): Promise<void> {
         let lastError: Error | null = null;
-        
+
         for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
             try {
                 const queueData = JSON.stringify(queue);
                 localStorage.setItem(UPDATE_QUEUE_KEY, queueData);
-                
+
                 // Verify storage
                 const stored = localStorage.getItem(UPDATE_QUEUE_KEY);
                 if (stored !== queueData) {
                     throw new Error('Queue storage verification failed');
                 }
-                
+
                 return;
-                
+
             } catch (error) {
                 lastError = error instanceof Error ? error : new Error(String(error));
                 console.warn(`Queue persistence attempt ${attempt}/${this.maxRetries} failed:`, error);
-                
+
                 if (attempt < this.maxRetries) {
                     await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
                 }
             }
         }
-        
+
         throw lastError || new Error('Failed to persist queue after all retries');
     }
 
@@ -439,7 +437,7 @@ class UserActivityTracker {
                     try {
                         const now = new Date();
                         const timeSinceLastActivity = now.getTime() - this.lastActivityTime.getTime();
-                        
+
                         if (timeSinceLastActivity > this.inactivityThreshold) {
                             this.isActive = false;
                             this.notifyListeners();
@@ -527,7 +525,7 @@ class UserActivityTracker {
         } catch (error) {
             console.error('Error adding activity listener:', error);
             // Return no-op cleanup function
-            return () => {};
+            return () => { };
         }
     }
 
@@ -601,7 +599,7 @@ class UpdateTimingManager {
         } else {
             try {
                 // Test the activity tracker
-                const activity = userActivityTracker.getActivity();
+                userActivityTracker.getActivity();
                 if (!userActivityTracker.isHealthy()) {
                     console.warn('Activity tracker is unhealthy, using fallback timing');
                     this.fallbackMode = true;
@@ -651,11 +649,11 @@ class UpdateTimingManager {
             // Wait for user inactivity with timeout fallback
             if (this.userActivityTracker) {
                 let hasExecuted = false;
-                
+
                 const executeUpdate = () => {
                     if (hasExecuted) return;
                     hasExecuted = true;
-                    
+
                     try {
                         callback();
                     } catch (error) {
@@ -681,11 +679,11 @@ class UpdateTimingManager {
                         } catch (error) {
                             console.warn('Error unsubscribing from activity tracker:', error);
                         }
-                        
+
                         console.log('User activity timeout reached, applying update anyway');
                         executeUpdate();
                     }, this.maxWaitTime);
-                    
+
                 } catch (error) {
                     console.warn('Error setting up activity-based scheduling:', error);
                     // Fall back to immediate execution
@@ -744,7 +742,7 @@ class UpdateTimingManager {
 // Import the enhanced cache management utilities
 import { CacheManager, DEFAULT_CACHE_CONFIG } from '../utils/cache-management';
 // Import comprehensive error recovery system
-import { globalErrorRecovery, withErrorRecovery } from '../utils/error-recovery';
+import { withErrorRecovery } from '../utils/error-recovery';
 
 /**
  * Custom hook to detect app version updates with silent update capabilities
@@ -770,9 +768,16 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
         retryCount: 0
     });
 
-    // Merge provided config with defaults
-    const config = { ...DEFAULT_SILENT_CONFIG, ...silentConfig };
-    
+    // Merge provided config with defaults and memoize
+    const config = useMemo(() => ({ ...DEFAULT_SILENT_CONFIG, ...silentConfig }), [
+        silentConfig?.enabled,
+        silentConfig?.delayMs,
+        silentConfig?.respectUserActivity,
+        silentConfig?.inactivityThreshold,
+        silentConfig?.maxRetries,
+        silentConfig?.retryDelayMs
+    ]);
+
     // Refs for cleanup and persistence
     const userActivityTrackerRef = useRef<UserActivityTracker | null>(null);
     const updateTimingManagerRef = useRef<UpdateTimingManager | null>(null);
@@ -787,7 +792,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
         if (config.enabled && config.respectUserActivity) {
             let activityTracker: UserActivityTracker | null = null;
             let timingManager: UpdateTimingManager | null = null;
-            
+
             // Enhanced activity tracker initialization with multiple fallback strategies
             const initializeActivityTracking = async () => {
                 const initStrategies = [
@@ -809,11 +814,11 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     try {
                         console.log(`Attempting activity tracker initialization: ${strategy.name}`);
                         activityTracker = strategy.fn();
-                        
+
                         // Test the tracker immediately
                         const testActivity = activityTracker.getActivity();
                         const diagnostics = activityTracker.getDiagnostics();
-                        
+
                         console.log('Activity tracker test results:', {
                             isHealthy: activityTracker.isHealthy(),
                             diagnostics,
@@ -822,7 +827,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                                 threshold: testActivity.inactivityThreshold
                             }
                         });
-                        
+
                         if (activityTracker.isHealthy()) {
                             console.log(`Activity tracker initialized successfully using: ${strategy.name}`);
                             break;
@@ -831,7 +836,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                             activityTracker.cleanup();
                             activityTracker = null;
                         }
-                        
+
                     } catch (strategyError) {
                         console.warn(`Activity tracker strategy '${strategy.name}' failed:`, strategyError);
                         if (activityTracker) {
@@ -869,19 +874,19 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     try {
                         console.log(`Attempting timing manager initialization: ${strategy.name}`);
                         const manager = strategy.fn();
-                        
+
                         // Test the timing manager
                         const shouldApply = manager.shouldApplyUpdate();
                         const diagnostics = manager.getDiagnostics();
-                        
+
                         console.log('Timing manager test results:', {
                             shouldApplyUpdate: shouldApply,
                             diagnostics
                         });
-                        
+
                         console.log(`Timing manager initialized successfully using: ${strategy.name}`);
                         return manager;
-                        
+
                     } catch (strategyError) {
                         console.warn(`Timing manager strategy '${strategy.name}' failed:`, strategyError);
                     }
@@ -897,33 +902,33 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     // Initialize activity tracking
                     activityTracker = await initializeActivityTracking();
                     userActivityTrackerRef.current = activityTracker;
-                    
+
                     if (!activityTracker) {
                         console.warn('All activity tracking strategies failed, using timing-only approach');
                     }
-                    
+
                     // Initialize timing manager
                     timingManager = initializeTimingManager(activityTracker);
                     updateTimingManagerRef.current = timingManager;
-                    
+
                     if (!timingManager) {
                         console.warn('All timing manager strategies failed, updates will be immediate');
                     }
-                    
+
                     // Set up health monitoring for ongoing error recovery
                     const healthCheckInterval = setInterval(() => {
                         try {
                             if (activityTracker && !activityTracker.isHealthy()) {
                                 console.warn('Activity tracker became unhealthy, switching to fallback mode');
                                 clearInterval(healthCheckInterval);
-                                
+
                                 // Reinitialize with fallback configuration
                                 try {
                                     activityTracker.cleanup();
                                 } catch (cleanupError) {
                                     console.warn('Error cleaning up unhealthy tracker:', cleanupError);
                                 }
-                                
+
                                 updateTimingManagerRef.current = new UpdateTimingManager(
                                     null,
                                     { ...config, respectUserActivity: false }
@@ -935,13 +940,13 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                             clearInterval(healthCheckInterval);
                         }
                     }, 30000); // Check every 30 seconds
-                    
+
                     // Store interval for cleanup
                     (userActivityTrackerRef as any).healthCheckInterval = healthCheckInterval;
-                    
+
                 } catch (initError) {
                     console.error('Complete initialization failed:', initError);
-                    
+
                     // Ultimate fallback - create minimal timing manager
                     try {
                         updateTimingManagerRef.current = new UpdateTimingManager(
@@ -973,7 +978,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         console.warn('Error clearing health check interval:', intervalError);
                     }
                 }
-                
+
                 if (userActivityTrackerRef.current) {
                     try {
                         userActivityTrackerRef.current.cleanup();
@@ -981,7 +986,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         console.warn('Error during activity tracker cleanup:', cleanupError);
                     }
                 }
-                
+
                 if (updateTimingManagerRef.current) {
                     try {
                         updateTimingManagerRef.current.cancelScheduledUpdate();
@@ -989,7 +994,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         console.warn('Error canceling scheduled update:', cancelError);
                     }
                 }
-                
+
                 if (retryTimeoutRef.current) {
                     try {
                         clearTimeout(retryTimeoutRef.current);
@@ -997,15 +1002,15 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         console.warn('Error clearing retry timeout:', timeoutError);
                     }
                 }
-                
+
                 // Cancel any processing updates
                 processingUpdateRef.current = null;
-                
+
             } catch (error) {
                 console.error('Error during useAppVersion cleanup:', error);
             }
         };
-    }, [config.enabled, config.respectUserActivity, config.inactivityThreshold]);
+    }, [config, config.enabled, config.respectUserActivity, config.inactivityThreshold]);
 
     /**
      * Process queued updates sequentially with comprehensive error recovery
@@ -1023,11 +1028,11 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
 
         processingUpdateRef.current = nextUpdate.id;
         let criticalError = false;
-        
+
         try {
             setUpdateState(prev => ({ ...prev, status: 'applying' }));
             console.log('Processing queued update:', nextUpdate.id, nextUpdate.version.version);
-            
+
             // Step 1: Clear caches with comprehensive error recovery
             let cacheResult;
             try {
@@ -1035,23 +1040,23 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     () => cacheManagerRef.current.clearAllCaches(),
                     `cache-clearing-${nextUpdate.id}`
                 );
-                
+
                 if (!cacheResult.success) {
                     console.warn('Cache clearing had issues:', cacheResult.errors);
-                    
+
                     // Determine if cache failures are critical
-                    const hasCriticalCacheFailure = cacheResult.errors.some(error => 
+                    const hasCriticalCacheFailure = cacheResult.errors.some(error =>
                         error.includes('Service Worker cache clearing failed') ||
                         error.includes('Browser cache clearing failed')
                     );
-                    
+
                     if (hasCriticalCacheFailure && cacheResult.errors.length > 2) {
                         console.warn('Multiple critical cache failures detected, but continuing with update');
                     }
                 }
             } catch (cacheError) {
                 console.error('Cache clearing completely failed after recovery attempts:', cacheError);
-                
+
                 // Try one final emergency cache clearing approach
                 try {
                     console.log('Attempting emergency cache clearing as final fallback');
@@ -1059,7 +1064,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         const cacheNames = await caches.keys();
                         await Promise.allSettled(cacheNames.map(name => caches.delete(name)));
                     }
-                    
+
                     cacheResult = {
                         success: true,
                         operations: {
@@ -1085,18 +1090,17 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     };
                 }
             }
-            
+
             // Step 2: Store version with comprehensive error recovery
-            let storageSuccess = false;
             try {
-                storageSuccess = await withErrorRecovery(
+                await withErrorRecovery(
                     () => storageManagerRef.current.storeVersion(nextUpdate.version),
                     `version-storage-${nextUpdate.id}`,
                     { maxRetries: 3, baseDelayMs: 1000 }
                 );
             } catch (storageError) {
                 console.error('Version storage failed after recovery attempts:', storageError);
-                
+
                 // Multi-level emergency storage fallback
                 const emergencyStrategies = [
                     {
@@ -1145,7 +1149,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     throw new Error('Complete version storage failure - cannot proceed safely');
                 }
             }
-            
+
             // Step 3: Mark update as completed (with error handling)
             try {
                 await queueManagerRef.current.completeUpdate(nextUpdate.id);
@@ -1159,18 +1163,18 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     console.error('Failed to clear update queue:', clearError);
                 }
             }
-            
+
             setUpdateState(prev => ({ ...prev, status: 'completed' }));
-            
+
             // Step 4: Force reload with comprehensive error handling
             try {
                 // Add a small delay to ensure state updates are processed
                 await new Promise(resolve => setTimeout(resolve, 100));
-                
+
                 cacheManagerRef.current.forceReloadFromServer();
             } catch (reloadError) {
                 console.error('Force reload failed:', reloadError);
-                
+
                 // Try alternative reload methods
                 try {
                     console.log('Attempting alternative reload method...');
@@ -1187,15 +1191,15 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     }
                 }
             }
-            
+
         } catch (error) {
             console.error('Queued update failed:', error);
-            
+
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            const isRecoverableError = !criticalError && 
-                                     !errorMessage.includes('Complete') && 
-                                     !errorMessage.includes('manual refresh required');
-            
+            const isRecoverableError = !criticalError &&
+                !errorMessage.includes('Complete') &&
+                !errorMessage.includes('manual refresh required');
+
             // Enhanced error recovery logic
             let shouldRetry = false;
             if (isRecoverableError) {
@@ -1207,7 +1211,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                     shouldRetry = nextUpdate.retryCount < 2 && !criticalError;
                 }
             }
-            
+
             setUpdateState(prev => ({
                 ...prev,
                 status: shouldRetry ? 'update-available' : 'failed',
@@ -1219,16 +1223,16 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
             if (shouldRetry) {
                 const baseDelay = config.retryDelayMs || 5000;
                 const retryDelay = baseDelay * Math.pow(2, nextUpdate.retryCount) + Math.random() * 1000;
-                
+
                 console.log(`Scheduling update retry in ${Math.round(retryDelay)}ms (attempt ${nextUpdate.retryCount + 1})`);
-                
+
                 retryTimeoutRef.current = window.setTimeout(() => {
                     console.log('Executing scheduled update retry');
                     processUpdateQueue();
                 }, retryDelay);
             } else {
                 console.error('Update failed permanently:', errorMessage);
-                
+
                 // If it's a critical error, notify user
                 if (criticalError) {
                     console.error('Critical update failure - user intervention may be required');
@@ -1248,13 +1252,13 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
             // Add update to queue for sequential processing
             const updateId = await queueManagerRef.current.queueUpdate(serverVersion);
             console.log('Update queued for processing:', updateId);
-            
+
             // Process the queue
             await processUpdateQueue();
-            
+
         } catch (error) {
             console.error('Failed to queue automatic update:', error);
-            
+
             setUpdateState(prev => ({
                 ...prev,
                 status: 'failed',
@@ -1270,14 +1274,14 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
     const fetchVersionWithRetry = useCallback(async (retryCount = 0): Promise<VersionInfo> => {
         const maxRetries = config.maxRetries || 3;
         const baseDelay = config.retryDelayMs || 1000;
-        
+
         try {
             // Calculate timeout based on retry attempt with progressive increase
             const timeoutMs = Math.min(5000 + (retryCount * 2000), 15000); // Cap at 15 seconds
-            
+
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-            
+
             try {
                 // Enhanced request with multiple fallback strategies
                 const requestOptions = {
@@ -1302,20 +1306,13 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                 ];
 
                 let lastFetchError: Error | null = null;
-                
+
                 for (let urlIndex = 0; urlIndex < urlStrategies.length; urlIndex++) {
                     try {
                         const response = await fetch(urlStrategies[urlIndex], requestOptions);
 
                         if (!response.ok) {
                             // Enhanced HTTP error handling
-                            const errorDetails = {
-                                status: response.status,
-                                statusText: response.statusText,
-                                url: response.url,
-                                headers: Object.fromEntries(response.headers.entries())
-                            };
-                            
                             // Specific handling for different HTTP errors
                             if (response.status === 404) {
                                 throw new Error(`Version file not found (404) at ${response.url}`);
@@ -1345,7 +1342,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         } catch (parseError) {
                             throw new Error(`Invalid JSON response: ${parseError}`);
                         }
-                        
+
                         // Enhanced validation with detailed error messages
                         const validationErrors: string[] = [];
                         if (!serverVersion || typeof serverVersion !== 'object') {
@@ -1373,52 +1370,52 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
                         clearTimeout(timeoutId);
                         console.log(`Version fetch successful on attempt ${retryCount + 1}, URL strategy ${urlIndex + 1}`);
                         return serverVersion;
-                        
+
                     } catch (fetchError) {
                         lastFetchError = fetchError instanceof Error ? fetchError : new Error(String(fetchError));
                         console.warn(`URL strategy ${urlIndex + 1} failed:`, lastFetchError.message);
-                        
+
                         // If this isn't the last URL strategy, continue to next
                         if (urlIndex < urlStrategies.length - 1) {
                             continue;
                         }
-                        
+
                         // All URL strategies failed, throw the last error
                         throw lastFetchError;
                     }
                 }
-                
+
             } finally {
                 clearTimeout(timeoutId);
             }
-            
+
         } catch (error) {
             // Enhanced error classification and recovery
             const errorMessage = error instanceof Error ? error.message : String(error);
             const errorName = (error as any)?.name || 'UnknownError';
-            
-            const isNetworkError = error instanceof TypeError || 
-                                 errorName === 'AbortError' ||
-                                 errorName === 'NetworkError' ||
-                                 errorMessage.includes('fetch') ||
-                                 errorMessage.includes('network') ||
-                                 (error as any)?.code === 'NETWORK_ERROR';
-            
-            const isTimeoutError = errorName === 'AbortError' || 
-                                  errorMessage.includes('timeout') ||
-                                  errorMessage.includes('aborted');
-            
+
+            const isNetworkError = error instanceof TypeError ||
+                errorName === 'AbortError' ||
+                errorName === 'NetworkError' ||
+                errorMessage.includes('fetch') ||
+                errorMessage.includes('network') ||
+                (error as any)?.code === 'NETWORK_ERROR';
+
+            const isTimeoutError = errorName === 'AbortError' ||
+                errorMessage.includes('timeout') ||
+                errorMessage.includes('aborted');
+
             const isServerError = (error as any)?.status >= 500 ||
-                                 errorMessage.includes('Server error');
-            
+                errorMessage.includes('Server error');
+
             const isRateLimitError = (error as any)?.status === 429 ||
-                                   errorMessage.includes('Rate limited');
-            
-            const isRetryableError = isNetworkError || 
-                                   isTimeoutError ||
-                                   isServerError ||
-                                   isRateLimitError ||
-                                   (error as any)?.status === 408; // Request timeout
+                errorMessage.includes('Rate limited');
+
+            const isRetryableError = isNetworkError ||
+                isTimeoutError ||
+                isServerError ||
+                isRateLimitError ||
+                (error as any)?.status === 408; // Request timeout
 
             console.warn(`Version fetch attempt ${retryCount + 1}/${maxRetries + 1} failed:`, {
                 error: errorMessage,
@@ -1435,24 +1432,24 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
             if (retryCount < maxRetries && isRetryableError) {
                 // Enhanced exponential backoff with jitter and rate limit handling
                 let delay = baseDelay * Math.pow(2, retryCount) + Math.random() * 1000;
-                
+
                 // Special handling for rate limits - longer delay
                 if (isRateLimitError) {
                     delay = Math.max(delay, 10000 + Math.random() * 5000); // 10-15 second delay
                 }
-                
+
                 // Cap maximum delay
                 delay = Math.min(delay, 30000); // Max 30 seconds
-                
+
                 console.log(`Retrying version fetch in ${Math.round(delay)}ms... (${isRateLimitError ? 'rate limit backoff' : 'standard retry'})`);
-                
+
                 await new Promise(resolve => setTimeout(resolve, delay));
                 return fetchVersionWithRetry(retryCount + 1);
             }
 
             // Enhanced final failure handling with recovery suggestions
             let enhancedErrorMessage = `Failed to fetch version after ${retryCount + 1} attempts: ${errorMessage}`;
-            
+
             if (isNetworkError) {
                 enhancedErrorMessage += ' (Network connectivity issue - check internet connection)';
             } else if (isServerError) {
@@ -1462,9 +1459,11 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
             } else if (errorMessage.includes('404')) {
                 enhancedErrorMessage += ' (Version file not found - deployment issue)';
             }
-            
+
             throw new Error(enhancedErrorMessage);
         }
+
+        throw new Error('Unreachable');
     }, [config.maxRetries, config.retryDelayMs]);
 
     /**
@@ -1534,10 +1533,10 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
         } catch (error) {
             console.error('Error checking for updates:', error);
             setLoading(false);
-            setUpdateState(prev => ({ 
-                ...prev, 
-                status: 'failed', 
-                error: error instanceof Error ? error.message : 'Unknown error' 
+            setUpdateState(prev => ({
+                ...prev,
+                status: 'failed',
+                error: error instanceof Error ? error.message : 'Unknown error'
             }));
         }
     }, [config.enabled, config.delayMs, applyAutomaticUpdate]);
@@ -1548,15 +1547,15 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
     const applyUpdate = useCallback(async () => {
         try {
             setUpdateState(prev => ({ ...prev, status: 'applying' }));
-            
+
             // Use enhanced cache manager
             const result = await cacheManagerRef.current.clearAllCaches();
-            
+
             if (!result.success) {
                 console.warn('Some cache clearing operations failed:', result.errors);
                 // Continue anyway - partial cache clearing is better than none
             }
-            
+
             // Update stored version before reload using enhanced storage
             try {
                 const response = await fetch(`/version.json?t=${Date.now()}`, { cache: 'no-store' });
@@ -1568,10 +1567,10 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
             } catch (error) {
                 console.warn('Failed to fetch latest version before reload:', error);
             }
-            
+
             // Force reload from server
             cacheManagerRef.current.forceReloadFromServer();
-            
+
         } catch (error) {
             console.error('Manual update failed:', error);
             // Fallback to simple reload using cache manager
@@ -1587,7 +1586,7 @@ export function useAppVersion(silentConfig?: Partial<SilentUpdateConfig>): UseAp
             console.log(`Found ${queueStatus.count} pending updates from previous session`);
             processUpdateQueue();
         }
-        
+
         checkForUpdates();
     }, [checkForUpdates, processUpdateQueue]);
 
