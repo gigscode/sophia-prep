@@ -1,21 +1,37 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigation } from '../hooks/useNavigation';
+import { createFormPersistence } from '../utils/form-state-persistence';
 
 export function SignupPage() {
   const { signup } = useAuth();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Form state persistence
+  const formPersistence = createFormPersistence('signup');
+
+  // Load saved form state on component mount
+  useEffect(() => {
+    const savedState = formPersistence.restoreFormState();
+    if (savedState) {
+      if (savedState.name) setName(savedState.name);
+      if (savedState.email) setEmail(savedState.email);
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await signup(email, password, name);
+      // Clear form state on successful signup
+      formPersistence.clearFormState();
       navigate('/');
     } catch (err) {
       setError('Failed to sign up');
@@ -31,7 +47,10 @@ export function SignupPage() {
           <input
             type="text"
             value={name}
-            onChange={e => setName(e.target.value)}
+            onChange={e => {
+              setName(e.target.value);
+              formPersistence.autoSaveFormState({ name: e.target.value, email });
+            }}
             className="w-full p-2 border rounded mb-3"
           />
 
@@ -39,7 +58,10 @@ export function SignupPage() {
           <input
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => {
+              setEmail(e.target.value);
+              formPersistence.autoSaveFormState({ name, email: e.target.value });
+            }}
             className="w-full p-2 border rounded mb-3"
             required
           />

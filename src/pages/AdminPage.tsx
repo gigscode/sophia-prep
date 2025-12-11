@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigation } from '../hooks/useNavigation';
 import { BookOpen, Users, FileQuestion, BarChart3, Menu, X, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserManagement } from '../components/admin/UserManagement';
@@ -12,7 +12,7 @@ type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions';
 
 export function AdminPage() {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [tab, setTab] = useState<AdminTab>('analytics');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(window.innerWidth >= 1024);

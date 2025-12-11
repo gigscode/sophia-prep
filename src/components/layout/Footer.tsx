@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
+import { useNavigation } from '../../hooks/useNavigation';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
+  const { navigate, isNavigating } = useNavigation();
 
   return (
     <footer className="bg-blue-950 text-white">
@@ -71,24 +72,40 @@ export function Footer() {
             <h4 className="text-lg font-semibold mb-4" style={{ color: '#B78628' }}>Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Home
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/subjects" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/subjects')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Subjects
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/quiz" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/quiz')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Quiz
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/study" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/study')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Study Hub
-                </Link>
+                </button>
               </li>
             </ul>
           </div>
@@ -98,29 +115,49 @@ export function Footer() {
             <h4 className="text-lg font-semibold mb-4" style={{ color: '#B78628' }}>Resources</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/help" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/help')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Help Center
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/about" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/about')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   About Us
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/privacy" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/privacy')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Privacy Policy
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/terms" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/terms')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Terms of Service
-                </Link>
+                </button>
               </li>
               <li>
-                <Link to="/contact" className="text-blue-200 transition-colors footer-link">
+                <button 
+                  onClick={() => navigate('/contact')}
+                  disabled={isNavigating}
+                  className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
+                >
                   Contact Us
-                </Link>
+                </button>
               </li>
             </ul>
           </div>

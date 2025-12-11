@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { showToast } from '../components/ui/Toast';
 import { adminConfig, normalizeEmail } from '../config/admin';
+import { authStateManager } from '../utils/auth-state-manager';
 
 type User = {
   id: string;
@@ -15,6 +16,7 @@ type User = {
 type AuthContextValue = {
   user: User | null;
   loading: boolean;
+  initialized: boolean;
   login: (email: string, password: string) => Promise<User>;
   signup: (email: string, password: string, name?: string) => Promise<User>;
   logout: () => void;
@@ -25,29 +27,102 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Check active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        mapUser(session.user).then(setUser);
+    let isMounted = true;
+
+    const initializeAuth = async () => {
+      try {
+        console.log('Initializing authentication state...');
+        
+        // Check for existing session
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error retrieving session:', error.message);
+          if (isMounted) {
+            setUser(null);
+            setLoading(false);
+            setInitialized(true);
+          }
+          return;
+        }
+
+        if (session?.user) {
+          console.log(`Session found for user: ${redactEmail(session.user.email)}`);
+          try {
+            const mappedUser = await mapUser(session.user);
+            if (isMounted) {
+              setUser(mappedUser);
+              console.log('Authentication state recovered from session');
+            }
+          } catch (mapError: any) {
+            console.error('Error mapping user from session:', mapError?.message || mapError);
+            if (isMounted) {
+              setUser(null);
+            }
+          }
+        } else {
+          console.log('No existing session found');
+          if (isMounted) {
+            setUser(null);
+          }
+        }
+      } catch (initError: any) {
+        console.error('Authentication initialization failed:', initError?.message || initError);
+        if (isMounted) {
+          setUser(null);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+          setInitialized(true);
+          console.log('Authentication initialization complete');
+        }
       }
-      setLoading(false);
-    });
+    };
+
+    // Initialize authentication state
+    initializeAuth();
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        mapUser(session.user).then(setUser);
-      } else {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (!isMounted) return;
+
+      console.log(`Auth state change: ${event}`);
+      
+      try {
+        if (session?.user) {
+          console.log(`User authenticated: ${redactEmail(session.user.email)}`);
+          const mappedUser = await mapUser(session.user);
+          setUser(mappedUser);
+          
+          // Notify auth state manager of login
+          authStateManager.handleLogin(mappedUser, 'local');
+        } else {
+          console.log('User signed out or session expired');
+          setUser(null);
+          
+          // Notify auth state manager of logout
+          authStateManager.handleLogout('local');
+        }
+      } catch (error: any) {
+        console.error('Error handling auth state change:', error?.message || error);
         setUser(null);
+        authStateManager.handleLogout('local');
       }
+      
+      // Ensure loading is false after any auth state change
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   /**
@@ -242,6 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     console.log(`Login attempt for: ${redactEmail(email)}`);
+    setLoading(true);
     
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -253,15 +329,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error(`Authentication failed for ${redactEmail(email)}:`, error.message);
         const userFriendlyMessage = categorizeError(error);
         showToast(userFriendlyMessage, 'error');
+        setLoading(false);
         throw error;
       }
 
       if (data.user) {
         console.log(`Authentication successful for: ${redactEmail(email)}`);
         const u = await mapUser(data.user);
+        // Note: loading will be set to false by the auth state change listener
         return u;
       }
 
+      setLoading(false);
       throw new Error('Login failed');
     } catch (error: any) {
       // Log authentication failure with redacted information
@@ -270,56 +349,81 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         error: error?.message || 'Unknown error',
         // Never log password or tokens
       });
+      setLoading(false);
       throw error;
     }
   };
 
   const signup = async (email: string, password: string, name?: string) => {
     console.log(`Signup attempt for: ${redactEmail(email)}`);
+    setLoading(true);
     
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: name,
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: name,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      console.error(`Signup failed for ${redactEmail(email)}:`, error.message);
-      showToast(error.message, 'error');
+      if (error) {
+        console.error(`Signup failed for ${redactEmail(email)}:`, error.message);
+        showToast(error.message, 'error');
+        setLoading(false);
+        throw error;
+      }
+
+      if (data.user) {
+        console.log(`Signup successful for: ${redactEmail(email)}`);
+        
+        // Immediately ensure user profile exists (fallback mechanism)
+        try {
+          await ensureUserProfile(data.user);
+          console.log(`[FALLBACK_PROFILE_CREATION] Profile ensured for user: ${redactEmail(email)}`);
+        } catch (profileError: any) {
+          // Log error but don't block signup
+          console.error(`[FALLBACK_PROFILE_CREATION_FAILED] User ${data.user.id}:`, profileError?.message || profileError);
+          // Continue with signup flow - profile will be created on next login
+        }
+        
+        const u = await mapUser(data.user);
+        // Note: loading will be set to false by the auth state change listener
+        return u;
+      }
+
+      setLoading(false);
+      throw new Error('Signup failed');
+    } catch (error: any) {
+      setLoading(false);
       throw error;
     }
-
-    if (data.user) {
-      console.log(`Signup successful for: ${redactEmail(email)}`);
-      
-      // Immediately ensure user profile exists (fallback mechanism)
-      try {
-        await ensureUserProfile(data.user);
-        console.log(`[FALLBACK_PROFILE_CREATION] Profile ensured for user: ${redactEmail(email)}`);
-      } catch (profileError: any) {
-        // Log error but don't block signup
-        console.error(`[FALLBACK_PROFILE_CREATION_FAILED] User ${data.user.id}:`, profileError?.message || profileError);
-        // Continue with signup flow - profile will be created on next login
-      }
-      
-      const u = await mapUser(data.user);
-      return u;
-    }
-
-    throw new Error('Signup failed');
   };
 
   const logout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
+    console.log('Logout initiated');
+    setLoading(true);
+    
+    try {
+      // Notify auth state manager before logout
+      authStateManager.handleLogout('manual');
+      
+      await supabase.auth.signOut();
+      // Note: user will be set to null by the auth state change listener
+      console.log('Logout successful');
+    } catch (error: any) {
+      console.error('Logout error:', error?.message || error);
+      // Even if logout fails, clear the user state
+      setUser(null);
+      setLoading(false);
+      authStateManager.handleLogout('manual');
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, initialized, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   );

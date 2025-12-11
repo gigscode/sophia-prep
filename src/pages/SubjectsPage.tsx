@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { BookOpen, Clock } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
+import { useNavigation } from '../hooks/useNavigation';
 import { PageHeader } from '../components/layout';
 import { subjectService } from '../services/subject-service';
 import { YearSelectionModal } from '../components/quiz/YearSelectionModal';
@@ -10,7 +10,7 @@ import type { Subject, ExamType, SubjectCategory } from '../integrations/supabas
 type CategoryFilter = SubjectCategory | 'ALL';
 
 export function SubjectsPage() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
   const [selectedExamType, setSelectedExamType] = useState<ExamType | 'ALL'>('ALL');

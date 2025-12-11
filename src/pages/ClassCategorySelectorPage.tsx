@@ -1,10 +1,11 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ClassCategorySelector } from '../components/quiz/ClassCategorySelector';
+import { useNavigation } from '../hooks/useNavigation';
 import type { ExamType } from '../types/quiz-config';
 
 export function ClassCategorySelectorPage() {
   const location = useLocation();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
 
   // Get exam type from location state
   const examType = (location.state as { examType?: ExamType })?.examType;

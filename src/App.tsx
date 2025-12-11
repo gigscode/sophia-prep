@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { AuthProvider } from './hooks/useAuth';
+import { NavigationStateProvider } from './hooks/useNavigation';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
 import PWAInstall from './components/PWAInstall';
@@ -10,34 +11,14 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
 import { AppUpdateNotification } from './components/AppUpdateNotification';
 import { LegacyQuizRedirect } from './components/quiz/LegacyQuizRedirect';
+import { NavigationDebug } from './components/NavigationDebug';
+import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator, UrlPersistenceProvider } from './components/routing';
+import { EnhancedAuthProvider } from './components/auth';
+import { routeConfigs } from './config/routes';
+import { routePreloader } from './utils/route-preloading';
 
-// Lazy load all pages
-const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
-const SubjectsPage = lazy(() => import('./pages/SubjectsPage').then(module => ({ default: module.SubjectsPage })));
-const SubjectDetailPage = lazy(() => import('./pages/SubjectDetailPage').then(module => ({ default: module.SubjectDetailPage })));
-const StudyHub = lazy(() => import('./pages/StudyHub').then(module => ({ default: module.StudyHub })));
-const SyllabusPage = lazy(() => import('./pages/SyllabusPage').then(module => ({ default: module.SyllabusPage })));
-const SummariesPage = lazy(() => import('./pages/SummariesPage').then(module => ({ default: module.SummariesPage })));
-const NovelsPage = lazy(() => import('./pages/NovelsPage').then(module => ({ default: module.NovelsPage })));
-const VideosPage = lazy(() => import('./pages/VideosPage').then(module => ({ default: module.VideosPage })));
-const QuizModeSelectorPage = lazy(() => import('./pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
-const ModeSelectionPage = lazy(() => import('./pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
-const ClassCategorySelectorPage = lazy(() => import('./pages/ClassCategorySelectorPage').then(module => ({ default: module.ClassCategorySelectorPage })));
-const UnifiedQuiz = lazy(() => import('./pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
-const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
-const HelpCenter = lazy(() => import('./pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
-const AboutPage = lazy(() => import('./pages/AboutPage').then(module => ({ default: module.AboutPage })));
-const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })));
-const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })));
-const ContactPage = lazy(() => import('./pages/ContactPage').then(module => ({ default: module.ContactPage })));
-const ProfilePage = lazy(() => import('./pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
-const LoginPage = lazy(() => import('./pages/LoginPage').then(module => ({ default: module.LoginPage })));
-const SignupPage = lazy(() => import('./pages/SignupPage').then(module => ({ default: module.SignupPage })));
-const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(module => ({ default: module.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage').then(module => ({ default: module.ResetPasswordPage })));
-const AdminPage = lazy(() => import('./pages/AdminPage').then(module => ({ default: module.AdminPage })));
-const ImportQuestionsPage = lazy(() => import('./pages/ImportQuestionsPage').then(module => ({ default: module.ImportQuestionsPage })));
-const MorePage = lazy(() => import('./pages/MorePage').then(module => ({ default: module.MorePage })));
+// Import NotFoundPage directly since it's used outside the route config
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(module => ({ default: module.NotFoundPage })));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -46,6 +27,8 @@ const PageLoader = () => (
   </div>
 );
 
+
+
 export function App() {
   // Perform startup database verification checks
   useEffect(() => {
@@ -53,70 +36,86 @@ export function App() {
     performStartupDatabaseChecks().catch(error => {
       console.error('[APP] Startup verification failed:', error);
     });
+
+    // Preload critical routes for better performance
+    const criticalRoutes = routeConfigs.filter(config => 
+      ['/', '/subjects', '/quiz', '/login'].includes(config.path)
+    );
+    routePreloader.preloadCriticalRoutes(criticalRoutes).catch(error => {
+      console.warn('[APP] Route preloading failed:', error);
+    });
   }, []);
 
   return (
     <AuthProvider>
-      <ScrollToTop />
-      <WhatsAppButton />
-      <PWAInstall />
-      <AppUpdateNotification />
-      <ToastContainer />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          {/* Home - Modern UI Redesign with BottomNavigation */}
-          <Route path="/" element={<HomePage />} />
+      <NavigationStateProvider>
+        <UrlPersistenceProvider autoRestore={true} validateOnMount={true}>
+          <EnhancedAuthProvider
+            sessionTimeoutMinutes={60}
+            sessionWarningMinutes={5}
+            enableCrossTabSync={true}
+            enableSessionTimeout={true}
+            enableSessionWarning={true}
+            enableAutoRefresh={true}
+          >
+            <ScrollToTop />
+            <WhatsAppButton />
+            <PWAInstall />
+            <AppUpdateNotification />
+            <ToastContainer />
+            <NavigationDebug />
+            <RouteErrorBoundary>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              {/* Generate routes from configuration */}
+              {routeConfigs.map((config) => {
+                const RouteComponent = config.component;
+                
+                // Create the route element with proper protection and validation
+                const routeElement = (
+                  <ProtectedRoute
+                    requireAuth={config.requireAuth}
+                    requireAdmin={config.requireAdmin}
+                    fallbackPath={config.fallbackPath}
+                  >
+                    <RouteParamValidator routeConfig={config}>
+                      {config.path === '/' ? (
+                        // Home page doesn't need Layout wrapper
+                        <RouteComponent />
+                      ) : (
+                        <Layout showFooter={config.showFooter}>
+                          <RouteComponent />
+                        </Layout>
+                      )}
+                    </RouteParamValidator>
+                  </ProtectedRoute>
+                );
 
-          {/* Subjects */}
-          <Route path="/subjects" element={<Layout showFooter={false}><SubjectsPage /></Layout>} />
-          <Route path="/subjects/:slug" element={<Layout><SubjectDetailPage /></Layout>} />
+                return (
+                  <Route
+                    key={config.path}
+                    path={config.path}
+                    element={routeElement}
+                  />
+                );
+              })}
 
-          {/* Study Resources */}
-          <Route path="/study" element={<Layout showFooter={false}><StudyHub /></Layout>} />
-          <Route path="/syllabus" element={<Layout><SyllabusPage /></Layout>} />
-          <Route path="/summaries" element={<Layout><SummariesPage /></Layout>} />
-          <Route path="/novels" element={<Layout><NovelsPage /></Layout>} />
-          <Route path="/videos" element={<Layout><VideosPage /></Layout>} />
+              {/* Legacy routes - redirect to new unified system */}
+              <Route path="/quiz/practice" element={<LegacyQuizRedirect mode="practice" />} />
+              <Route path="/quiz/cbt" element={<LegacyQuizRedirect mode="exam" />} />
 
-          {/* Quiz Routes */}
-          <Route path="/quiz" element={<Layout showFooter={false}><QuizModeSelectorPage /></Layout>} />
-          <Route path="/quiz/mode-selection" element={<Layout showFooter={false}><ModeSelectionPage /></Layout>} />
-          <Route path="/quiz/class-category" element={<Layout showFooter={false}><ClassCategorySelectorPage /></Layout>} />
-          <Route path="/quiz/unified" element={<Layout showFooter={false}><UnifiedQuiz /></Layout>} />
-          {/* Legacy routes - redirect to new unified system */}
-          <Route path="/quiz/practice" element={<LegacyQuizRedirect mode="practice" />} />
-          <Route path="/quiz/cbt" element={<LegacyQuizRedirect mode="exam" />} />
-          <Route path="/quiz/results" element={<Layout showFooter={false}><QuizResultsPage /></Layout>} />
+              {/* Events - placeholder routes until EventsPage is created */}
+              <Route path="/events" element={<Navigate to="/" replace />} />
+              <Route path="/events/:id" element={<Navigate to="/" replace />} />
 
-          {/* Help & Info */}
-          <Route path="/help" element={<Layout><HelpCenter /></Layout>} />
-          <Route path="/about" element={<Layout><AboutPage /></Layout>} />
-          <Route path="/privacy" element={<Layout><PrivacyPolicyPage /></Layout>} />
-          <Route path="/terms" element={<Layout><TermsOfServicePage /></Layout>} />
-          <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
-
-          {/* Events - placeholder routes until EventsPage is created */}
-          <Route path="/events" element={<Navigate to="/" replace />} />
-          <Route path="/events/:id" element={<Navigate to="/" replace />} />
-
-          {/* More Page */}
-          <Route path="/more" element={<Layout showFooter={true}><MorePage /></Layout>} />
-
-          {/* Profile / Auth */}
-          <Route path="/profile" element={<Layout showFooter={false}><ProfilePage /></Layout>} />
-          <Route path="/login" element={<Layout showFooter={false}><LoginPage /></Layout>} />
-          <Route path="/signup" element={<Layout showFooter={false}><SignupPage /></Layout>} />
-          <Route path="/forgot-password" element={<Layout showFooter={false}><ForgotPasswordPage /></Layout>} />
-          <Route path="/reset-password" element={<Layout showFooter={false}><ResetPasswordPage /></Layout>} />
-
-          {/* Admin - Now with BottomNavigation */}
-          <Route path="/7351/admin" element={<Layout showFooter={false}><AdminPage /></Layout>} />
-          <Route path="/admin/import-questions" element={<Layout showFooter={false}><ImportQuestionsPage /></Layout>} />
-
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
+              {/* Fallback - 404 Page */}
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
+        </RouteErrorBoundary>
+          </EnhancedAuthProvider>
+        </UrlPersistenceProvider>
+      </NavigationStateProvider>
     </AuthProvider>
   );
 }

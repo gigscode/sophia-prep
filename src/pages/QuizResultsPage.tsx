@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { useNavigation } from '../hooks/useNavigation';
 import { CheckCircle, XCircle, Home, RotateCcw, BookOpen } from 'lucide-react';
 import type { QuizConfig } from '../types/quiz-config';
 import { QuizConfigHelpers } from '../types/quiz-config';
@@ -31,7 +32,7 @@ interface QuizResultsData {
 }
 
 export function QuizResultsPage() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const location = useLocation();
   const [resultsData, setResultsData] = useState<QuizResultsData | null>(null);
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);

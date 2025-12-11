@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, BookOpen, Clock, Calendar, BookMarked } from 'lucide-react';
+import { useNavigation } from '../hooks/useNavigation';
 import type { ExamType, QuizMode, SelectionMethod, QuizConfig } from '../types/quiz-config';
 import { QuizConfigHelpers } from '../types/quiz-config';
 import { subjectService } from '../services/subject-service';
@@ -19,7 +20,7 @@ interface ModeSelectionState {
 }
 
 export function ModeSelectionPage() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const location = useLocation();
   const preselectedMode = (location.state as { preselectedMode?: QuizMode })?.preselectedMode;
   

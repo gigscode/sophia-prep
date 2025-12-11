@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { User, BarChart3, Settings, Crown, Calendar, CreditCard, ArrowRight, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigation } from '../hooks/useNavigation';
 import { AnalyticsDashboard } from '../components/analytics/AnalyticsDashboard';
 import { subscriptionService, UserSubscription } from '../services/subscription-service';
 import { Card } from '../components/ui/Card';
@@ -9,7 +9,7 @@ import { Button } from '../components/ui/Button';
 
 export function ProfilePage() {
   const { user, loading } = useAuth();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [activeTab, setActiveTab] = useState<'profile' | 'analytics'>('profile');
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);

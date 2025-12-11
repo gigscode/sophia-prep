@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Home, BookOpen, Target, GraduationCap, HelpCircle, User, ServerCog, LogOut } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useNavigation } from '../../hooks/useNavigation';
 
 export function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
+  const { navigate, isNavigating } = useNavigation();
 
   const navLinks = [
     { to: '/help', label: 'Help', icon: HelpCircle },
@@ -30,7 +32,11 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-1 hover:opacity-90 transition-all duration-300 transform hover:scale-105">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1 hover:opacity-90 transition-all duration-300 transform hover:scale-105"
+            disabled={isNavigating}
+          >
             <img
               src="/sophialogo2.png"
               alt="Sophia Prep"
@@ -40,7 +46,7 @@ export function Navbar() {
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-tight" style={{ color: '#B78628' }}>Sophia Prep</h1>
             </div>
-          </Link>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
@@ -62,10 +68,11 @@ export function Navbar() {
             })}
 
             {/* Profile / avatar */}
-            <Link
-              to={user ? '/profile' : '/login'}
+            <button
+              onClick={() => navigate(user ? '/profile' : '/login')}
+              disabled={isNavigating || loading}
               className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 ${isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
-                }`}
+                } ${(isNavigating || loading) ? 'opacity-50 cursor-not-allowed' : ''}`}
               style={isActive('/profile') ? { backgroundColor: '#B78628' } : undefined}
             >
               {user ? (
@@ -75,7 +82,7 @@ export function Navbar() {
               ) : (
                 <User className="w-5 h-5" />
               )}
-            </Link>
+            </button>
             {user && (
               <button
                 onClick={() => logout()}
@@ -125,16 +132,19 @@ export function Navbar() {
                 );
               })}
               {/* Profile / admin link for authenticated users on mobile */}
-              <Link
-                to={user ? '/profile' : '/login'}
-                onClick={() => setIsMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 ${isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
-                  }`}
+              <button
+                onClick={() => {
+                  navigate(user ? '/profile' : '/login');
+                  setIsMenuOpen(false);
+                }}
+                disabled={isNavigating || loading}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 transform hover:scale-105 w-full text-left ${isActive('/profile') ? 'text-blue-900 font-semibold shadow-lg' : 'text-white hover:bg-blue-700'
+                  } ${(isNavigating || loading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                 style={isActive('/profile') ? { backgroundColor: '#B78628' } : undefined}
               >
                 <User className="w-5 h-5" />
                 <span className="font-medium">{user ? 'Profile' : 'Login'}</span>
-              </Link>
+              </button>
               {user && (
                 <button
                   onClick={() => {

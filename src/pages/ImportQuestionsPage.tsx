@@ -8,6 +8,7 @@ import { adminSubjectService } from '../services/admin-subject-service';
 import { Upload, FileText, Download, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import type { Subject } from '../integrations/supabase/types';
 import { Card } from '../components/ui/Card';
+import { createFormPersistence } from '../utils/form-state-persistence';
 
 type ImportFormat = 'json' | 'csv' | 'simple';
 
@@ -67,8 +68,21 @@ export function ImportQuestionsPage() {
     const [textInput, setTextInput] = useState('');
     const [importMode, setImportMode] = useState<'file' | 'text'>('file');
 
+    // Form state persistence
+    const formPersistence = createFormPersistence('importQuestions');
+
     useEffect(() => {
         loadSubjects();
+        
+        // Load saved form state
+        const savedState = formPersistence.restoreFormState();
+        if (savedState) {
+            if (savedState.selectedSubject) setSelectedSubject(savedState.selectedSubject);
+            if (savedState.selectedExamType) setSelectedExamType(savedState.selectedExamType as 'JAMB' | 'WAEC');
+            if (savedState.selectedExamYear) setSelectedExamYear(savedState.selectedExamYear);
+            if (savedState.format) setFormat(savedState.format as ImportFormat);
+            if (savedState.importMode) setImportMode(savedState.importMode as 'file' | 'text');
+        }
     }, []);
 
     const loadSubjects = async () => {
@@ -83,6 +97,14 @@ export function ImportQuestionsPage() {
 
     const handleSubjectChange = async (subjectId: string) => {
         setSelectedSubject(subjectId);
+        // Auto-save form state
+        formPersistence.autoSaveFormState({
+            selectedSubject: subjectId,
+            selectedExamType,
+            selectedExamYear,
+            format,
+            importMode
+        });
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -370,6 +392,8 @@ export function ImportQuestionsPage() {
 
             if (result.success > 0) {
                 showToast(`Successfully imported ${result.success} questions`, 'success');
+                // Clear form state on successful import
+                formPersistence.clearFormState();
             }
 
             if (result.failed > 0) {
@@ -469,7 +493,16 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                         {/* Import Mode Selection */}
                         <div className="flex gap-4 mb-6">
                             <button
-                                onClick={() => setImportMode('file')}
+                                onClick={() => {
+                                    setImportMode('file');
+                                    formPersistence.autoSaveFormState({
+                                        selectedSubject,
+                                        selectedExamType,
+                                        selectedExamYear,
+                                        format,
+                                        importMode: 'file'
+                                    });
+                                }}
                                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${importMode === 'file'
                                     ? 'bg-blue-100 text-blue-700 border border-blue-200'
                                     : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
@@ -481,6 +514,13 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                 onClick={() => {
                                     setImportMode('text');
                                     setFormat('simple');
+                                    formPersistence.autoSaveFormState({
+                                        selectedSubject,
+                                        selectedExamType,
+                                        selectedExamYear,
+                                        format: 'simple',
+                                        importMode: 'text'
+                                    });
                                 }}
                                 className={`flex-1 py-3 px-4 rounded-lg font-medium transition-colors ${importMode === 'text'
                                     ? 'bg-blue-100 text-blue-700 border border-blue-200'
@@ -496,7 +536,16 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                             <label className="block text-sm font-medium mb-3">Import Format</label>
                             <div className="grid grid-cols-3 gap-4">
                                 <button
-                                    onClick={() => setFormat('json')}
+                                    onClick={() => {
+                                        setFormat('json');
+                                        formPersistence.autoSaveFormState({
+                                            selectedSubject,
+                                            selectedExamType,
+                                            selectedExamYear,
+                                            format: 'json',
+                                            importMode
+                                        });
+                                    }}
                                     className={`p-6 border-2 rounded-xl flex flex-col items-center justify-center gap-3 transition-all ${format === 'json'
                                         ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
                                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -507,7 +556,16 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                     <span className="text-xs text-gray-500">Structured data</span>
                                 </button>
                                 <button
-                                    onClick={() => setFormat('csv')}
+                                    onClick={() => {
+                                        setFormat('csv');
+                                        formPersistence.autoSaveFormState({
+                                            selectedSubject,
+                                            selectedExamType,
+                                            selectedExamYear,
+                                            format: 'csv',
+                                            importMode
+                                        });
+                                    }}
                                     className={`p-6 border-2 rounded-xl flex flex-col items-center justify-center gap-3 transition-all ${format === 'csv'
                                         ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
                                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -518,7 +576,16 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                     <span className="text-xs text-gray-500">Spreadsheet</span>
                                 </button>
                                 <button
-                                    onClick={() => setFormat('simple')}
+                                    onClick={() => {
+                                        setFormat('simple');
+                                        formPersistence.autoSaveFormState({
+                                            selectedSubject,
+                                            selectedExamType,
+                                            selectedExamYear,
+                                            format: 'simple',
+                                            importMode
+                                        });
+                                    }}
                                     className={`p-6 border-2 rounded-xl flex flex-col items-center justify-center gap-3 transition-all ${format === 'simple'
                                         ? 'border-[#B78628] bg-[#FDF6E8] text-[#B78628] shadow-sm'
                                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
@@ -590,7 +657,17 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                 <label className="block text-sm font-medium mb-2">Exam Type (Optional)</label>
                                 <Select
                                     value={selectedExamType}
-                                    onChange={(e) => setSelectedExamType(e.target.value as 'JAMB' | 'WAEC' | '')}
+                                    onChange={(e) => {
+                                        const value = e.target.value as 'JAMB' | 'WAEC' | '';
+                                        setSelectedExamType(value);
+                                        formPersistence.autoSaveFormState({
+                                            selectedSubject,
+                                            selectedExamType: value,
+                                            selectedExamYear,
+                                            format,
+                                            importMode
+                                        });
+                                    }}
                                     options={[
                                         { value: '', label: 'Select Exam Type' },
                                         { value: 'JAMB', label: 'JAMB' },
@@ -603,7 +680,16 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                 <input
                                     type="number"
                                     value={selectedExamYear}
-                                    onChange={(e) => setSelectedExamYear(e.target.value)}
+                                    onChange={(e) => {
+                                        setSelectedExamYear(e.target.value);
+                                        formPersistence.autoSaveFormState({
+                                            selectedSubject,
+                                            selectedExamType,
+                                            selectedExamYear: e.target.value,
+                                            format,
+                                            importMode
+                                        });
+                                    }}
                                     placeholder="e.g. 2023"
                                     className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#B78628] focus:border-transparent"
                                 />

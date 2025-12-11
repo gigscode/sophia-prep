@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useNavigation } from '../hooks/useNavigation';
 import { questionService, normalizeQuestions } from '../services/question-service';
 import { subjectService } from '../services/subject-service';
 import { analyticsService } from '../services/analytics-service';
@@ -25,7 +26,7 @@ interface UnifiedQuizProps {
  * Requirements: 2.2, 2.3, 5.1, 5.2, 5.3, 5.4, 6.2, 6.3, 6.4, 7.1, 7.2, 11.1, 11.2, 11.3
  */
 export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const location = useLocation();
 
   // Get config from props, location state, or sessionStorage

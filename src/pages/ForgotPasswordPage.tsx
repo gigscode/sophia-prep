@@ -1,13 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import { showToast } from '../components/ui/Toast';
+import { createFormPersistence } from '../utils/form-state-persistence';
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+
+  // Form state persistence
+  const formPersistence = createFormPersistence('forgotPassword');
+
+  // Load saved form state on component mount
+  useEffect(() => {
+    const savedState = formPersistence.restoreFormState();
+    if (savedState && savedState.email) {
+      setEmail(savedState.email);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +34,8 @@ export function ForgotPasswordPage() {
         showToast(error.message, 'error');
       } else {
         setEmailSent(true);
+        // Clear form state on successful email send
+        formPersistence.clearFormState();
         showToast('Password reset email sent! Check your inbox.', 'success');
       }
     } catch (err) {
@@ -91,7 +105,10 @@ export function ForgotPasswordPage() {
           <input
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => {
+              setEmail(e.target.value);
+              formPersistence.autoSaveFormState({ email: e.target.value });
+            }}
             className="w-full p-2 border rounded mb-4"
             placeholder="your.email@example.com"
             required

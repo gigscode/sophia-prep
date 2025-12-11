@@ -1,6 +1,6 @@
-import { useNavigate } from 'react-router-dom';
 import { User, Calendar, Newspaper, ShoppingBag, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigation } from '../hooks/useNavigation';
 
 interface MoreOption {
   id: string;
@@ -52,7 +52,7 @@ const moreOptions: MoreOption[] = [
 ];
 
 export function MorePage() {
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const { user } = useAuth();
 
   // Create dynamic options array including admin option if user is admin

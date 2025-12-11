@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom';
 import { Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Layout } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
+import { useNavigation } from '../hooks/useNavigation';
 import { useLazyLoad } from '../hooks/useLazyLoad';
 import { Header } from '../components/home/Header';
 import { HeroBanner } from '../components/home/HeroBanner';
@@ -25,8 +25,8 @@ import { logPerformanceMetrics, markInteractive } from '../utils/performance';
  * Requirements: All requirements integrated
  */
 export function HomePage() {
-  const navigate = useNavigate();
   const { user } = useAuth();
+  const { navigate } = useNavigation();
 
   // Lazy load refs for below-the-fold sections
   const [quickLinksRef, quickLinksVisible] = useLazyLoad<HTMLDivElement>({

@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Home, BookOpen, ClipboardList, Layers, MoreHorizontal } from 'lucide-react';
 import { generateAriaLabel } from '../../utils/accessibility';
+import { useNavigation } from '../../hooks/useNavigation';
 
 /**
  * BottomNavigation Component
@@ -59,6 +60,7 @@ const navItems: NavItem[] = [
 
 export function BottomNavigation() {
   const location = useLocation();
+  const { navigate, isNavigating } = useNavigation();
 
   const isActive = (route: string): boolean => {
     if (route === '/') {
@@ -83,9 +85,10 @@ export function BottomNavigation() {
           const active = isActive(item.route);
 
           return (
-            <Link
+            <button
               key={item.id}
-              to={item.route}
+              onClick={() => navigate(item.route)}
+              disabled={isNavigating}
               className={`
                 touch-target-interactive
                 flex flex-col items-center justify-center flex-1 h-full
@@ -93,6 +96,7 @@ export function BottomNavigation() {
                 focus-visible-ring
                 interactive-element
                 ${active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}
+                ${isNavigating ? 'opacity-50 cursor-not-allowed' : ''}
               `}
               aria-label={generateAriaLabel(item.label, item.description)}
               aria-current={active ? 'page' : undefined}
@@ -134,7 +138,7 @@ export function BottomNavigation() {
                   {item.description}
                 </span>
               </div>
-            </Link>
+            </button>
           );
         })}
       </div>

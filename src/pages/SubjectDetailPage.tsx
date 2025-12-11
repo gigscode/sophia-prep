@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { subjectService } from '../services/subject-service';
+import { useNavigation } from '../hooks/useNavigation';
 import * as LucideIcons from 'lucide-react';
 import { BookOpen } from 'lucide-react';
 import type { Subject } from '../integrations/supabase/types';
 
 export function SubjectDetailPage() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
+  const { navigate } = useNavigation();
   const [subject, setSubject] = useState<Subject | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
