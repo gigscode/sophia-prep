@@ -50,22 +50,22 @@ export function Table<T extends { id?: string | number }>({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
-        <thead className="bg-gray-50 border-b">
+    <div className="overflow-x-auto max-h-[70vh] overflow-y-auto">
+      <table className="w-full min-w-[600px]">
+        <thead className="bg-gray-50 border-b sticky top-0 z-10">
           <tr>
             {columns.map((column) => (
               <th
                 key={column.key}
-                className={`px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider ${
+                className={`px-3 sm:px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider ${
                   column.sortable ? 'cursor-pointer hover:bg-gray-100' : ''
                 }`}
                 onClick={() => handleSort(column.key, column.sortable)}
               >
                 <div className="flex items-center gap-2">
-                  {column.label}
+                  <span className="truncate">{column.label}</span>
                   {column.sortable && sortKey === column.key && (
-                    <span>
+                    <span className="flex-shrink-0">
                       {sortDirection === 'asc' ? (
                         <ArrowUp className="w-4 h-4" />
                       ) : (
@@ -82,8 +82,10 @@ export function Table<T extends { id?: string | number }>({
           {data.map((row, index) => (
             <tr key={row.id || index} className="hover:bg-gray-50">
               {columns.map((column) => (
-                <td key={column.key} className="px-4 py-3 text-sm text-gray-900">
-                  {column.render ? column.render(row) : (row as any)[column.key]}
+                <td key={column.key} className="px-3 sm:px-4 py-3 text-sm text-gray-900">
+                  <div className="max-w-xs truncate">
+                    {column.render ? column.render(row) : (row as any)[column.key]}
+                  </div>
                 </td>
               ))}
             </tr>

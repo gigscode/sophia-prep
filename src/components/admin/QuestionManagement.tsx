@@ -222,10 +222,10 @@ export function QuestionManagement() {
       key: 'actions',
       label: 'Actions',
       render: (q: QuestionWithDetails) => (
-        <div className="flex space-x-2">
+        <div className="flex space-x-1 sm:space-x-2">
           <button
             onClick={() => handleEdit(q.id)}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-2 sm:p-1 hover:bg-gray-100 rounded touch-manipulation"
             title="Edit"
           >
             <Edit className="w-4 h-4 text-blue-600" />
@@ -235,7 +235,7 @@ export function QuestionManagement() {
               setQuestionToDelete(q.id);
               setShowDeleteDialog(true);
             }}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="p-2 sm:p-1 hover:bg-gray-100 rounded touch-manipulation"
             title="Delete"
           >
             <Trash2 className="w-4 h-4 text-red-600" />
@@ -248,14 +248,14 @@ export function QuestionManagement() {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Question Management</h2>
-        <div className="flex space-x-2">
-          <Button onClick={handleCreate}>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold">Question Management</h2>
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
+          <Button onClick={handleCreate} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
             Create Question
           </Button>
-          <Button onClick={handleImport} variant="outline">
+          <Button onClick={handleImport} variant="outline" className="w-full sm:w-auto">
             <Upload className="w-4 h-4 mr-2" />
             Import Questions
           </Button>
@@ -264,25 +264,30 @@ export function QuestionManagement() {
 
       {/* Statistics */}
       {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="text-sm text-gray-600">Total Questions</div>
-            <div className="text-2xl font-bold">{stats.total}</div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+            <div className="text-xs sm:text-sm text-gray-600">Total Questions</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.total}</div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="text-sm text-gray-600">JAMB Questions</div>
-            <div className="text-2xl font-bold">{stats.byExamType.JAMB || 0}</div>
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+            <div className="text-xs sm:text-sm text-gray-600">JAMB Questions</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.byExamType.JAMB || 0}</div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="text-sm text-gray-600">WAEC Questions</div>
-            <div className="text-2xl font-bold">{stats.byExamType.WAEC || 0}</div>
+          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
+            <div className="text-xs sm:text-sm text-gray-600">WAEC Questions</div>
+            <div className="text-lg sm:text-2xl font-bold">{stats.byExamType.WAEC || 0}</div>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <SearchBar value={filters.search || ''} onChange={handleSearch} placeholder="Search questions..." className="md:col-span-2" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-4">
+        <SearchBar 
+          value={filters.search || ''} 
+          onChange={handleSearch} 
+          placeholder="Search questions..." 
+          className="sm:col-span-2 lg:col-span-2" 
+        />
         <Select
           value={filters.subjectId || 'all'}
           onChange={(e) => handleFilterChange('subjectId', e.target.value)}
