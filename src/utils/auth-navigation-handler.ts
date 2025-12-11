@@ -81,7 +81,7 @@ export class AuthNavigationHandler {
    */
   private handleLogin(event: AuthStateChangeEvent): void {
     const { user, source } = event;
-    
+
     // Show success message for local logins
     if (source === 'local') {
       showToast(`Welcome back, ${user?.name || user?.email || 'User'}!`, 'success');
@@ -113,6 +113,12 @@ export class AuthNavigationHandler {
 
     // Default redirect after login
     const defaultPath = user?.isAdmin ? this.config.adminPath : this.config.homePath;
+
+    // Avoid redirecting to the same path
+    if (this.currentPath === defaultPath) {
+      return;
+    }
+
     this.navigate?.(defaultPath, { replace: true });
   }
 
@@ -121,7 +127,7 @@ export class AuthNavigationHandler {
    */
   private handleLogout(event: AuthStateChangeEvent): void {
     const { source } = event;
-    
+
     // Show appropriate message based on logout source
     switch (source) {
       case 'timeout':
@@ -144,9 +150,9 @@ export class AuthNavigationHandler {
     // If on a protected path, redirect to login
     if (this.isProtectedPath(this.currentPath)) {
       this.setPendingRedirect(this.currentPath);
-      this.navigate?.(this.config.loginPath, { 
+      this.navigate?.(this.config.loginPath, {
         replace: true,
-        state: { 
+        state: {
           from: this.currentPath,
           message: 'Please log in to continue'
         }
@@ -161,17 +167,17 @@ export class AuthNavigationHandler {
   /**
    * Handle session timeout
    */
-  private handleSessionTimeout(event: AuthStateChangeEvent): void {
+  private handleSessionTimeout(_event: AuthStateChangeEvent): void {
     // Save current location for post-login redirect
     if (this.isProtectedPath(this.currentPath)) {
       this.setPendingRedirect(this.currentPath);
     }
 
     showToast('Your session has expired. Please log in again.', 'warning');
-    
-    this.navigate?.(this.config.sessionTimeoutRedirect, { 
+
+    this.navigate?.(this.config.sessionTimeoutRedirect, {
       replace: true,
-      state: { 
+      state: {
         from: this.currentPath,
         message: 'Session expired. Please log in again.',
         sessionTimeout: true
@@ -206,7 +212,7 @@ export class AuthNavigationHandler {
    * Check if a path is protected (requires authentication)
    */
   private isProtectedPath(path: string): boolean {
-    return this.config.protectedPaths.some(protectedPath => 
+    return this.config.protectedPaths.some(protectedPath =>
       path.startsWith(protectedPath)
     );
   }
@@ -215,7 +221,7 @@ export class AuthNavigationHandler {
    * Check if a path is public (accessible without authentication)
    */
   private isPublicPath(path: string): boolean {
-    return this.config.publicPaths.some(publicPath => 
+    return this.config.publicPaths.some(publicPath =>
       path === publicPath || path.startsWith(publicPath + '/')
     );
   }

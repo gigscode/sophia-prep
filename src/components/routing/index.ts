@@ -10,4 +10,5 @@ export {
   BookmarkList, 
   DeepLinkActions 
 } from './DeepLinkHandler';
-export { UrlPersistenceProvider, useUrlPersistence, withUrlPersistence } from './UrlPersistenceProvider';
+// UrlPersistenceProvider, useUrlPersistence, and withUrlPersistence have been deprecated
+// Use UnifiedNavigationProvider from '../navigation/UnifiedNavigationProvider' instead

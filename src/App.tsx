@@ -2,7 +2,7 @@ import { Suspense, lazy, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { AuthProvider } from './hooks/useAuth';
-import { NavigationStateProvider } from './hooks/useNavigation';
+import { UnifiedNavigationProvider, NavigationErrorBoundary } from './components/navigation';
 import ScrollToTop from './components/ScrollToTop';
 import WhatsAppButton from './components/WhatsAppButton';
 import PWAInstall from './components/PWAInstall';
@@ -12,7 +12,7 @@ import { performStartupDatabaseChecks } from './utils/database-verification';
 
 import { LegacyQuizRedirect } from './components/quiz/LegacyQuizRedirect';
 import { NavigationDebug } from './components/NavigationDebug';
-import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator, UrlPersistenceProvider } from './components/routing';
+import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator } from './components/routing';
 import { EnhancedAuthProvider } from './components/auth';
 import { routeConfigs } from './config/routes';
 import { routePreloader } from './utils/route-preloading';
@@ -48,8 +48,23 @@ export function App() {
 
   return (
     <AuthProvider>
-      <NavigationStateProvider>
-        <UrlPersistenceProvider autoRestore={true} validateOnMount={true}>
+      <NavigationErrorBoundary
+        enableAutoRecovery={true}
+        maxRecoveryAttempts={3}
+        recoveryDelay={2000}
+        onError={(error) => {
+          console.error('[App] Navigation error caught by boundary:', error);
+        }}
+      >
+        <UnifiedNavigationProvider 
+          enableDebugMode={false}
+          config={{
+            enablePersistence: true,
+            enableErrorRecovery: true,
+            maxRetries: 3,
+            debugMode: false
+          }}
+        >
           <EnhancedAuthProvider
             sessionTimeoutMinutes={60}
             sessionWarningMinutes={5}
@@ -58,13 +73,13 @@ export function App() {
             enableSessionWarning={true}
             enableAutoRefresh={true}
           >
-            <ScrollToTop />
-            <WhatsAppButton />
-            <PWAInstall />
+              <ScrollToTop />
+              <WhatsAppButton />
+              <PWAInstall />
 
-            <ToastContainer />
-            <NavigationDebug />
-            <RouteErrorBoundary>
+              <ToastContainer />
+              <NavigationDebug />
+              <RouteErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {/* Generate routes from configuration */}
@@ -114,8 +129,8 @@ export function App() {
           </Suspense>
         </RouteErrorBoundary>
           </EnhancedAuthProvider>
-        </UrlPersistenceProvider>
-      </NavigationStateProvider>
+        </UnifiedNavigationProvider>
+      </NavigationErrorBoundary>
     </AuthProvider>
   );
 }

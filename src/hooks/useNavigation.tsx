@@ -1,21 +1,17 @@
-import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { 
-  isValidPath, 
-  normalizePath, 
-  preserveUrlState, 
-  getPreservedUrlState,
-  clearPreservedUrlState,
-  preserveQueryParams,
-  mergeQueryParams,
-  restoreQueryParams,
-  preserveRouteParams,
-  getPreservedRouteParams,
-  createUrlStateSnapshot
-} from '../utils/navigation';
-import { defaultUrlStateManager } from '../utils/url-state-manager';
+/**
+ * Simplified useNavigation Hook
+ * 
+ * Refactored to use the UnifiedNavigationProvider and eliminate circular dependencies.
+ * This hook now provides a clean interface without managing its own state or context.
+ */
 
-interface NavigationState {
+import { useCallback, useMemo } from 'react';
+import { useUnifiedNavigation } from '../components/navigation/UnifiedNavigationProvider';
+
+/**
+ * Navigation state interface for backward compatibility
+ */
+export interface NavigationState {
   currentPath: string;
   previousPath: string | null;
   isNavigating: boolean;
@@ -25,10 +21,13 @@ interface NavigationState {
   routeParams: Record<string, string>;
 }
 
-interface NavigationContextValue extends NavigationState {
-  navigate: (path: string, options?: { replace?: boolean; state?: any; preserveParams?: boolean }) => void;
-  goBack: () => void;
-  goForward: () => void;
+/**
+ * Navigation context value interface for backward compatibility
+ */
+export interface NavigationContextValue extends NavigationState {
+  navigate: (path: string, options?: { replace?: boolean; state?: any; preserveParams?: boolean }) => Promise<boolean>;
+  goBack: () => Promise<boolean>;
+  goForward: () => Promise<boolean>;
   setPendingRedirect: (path: string | null) => void;
   clearNavigationError: () => void;
   setNavigationError: (error: string | null) => void;
@@ -38,289 +37,128 @@ interface NavigationContextValue extends NavigationState {
   updateRouteParams: (params: Record<string, string>) => void;
 }
 
-const NavigationContext = createContext<NavigationContextValue | undefined>(undefined);
+/**
+ * Enhanced useNavigation hook that uses the unified navigation system
+ * 
+ * This hook eliminates circular dependencies by:
+ * 1. Using the UnifiedNavigationProvider instead of managing its own state
+ * 2. Providing stable references to prevent unnecessary re-renders
+ * 3. Including built-in error handling and recovery
+ * 4. Removing complex useEffect dependencies that caused loops
+ */
+export function useNavigation(): NavigationContextValue {
+  const unified = useUnifiedNavigation();
 
-export function NavigationStateProvider({ children }: { children: ReactNode }) {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const params = useParams();
-  
-  const [navigationState, setNavigationState] = useState<NavigationState>(() => {
-    const currentPath = normalizePath(location.pathname + location.search + location.hash);
-    const previousPath = getPreservedUrlState('previousPath');
-    const preservedParams = getPreservedUrlState('queryParams') || {};
-    const routeParams = getPreservedRouteParams(location.pathname) || {};
-    
-    return {
-      currentPath,
-      previousPath,
-      isNavigating: false,
-      pendingRedirect: getPreservedUrlState('pendingRedirect'),
-      navigationError: null,
-      preservedParams,
-      routeParams,
-    };
-  });
-
-  // Track path changes and update navigation state
-  useEffect(() => {
-    const newPath = normalizePath(location.pathname + location.search + location.hash);
-    
-    setNavigationState(prev => {
-      const updatedState = {
-        ...prev,
-        previousPath: prev.currentPath !== newPath ? prev.currentPath : prev.previousPath,
-        currentPath: newPath,
-        isNavigating: false, // Navigation completed
-        routeParams: { ...params } as Record<string, string>,
-      };
-      
-      // Preserve navigation state for page refreshes
-      preserveUrlState('previousPath', updatedState.previousPath);
-      preserveUrlState('currentPath', updatedState.currentPath);
-      
-      // Create and save URL state snapshot
-      const snapshot = createUrlStateSnapshot(location, params as Record<string, string>);
-      defaultUrlStateManager.saveSnapshot(snapshot);
-      
-      // Preserve route parameters
-      preserveRouteParams(params as Record<string, string>, location.pathname);
-      
-      return updatedState;
-    });
-  }, [location, params]);
-
-  // Enhanced navigate function with loading states and error handling
-  const handleNavigate = useCallback((path: string, options?: { replace?: boolean; state?: any; preserveParams?: boolean }) => {
+  // Create stable navigate function with error handling
+  const navigate = useCallback(async (
+    path: string, 
+    options?: { replace?: boolean; state?: any; preserveParams?: boolean }
+  ): Promise<boolean> => {
     try {
-      // Validate path before navigation
-      if (!isValidPath(path)) {
-        throw new Error(`Invalid navigation path: ${path}`);
-      }
-
-      let finalPath = normalizePath(path);
-      
-      // Merge preserved parameters if requested
-      if (options?.preserveParams) {
-        const currentParams = new URLSearchParams(location.search);
-        const preserved = preserveQueryParams(currentParams, Object.keys(navigationState.preservedParams));
-        const merged = mergeQueryParams(preserved, true);
-        
-        if (Object.keys(merged).length > 0) {
-          const url = new URL(finalPath, window.location.origin);
-          Object.entries(merged).forEach(([key, value]) => {
-            url.searchParams.set(key, value);
-          });
-          finalPath = url.pathname + url.search + url.hash;
-        }
-      }
-      
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: true,
-        navigationError: null,
-      }));
-
-      navigate(finalPath, options);
+      return await unified.navigate(path, options);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Navigation failed';
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: false,
-        navigationError: errorMessage,
-      }));
-      console.error('Navigation error:', error);
+      console.error('Navigation failed in useNavigation hook:', error);
+      return false;
     }
-  }, [navigate, location.search, navigationState.preservedParams]);
+  }, [unified.navigate]);
 
-  // Browser back navigation
-  const goBack = useCallback(() => {
+  // Create stable goBack function with error handling
+  const goBack = useCallback(async (): Promise<boolean> => {
     try {
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: true,
-        navigationError: null,
-      }));
-
-      window.history.back();
+      return await unified.goBack();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Back navigation failed';
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: false,
-        navigationError: errorMessage,
-      }));
-      console.error('Back navigation error:', error);
+      console.error('Back navigation failed in useNavigation hook:', error);
+      return false;
     }
-  }, []);
+  }, [unified.goBack]);
 
-  // Browser forward navigation
-  const goForward = useCallback(() => {
+  // Create stable goForward function with error handling
+  const goForward = useCallback(async (): Promise<boolean> => {
     try {
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: true,
-        navigationError: null,
-      }));
-
-      window.history.forward();
+      return await unified.goForward();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Forward navigation failed';
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: false,
-        navigationError: errorMessage,
-      }));
-      console.error('Forward navigation error:', error);
+      console.error('Forward navigation failed in useNavigation hook:', error);
+      return false;
     }
-  }, []);
+  }, [unified.goForward]);
 
-  // Set pending redirect for post-authentication navigation
+  // Create stable setPendingRedirect function
   const setPendingRedirect = useCallback((path: string | null) => {
-    setNavigationState(prev => ({
-      ...prev,
-      pendingRedirect: path,
-    }));
+    try {
+      unified.setPendingRedirect(path);
+    } catch (error) {
+      console.error('Set pending redirect failed in useNavigation hook:', error);
+    }
+  }, [unified.setPendingRedirect]);
+
+  // Create stable clearNavigationError function
+  const clearNavigationError = useCallback(() => {
+    try {
+      unified.clearNavigationError();
+    } catch (error) {
+      console.error('Clear navigation error failed in useNavigation hook:', error);
+    }
+  }, [unified.clearNavigationError]);
+
+  // Backward compatibility function for setNavigationError
+  const setNavigationError = useCallback((error: string | null) => {
+    // This functionality is now handled by the NavigationManager
+    // Log a deprecation warning
+    console.warn('setNavigationError is deprecated in unified navigation system');
     
-    // Preserve pending redirect across page refreshes
-    if (path) {
-      preserveUrlState('pendingRedirect', path);
-    } else {
-      clearPreservedUrlState('pendingRedirect');
+    // For backward compatibility, we could potentially add this to NavigationManager
+    // For now, just log the error
+    if (error) {
+      console.error('Navigation error set via deprecated method:', error);
     }
   }, []);
 
-  // Clear navigation error
-  const clearNavigationError = useCallback(() => {
-    setNavigationState(prev => ({
-      ...prev,
-      navigationError: null,
-    }));
-  }, []);
-
-  // Set navigation error
-  const setNavigationError = useCallback((error: string | null) => {
-    setNavigationState(prev => ({
-      ...prev,
-      navigationError: error,
-    }));
-  }, []);
-
-  // Preserve current query parameters
+  // Create stable preserveCurrentParams function
   const preserveCurrentParams = useCallback((paramsToPreserve?: string[]) => {
     try {
-      const currentParams = new URLSearchParams(location.search);
-      const toPreserve = paramsToPreserve || Array.from(currentParams.keys());
-      const preserved = preserveQueryParams(currentParams, toPreserve);
-      
-      setNavigationState(prev => ({
-        ...prev,
-        preservedParams: { ...prev.preservedParams, ...preserved },
-      }));
+      unified.preserveCurrentParams(paramsToPreserve);
     } catch (error) {
-      console.warn('Failed to preserve current parameters:', error);
+      console.error('Preserve current params failed in useNavigation hook:', error);
     }
-  }, [location.search]);
+  }, [unified.preserveCurrentParams]);
 
-  // Restore preserved query parameters
+  // Backward compatibility function for restorePreservedParams
   const restorePreservedParams = useCallback(() => {
-    try {
-      if (Object.keys(navigationState.preservedParams).length > 0) {
-        restoreQueryParams(navigate, location.pathname);
-      }
-    } catch (error) {
-      console.warn('Failed to restore preserved parameters:', error);
-    }
-  }, [navigate, location.pathname, navigationState.preservedParams]);
+    // This functionality is now handled automatically by the unified system
+    console.warn('restorePreservedParams is deprecated - parameters are restored automatically');
+  }, []);
 
-  // Clear preserved parameters
+  // Create stable clearPreservedParams function
   const clearPreservedParams = useCallback(() => {
-    setNavigationState(prev => ({
-      ...prev,
-      preservedParams: {},
-    }));
-    clearPreservedUrlState('queryParams');
-  }, []);
+    try {
+      unified.clearPreservedParams();
+    } catch (error) {
+      console.error('Clear preserved params failed in useNavigation hook:', error);
+    }
+  }, [unified.clearPreservedParams]);
 
-  // Update route parameters
-  const updateRouteParams = useCallback((newParams: Record<string, string>) => {
-    setNavigationState(prev => ({
-      ...prev,
-      routeParams: { ...prev.routeParams, ...newParams },
-    }));
-    preserveRouteParams(newParams, location.pathname);
-  }, [location.pathname]);
+  // Create stable updateRouteParams function
+  const updateRouteParams = useCallback((params: Record<string, string>) => {
+    try {
+      unified.updateRouteParams(params);
+    } catch (error) {
+      console.error('Update route params failed in useNavigation hook:', error);
+    }
+  }, [unified.updateRouteParams]);
 
-  // Handle browser navigation events (back/forward buttons)
-  useEffect(() => {
-    const handlePopState = () => {
-      setNavigationState(prev => ({
-        ...prev,
-        isNavigating: true,
-        navigationError: null,
-      }));
-    };
-
-    window.addEventListener('popstate', handlePopState);
+  // Create stable context value to prevent unnecessary re-renders
+  const contextValue = useMemo((): NavigationContextValue => ({
+    // Navigation state from unified provider
+    currentPath: unified.currentPath,
+    previousPath: unified.previousPath,
+    isNavigating: unified.isNavigating,
+    pendingRedirect: unified.pendingRedirect,
+    navigationError: unified.navigationError,
+    preservedParams: unified.preservedParams,
+    routeParams: unified.routeParams,
     
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, []);
-
-  // Handle pending redirects after authentication
-  useEffect(() => {
-    if (navigationState.pendingRedirect && !navigationState.isNavigating) {
-      const redirectPath = navigationState.pendingRedirect;
-      setPendingRedirect(null);
-      handleNavigate(redirectPath);
-    }
-  }, [navigationState.pendingRedirect, navigationState.isNavigating, handleNavigate, setPendingRedirect]);
-
-  // Handle page refresh and URL state restoration
-  useEffect(() => {
-    const handlePageLoad = () => {
-      try {
-        // Check if we should restore URL state on page load
-        if (defaultUrlStateManager.shouldRestoreOnPageLoad(location)) {
-          // Try to restore preserved state
-          const restored = defaultUrlStateManager.restorePreservedState(
-            navigate, 
-            'preserved', 
-            { replace: true }
-          );
-          
-          if (!restored) {
-            // If no preserved state, handle current state
-            defaultUrlStateManager.handlePageRefresh(
-              location,
-              navigate,
-              params as Record<string, string>,
-              location.pathname
-            );
-          }
-        } else {
-          // Just preserve current state for future use
-          defaultUrlStateManager.preserveCurrentState(
-            location,
-            params as Record<string, string>,
-            location.pathname
-          );
-        }
-      } catch (error) {
-        console.warn('Failed to handle page load URL state:', error);
-      }
-    };
-
-    // Only run on initial load, not on every location change
-    if (navigationState.currentPath === normalizePath(location.pathname + location.search + location.hash)) {
-      handlePageLoad();
-    }
-  }, []); // Empty dependency array - only run once on mount
-
-  const contextValue: NavigationContextValue = {
-    ...navigationState,
-    navigate: handleNavigate,
+    // Stable function references
+    navigate,
     goBack,
     goForward,
     setPendingRedirect,
@@ -329,22 +167,34 @@ export function NavigationStateProvider({ children }: { children: ReactNode }) {
     preserveCurrentParams,
     restorePreservedParams,
     clearPreservedParams,
-    updateRouteParams,
-  };
+    updateRouteParams
+  }), [
+    // State dependencies
+    unified.currentPath,
+    unified.previousPath,
+    unified.isNavigating,
+    unified.pendingRedirect,
+    unified.navigationError,
+    unified.preservedParams,
+    unified.routeParams,
+    
+    // Function dependencies (these are stable due to useCallback)
+    navigate,
+    goBack,
+    goForward,
+    setPendingRedirect,
+    clearNavigationError,
+    setNavigationError,
+    preserveCurrentParams,
+    restorePreservedParams,
+    clearPreservedParams,
+    updateRouteParams
+  ]);
 
-  return (
-    <NavigationContext.Provider value={contextValue}>
-      {children}
-    </NavigationContext.Provider>
-  );
+  return contextValue;
 }
 
-export function useNavigation() {
-  const context = useContext(NavigationContext);
-  if (!context) {
-    throw new Error('useNavigation must be used within NavigationStateProvider');
-  }
-  return context;
-}
+// NavigationStateProvider has been removed - use UnifiedNavigationProvider instead
 
-export type { NavigationState, NavigationContextValue };
+// Export types for backward compatibility
+export type { NavigationContextValue };

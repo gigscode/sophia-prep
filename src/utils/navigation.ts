@@ -1,6 +1,6 @@
 /**
  * Navigation utilities for URL and history management
- * Supports the NavigationStateProvider with helper functions
+ * Provides helper functions for the unified navigation system
  */
 
 /**
@@ -95,50 +95,8 @@ export function normalizePath(path: string): string {
   return normalized;
 }
 
-/**
- * Checks if the current path matches a pattern
- * @param currentPath - The current path
- * @param pattern - The pattern to match (supports wildcards with *)
- * @returns boolean indicating if the path matches
- */
-export function pathMatches(currentPath: string, pattern: string): boolean {
-  // Convert pattern to regex
-  const regexPattern = pattern
-    .replace(/\*/g, '.*')
-    .replace(/\?/g, '\\?');
-  
-  const regex = new RegExp(`^${regexPattern}$`);
-  return regex.test(currentPath);
-}
-
-/**
- * Gets the route segments from a path
- * @param path - The path to parse
- * @returns Array of route segments
- */
-export function getRouteSegments(path: string): string[] {
-  const cleanPath = path.split('?')[0].split('#')[0]; // Remove query and hash
-  return cleanPath.split('/').filter(segment => segment.length > 0);
-}
-
-/**
- * Checks if a path requires authentication based on common patterns
- * @param path - The path to check
- * @returns boolean indicating if authentication is likely required
- */
-export function pathRequiresAuth(path: string): boolean {
-  const authRequiredPatterns = [
-    '/profile',
-    '/admin',
-    '/dashboard',
-    '/settings',
-    '/account'
-  ];
-  
-  return authRequiredPatterns.some(pattern => 
-    path.startsWith(pattern) || pathMatches(path, pattern + '/*')
-  );
-}
+// Removed unused utility functions: pathMatches, getRouteSegments, pathRequiresAuth
+// These functions were only used in tests and are no longer needed by the unified navigation system
 
 /**
  * Preserves URL state across navigation by storing in sessionStorage

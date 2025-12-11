@@ -1,8 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { render } from '@testing-library/react';
+import { render } from '../test/test-utils';
 import { Navbar } from '../components/layout/Navbar';
 import { Footer } from '../components/layout/Footer';
-import { BrowserRouter } from 'react-router-dom';
 
 /**
  * Property Test 17.1: Image Lazy Loading
@@ -12,11 +11,7 @@ import { BrowserRouter } from 'react-router-dom';
  */
 describe('Property Test 17.1: Image Lazy Loading', () => {
     it('should have lazy loading attribute on Navbar logo', () => {
-        const { container } = render(
-            <BrowserRouter>
-                <Navbar />
-            </BrowserRouter>
-        );
+        const { container } = render(<Navbar />);
 
         const logoImg = container.querySelector('img[alt="Sophia Prep"]');
         expect(logoImg).toBeTruthy();
@@ -24,11 +19,7 @@ describe('Property Test 17.1: Image Lazy Loading', () => {
     });
 
     it('should have lazy loading attribute on Footer logo', () => {
-        const { container } = render(
-            <BrowserRouter>
-                <Footer />
-            </BrowserRouter>
-        );
+        const { container } = render(<Footer />);
 
         const logoImg = container.querySelector('img[alt="Sophia Prep"]');
         expect(logoImg).toBeTruthy();

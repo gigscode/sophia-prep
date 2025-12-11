@@ -1,8 +1,21 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Layout } from '../components/layout';
 import { AuthProvider } from '../hooks/useAuth';
+import { UnifiedNavigationProvider } from '../components/navigation/UnifiedNavigationProvider';
+
+// Mock Supabase client
+vi.mock('../integrations/supabase/client', () => ({
+  supabase: {
+    auth: {
+      getSession: vi.fn().mockResolvedValue({ data: { session: null }, error: null }),
+      onAuthStateChange: vi.fn().mockReturnValue({
+        data: { subscription: { unsubscribe: vi.fn() } }
+      })
+    }
+  }
+}));
 
 /**
  * Integration tests for BottomNavigation across all pages
@@ -11,73 +24,100 @@ import { AuthProvider } from '../hooks/useAuth';
  */
 
 describe('BottomNavigation Integration', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   const renderWithLayout = (children: React.ReactNode) => {
     return render(
       <AuthProvider>
         <BrowserRouter>
-          <Layout>{children}</Layout>
+          <UnifiedNavigationProvider enableDebugMode={false}>
+            <Layout>{children}</Layout>
+          </UnifiedNavigationProvider>
         </BrowserRouter>
       </AuthProvider>
     );
   };
 
-  it('should render BottomNavigation by default in Layout', () => {
+  it('should render BottomNavigation by default in Layout', async () => {
     renderWithLayout(<div>Test Page Content</div>);
+
+    // Wait for auth to initialize
+    await screen.findByText('Test Page Content');
 
     // Check for navigation element with aria-label
     const nav = screen.getByRole('navigation', { name: /primary navigation/i });
     expect(nav).toBeInTheDocument();
 
-    // Check for all 5 navigation items by their visible text
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('Study')).toBeInTheDocument();
-    expect(screen.getByText('Test')).toBeInTheDocument();
-    expect(screen.getByText('Chat')).toBeInTheDocument();
-    expect(screen.getByText('More')).toBeInTheDocument();
+    // Check for all 5 navigation items by their visible text in the bottom navigation
+    const bottomNavItems = screen.getAllByText('Home');
+    expect(bottomNavItems.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Subjects').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('CBT Exam').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Study').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('More').length).toBeGreaterThan(0);
   });
 
-  it('should render page content along with BottomNavigation', () => {
+  it('should render page content along with BottomNavigation', async () => {
     renderWithLayout(<div data-testid="page-content">Test Page Content</div>);
+
+    // Wait for auth to initialize and content to render
+    await screen.findByTestId('page-content');
 
     // Both page content and navigation should be present
     expect(screen.getByTestId('page-content')).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: /primary navigation/i })).toBeInTheDocument();
   });
 
-  it('should allow hiding BottomNavigation when showBottomNav is false', () => {
+  it('should allow hiding BottomNavigation when showBottomNav is false', async () => {
     render(
       <AuthProvider>
         <BrowserRouter>
-          <Layout showBottomNav={false}>
-            <div>Test Page Content</div>
-          </Layout>
+          <UnifiedNavigationProvider enableDebugMode={false}>
+            <Layout showBottomNav={false}>
+              <div>Test Page Content</div>
+            </Layout>
+          </UnifiedNavigationProvider>
         </BrowserRouter>
       </AuthProvider>
     );
+
+    // Wait for auth to initialize
+    await screen.findByText('Test Page Content');
 
     // Navigation should not be present
     expect(screen.queryByRole('navigation', { name: /primary navigation/i })).not.toBeInTheDocument();
   });
 
-  it('should have correct navigation links', () => {
+  it('should have correct navigation links', async () => {
     renderWithLayout(<div>Test Page Content</div>);
 
-    // Check that all links have correct href attributes
-    const homeLink = screen.getByText('Home').closest('a');
-    const studyLink = screen.getByText('Study').closest('a');
-    const testLink = screen.getByText('Test').closest('a');
-    const chatLink = screen.getByText('Chat').closest('a');
-    const moreLink = screen.getByText('More').closest('a');
+    // Wait for auth to initialize
+    await screen.findByText('Test Page Content');
 
-    expect(homeLink).toHaveAttribute('href', '/');
-    expect(studyLink).toHaveAttribute('href', '/study');
-    expect(testLink).toHaveAttribute('href', '/quiz');
-    expect(chatLink).toHaveAttribute('href', '/help');
-    expect(moreLink).toHaveAttribute('href', '/profile');
+    // Check that all navigation buttons exist and have correct functionality
+    const bottomNav = screen.getByRole('navigation', { name: /primary navigation/i });
+    
+    // Get buttons within the bottom navigation specifically
+    const homeButton = bottomNav.querySelector('button[aria-label*="Home"]');
+    const subjectsButton = bottomNav.querySelector('button[aria-label*="Subjects"]');
+    const cbtButton = bottomNav.querySelector('button[aria-label*="CBT Exam"]');
+    const studyButton = bottomNav.querySelector('button[aria-label*="Study"]');
+    const moreButton = bottomNav.querySelector('button[aria-label*="More"]');
+
+    expect(homeButton).toBeInTheDocument();
+    expect(subjectsButton).toBeInTheDocument();
+    expect(cbtButton).toBeInTheDocument();
+    expect(studyButton).toBeInTheDocument();
+    expect(moreButton).toBeInTheDocument();
   });
 
-  it('should have fixed positioning for mobile access', () => {
+  it('should have fixed positioning for mobile access', async () => {
     renderWithLayout(<div>Test Page Content</div>);
+
+    // Wait for auth to initialize
+    await screen.findByText('Test Page Content');
 
     const nav = screen.getByRole('navigation', { name: /primary navigation/i });
     

@@ -3,14 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigation } from '../hooks/useNavigation';
-import { usePendingRedirect } from '../components/routing';
 import { createFormPersistence } from '../utils/form-state-persistence';
 
 export function LoginPage() {
   const { login, user, loading } = useAuth();
   const { navigate } = useNavigation();
   const location = useLocation();
-  const { getPendingRedirect, clearPendingRedirect } = usePendingRedirect();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -31,26 +29,8 @@ export function LoginPage() {
     if (user && !loading) {
       // Clear form state on successful login
       formPersistence.clearFormState();
-      
-      // Check for pending redirect first
-      const pendingRedirect = getPendingRedirect();
-      if (pendingRedirect) {
-        clearPendingRedirect();
-        navigate(pendingRedirect, { replace: true });
-        return;
-      }
-
-      // Check for redirect from location state (from ProtectedRoute)
-      const from = location.state?.from;
-      if (from && from !== '/login') {
-        navigate(from, { replace: true });
-        return;
-      }
-
-      // Default redirect to home
-      navigate('/', { replace: true });
     }
-  }, [user, loading, navigate, location.state, getPendingRedirect, clearPendingRedirect, formPersistence]);
+  }, [user, loading, formPersistence]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,14 +49,14 @@ export function LoginPage() {
     <div className="container mx-auto px-4 py-12 max-w-md">
       <div className="bg-white rounded-lg shadow-lg p-6">
         <h2 className="text-2xl font-bold mb-4">Log In</h2>
-        
+
         {/* Show message if redirected from protected route */}
         {location.state?.message && (
           <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">{location.state.message}</p>
           </div>
         )}
-        
+
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium">Email</label>
           <input

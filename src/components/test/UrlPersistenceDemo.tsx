@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useUrlParams } from '../../hooks/useUrlParams';
 import { useNavigation } from '../../hooks/useNavigation';
-import { useUrlPersistence } from '../routing/UrlPersistenceProvider';
+import { useUrlPersistence } from '../navigation/UnifiedNavigationProvider';
 
 export function UrlPersistenceDemo() {
   const location = useLocation();

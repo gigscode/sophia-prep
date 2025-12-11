@@ -42,8 +42,10 @@ describe('Property 20: Touch targets meet minimum size', () => {
     );
     
     const card = screen.getByRole('button');
-    // Cards have padding (p-6 = 24px on all sides) which ensures minimum touch target size
-    expect(card).toHaveClass('p-6');
+    // Cards have padding (p-3 = 12px on all sides) and min dimensions which ensures minimum touch target size
+    expect(card).toHaveClass('p-3');
+    expect(card).toHaveClass('min-h-[44px]');
+    expect(card).toHaveClass('min-w-[44px]');
     expect(card).toHaveClass('cursor-pointer');
   });
 

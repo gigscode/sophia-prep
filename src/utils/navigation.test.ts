@@ -4,9 +4,6 @@ import {
   extractQueryParams,
   buildPathWithParams,
   normalizePath,
-  pathMatches,
-  getRouteSegments,
-  pathRequiresAuth,
   preserveUrlState,
   getPreservedUrlState,
   clearPreservedUrlState,
@@ -90,40 +87,8 @@ describe('Navigation Utilities', () => {
     });
   });
 
-  describe('pathMatches', () => {
-    it('should match exact paths', () => {
-      expect(pathMatches('/home', '/home')).toBe(true);
-      expect(pathMatches('/home', '/about')).toBe(false);
-    });
-
-    it('should match wildcard patterns', () => {
-      expect(pathMatches('/users/123', '/users/*')).toBe(true);
-      expect(pathMatches('/admin/settings', '/admin/*')).toBe(true);
-      expect(pathMatches('/home', '/users/*')).toBe(false);
-    });
-  });
-
-  describe('getRouteSegments', () => {
-    it('should extract route segments', () => {
-      expect(getRouteSegments('/users/123/profile')).toEqual(['users', '123', 'profile']);
-      expect(getRouteSegments('/home')).toEqual(['home']);
-      expect(getRouteSegments('/')).toEqual([]);
-    });
-
-    it('should handle query parameters and hash', () => {
-      expect(getRouteSegments('/users/123?tab=profile#section')).toEqual(['users', '123']);
-    });
-  });
-
-  describe('pathRequiresAuth', () => {
-    it('should identify auth-required paths', () => {
-      expect(pathRequiresAuth('/profile')).toBe(true);
-      expect(pathRequiresAuth('/admin/users')).toBe(true);
-      expect(pathRequiresAuth('/dashboard')).toBe(true);
-      expect(pathRequiresAuth('/home')).toBe(false);
-      expect(pathRequiresAuth('/about')).toBe(false);
-    });
-  });
+  // Removed tests for pathMatches, getRouteSegments, and pathRequiresAuth
+  // These functions have been removed as they were unused by the application
 
   describe('URL state preservation', () => {
     it('should preserve and retrieve URL state', () => {

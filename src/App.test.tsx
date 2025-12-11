@@ -8,8 +8,8 @@ vi.mock('./hooks/useAuth', () => ({
   AuthProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="auth-provider">{children}</div>
 }));
 
-vi.mock('./hooks/useNavigation', () => ({
-  NavigationStateProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="navigation-provider">{children}</div>
+vi.mock('./components/navigation/UnifiedNavigationProvider', () => ({
+  UnifiedNavigationProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="unified-navigation-provider">{children}</div>
 }));
 
 vi.mock('./components/auth', () => ({
@@ -19,8 +19,7 @@ vi.mock('./components/auth', () => ({
 vi.mock('./components/routing', () => ({
   RouteErrorBoundary: ({ children }: { children: React.ReactNode }) => <div data-testid="route-error-boundary">{children}</div>,
   ProtectedRoute: ({ children }: { children: React.ReactNode }) => <div data-testid="protected-route">{children}</div>,
-  RouteParamValidator: ({ children }: { children: React.ReactNode }) => <div data-testid="route-param-validator">{children}</div>,
-  UrlPersistenceProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="url-persistence-provider">{children}</div>
+  RouteParamValidator: ({ children }: { children: React.ReactNode }) => <div data-testid="route-param-validator">{children}</div>
 }));
 
 vi.mock('./components/ScrollToTop', () => ({
@@ -112,9 +111,8 @@ describe('App Component', () => {
       
       // Verify essential providers are present
       expect(screen.getByTestId('auth-provider')).toBeInTheDocument();
-      expect(screen.getByTestId('navigation-provider')).toBeInTheDocument();
+      expect(screen.getByTestId('unified-navigation-provider')).toBeInTheDocument();
       expect(screen.getByTestId('enhanced-auth-provider')).toBeInTheDocument();
-      expect(screen.getByTestId('url-persistence-provider')).toBeInTheDocument();
       expect(screen.getByTestId('route-error-boundary')).toBeInTheDocument();
     });
 
