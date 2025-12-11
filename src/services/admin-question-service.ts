@@ -1,5 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
 import type { Question } from '../integrations/supabase/types';
+import { questionContentValidator } from '../utils/question-content-validator';
 
 export type QuestionFilters = {
   search?: string;
@@ -36,10 +37,15 @@ export class AdminQuestionService {
   /**
    * Validates a question input for import/creation
    * @param question The question input to validate
+   * @param subjectSlug Optional subject slug for content validation
    * @returns Object with isValid flag and array of error messages
    */
-  validateQuestionInput(question: QuestionInput): { isValid: boolean; errors: string[] } {
+  async validateQuestionInput(
+    question: QuestionInput, 
+    subjectSlug?: string
+  ): Promise<{ isValid: boolean; errors: string[]; warnings: string[] }> {
     const errors: string[] = [];
+    const warnings: string[] = [];
     const questionPreview = question.question_text?.substring(0, 50) || 'Unknown question';
 
     // Validate that subject_id is provided
@@ -69,9 +75,29 @@ export class AdminQuestionService {
       errors.push(`correct_answer must be A, B, C, or D (got "${question.correct_answer}"). Question: "${questionPreview}..."`);
     }
 
+    // Content validation - check if question content matches assigned subject
+    if (subjectSlug && question.question_text && question.option_a && question.option_b && question.option_c && question.option_d) {
+      const contentValidation = questionContentValidator.validateQuestionSubjectMatch(
+        question.question_text,
+        [question.option_a, question.option_b, question.option_c, question.option_d],
+        subjectSlug,
+        0.3 // Minimum confidence threshold
+      );
+
+      if (!contentValidation.isValid) {
+        if (contentValidation.suggestedSubject) {
+          // This is a warning, not an error - allow import but warn user
+          warnings.push(`⚠️ CONTENT MISMATCH: "${questionPreview}..." appears to be ${contentValidation.suggestedSubject} content but is assigned to ${subjectSlug}. Confidence: ${(contentValidation.confidence * 100).toFixed(1)}%`);
+        } else {
+          warnings.push(`⚠️ LOW CONFIDENCE: "${questionPreview}..." may not match ${subjectSlug} subject content. Confidence: ${(contentValidation.confidence * 100).toFixed(1)}%`);
+        }
+      }
+    }
+
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
+      warnings
     };
   }
 
@@ -143,12 +169,17 @@ export class AdminQuestionService {
     }
   }
 
-  async createQuestion(input: QuestionInput): Promise<Question | null> {
+  async createQuestion(input: QuestionInput, subjectSlug?: string): Promise<Question | null> {
     try {
       // Validate input before creating
-      const validation = this.validateQuestionInput(input);
+      const validation = await this.validateQuestionInput(input, subjectSlug);
       if (!validation.isValid) {
         throw new Error(`Validation failed: ${validation.errors.join('; ')}`);
+      }
+
+      // Log warnings if any
+      if (validation.warnings.length > 0) {
+        console.warn('Question content warnings:', validation.warnings);
       }
 
       const { data, error } = await (supabase
@@ -226,20 +257,25 @@ export class AdminQuestionService {
     }
   }
 
-  async importQuestions(questions: QuestionInput[]): Promise<ImportResult> {
+  async importQuestions(questions: QuestionInput[], subjectSlug?: string): Promise<ImportResult> {
     const result: ImportResult = { success: 0, failed: 0, errors: [] };
 
     for (const question of questions) {
       try {
-        // Validate question input
-        const validation = this.validateQuestionInput(question);
+        // Validate question input with content validation
+        const validation = await this.validateQuestionInput(question, subjectSlug);
         if (!validation.isValid) {
           result.failed++;
           result.errors.push(...validation.errors);
           continue;
         }
 
-        await this.createQuestion(question);
+        // Add warnings to errors array for user visibility
+        if (validation.warnings.length > 0) {
+          result.errors.push(...validation.warnings);
+        }
+
+        await this.createQuestion(question, subjectSlug);
         result.success++;
       } catch (err: any) {
         result.failed++;

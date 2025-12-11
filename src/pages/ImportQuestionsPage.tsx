@@ -5,6 +5,7 @@ import { Select } from '../components/ui/Select';
 import { showToast } from '../components/ui/Toast';
 import { adminQuestionService, type QuestionInput } from '../services/admin-question-service';
 import { adminSubjectService } from '../services/admin-subject-service';
+import { questionContentValidator } from '../utils/question-content-validator';
 import { Upload, FileText, Download, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import type { Subject } from '../integrations/supabase/types';
 import { Card } from '../components/ui/Card';
@@ -67,6 +68,17 @@ export function ImportQuestionsPage() {
 
     const [textInput, setTextInput] = useState('');
     const [importMode, setImportMode] = useState<'file' | 'text'>('file');
+    const [previewValidation, setPreviewValidation] = useState<{
+        totalQuestions: number;
+        validQuestions: number;
+        warnings: string[];
+        suggestions: Array<{
+            questionPreview: string;
+            currentSubject: string;
+            suggestedSubject: string;
+            confidence: number;
+        }>;
+    } | null>(null);
 
     // Form state persistence
     const formPersistence = createFormPersistence('importQuestions');
@@ -105,6 +117,74 @@ export function ImportQuestionsPage() {
             format,
             importMode
         });
+        
+        // Clear previous validation when subject changes
+        setPreviewValidation(null);
+    };
+
+    const validateContent = async () => {
+        if (!selectedSubject) {
+            showToast('Please select a subject first', 'error');
+            return;
+        }
+
+        try {
+            let text = '';
+            if (importMode === 'file' && file) {
+                text = await file.text();
+            } else if (importMode === 'text' && textInput.trim()) {
+                text = textInput;
+            } else {
+                showToast('Please provide content to validate', 'error');
+                return;
+            }
+
+            let parsedQuestions: ParsedQuestion[];
+
+            // Parse questions based on format
+            if (format === 'csv') {
+                parsedQuestions = parseCSV(text);
+            } else if (format === 'simple') {
+                parsedQuestions = parseSimpleText(text);
+            } else {
+                parsedQuestions = parseJSON(text);
+            }
+
+            // Get subject slug for validation
+            const selectedSubjectObj = subjects.find(s => s.id === selectedSubject);
+            if (!selectedSubjectObj) {
+                showToast('Selected subject not found', 'error');
+                return;
+            }
+
+            // Validate content
+            const questionsForValidation = parsedQuestions.map(pq => ({
+                questionText: pq.question_text,
+                options: [pq.option_a, pq.option_b, pq.option_c, pq.option_d],
+                assignedSubjectSlug: selectedSubjectObj.slug
+            }));
+
+            const validation = questionContentValidator.validateQuestionBatch(
+                questionsForValidation,
+                0.3 // Minimum confidence threshold
+            );
+
+            setPreviewValidation({
+                totalQuestions: parsedQuestions.length,
+                validQuestions: validation.validQuestions,
+                warnings: validation.warnings,
+                suggestions: validation.suggestions
+            });
+
+            if (validation.invalidQuestions > 0) {
+                showToast(`Found ${validation.invalidQuestions} questions with content mismatches`, 'warning');
+            } else {
+                showToast('All questions appear to match the selected subject', 'success');
+            }
+
+        } catch (error: any) {
+            showToast(`Validation failed: ${error.message}`, 'error');
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -376,11 +456,15 @@ export function ImportQuestionsPage() {
                 });
             }
 
-            // Import questions
+            // Import questions with content validation
             const result = { success: 0, failed: 0, errors: [...errors] };
 
             if (questionsToImport.length > 0) {
-                const importRes = await adminQuestionService.importQuestions(questionsToImport);
+                // Get subject slug for content validation
+                const selectedSubjectObj = subjects.find(s => s.id === selectedSubject);
+                const subjectSlug = selectedSubjectObj?.slug;
+
+                const importRes = await adminQuestionService.importQuestions(questionsToImport, subjectSlug);
                 result.success = importRes.success;
                 result.failed = importRes.failed + errors.length;
                 result.errors = [...result.errors, ...importRes.errors];
@@ -786,8 +870,67 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                             </div>
                         )}
 
+                        {/* Content Validation Preview */}
+                        {previewValidation && (
+                            <div className="p-6 bg-blue-50 border border-blue-200 rounded-xl">
+                                <div className="flex items-start gap-4">
+                                    <div className="p-2 bg-blue-100 rounded-lg">
+                                        <AlertCircle className="w-6 h-6 text-blue-600" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h3 className="font-semibold text-blue-900 mb-2">Content Validation Results</h3>
+                                        <div className="flex gap-4 mb-3">
+                                            <span className="px-3 py-1 bg-white rounded-full text-sm font-medium text-green-700 border border-green-200">
+                                                Valid: {previewValidation.validQuestions}/{previewValidation.totalQuestions}
+                                            </span>
+                                            {previewValidation.suggestions.length > 0 && (
+                                                <span className="px-3 py-1 bg-white rounded-full text-sm font-medium text-orange-700 border border-orange-200">
+                                                    Mismatches: {previewValidation.suggestions.length}
+                                                </span>
+                                            )}
+                                        </div>
+                                        
+                                        {previewValidation.suggestions.length > 0 && (
+                                            <div className="mt-4 bg-white p-4 rounded-lg border border-orange-100">
+                                                <p className="text-sm font-semibold text-orange-800 mb-2">⚠️ Content Mismatches Detected:</p>
+                                                <ul className="text-sm space-y-2 max-h-40 overflow-y-auto pr-2">
+                                                    {previewValidation.suggestions.slice(0, 5).map((suggestion, index) => (
+                                                        <li key={index} className="text-orange-600 p-2 bg-orange-50 rounded border border-orange-200">
+                                                            <div className="font-medium">"{suggestion.questionPreview}..."</div>
+                                                            <div className="text-xs mt-1">
+                                                                Assigned to: <span className="font-medium">{suggestion.currentSubject}</span> | 
+                                                                Appears to be: <span className="font-medium">{suggestion.suggestedSubject}</span> | 
+                                                                Confidence: {(suggestion.confidence * 100).toFixed(1)}%
+                                                            </div>
+                                                        </li>
+                                                    ))}
+                                                    {previewValidation.suggestions.length > 5 && (
+                                                        <li className="text-orange-500 italic">... and {previewValidation.suggestions.length - 5} more mismatches</li>
+                                                    )}
+                                                </ul>
+                                                <p className="text-xs text-orange-700 mt-2 font-medium">
+                                                    💡 Tip: These questions will still be imported but may be assigned to the wrong subject. 
+                                                    Consider reviewing the subject assignment or the question content.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Actions */}
-                        <div className="flex justify-end pt-4 border-t">
+                        <div className="flex justify-between pt-4 border-t">
+                            <Button
+                                onClick={validateContent}
+                                disabled={(importMode === 'file' && !file) || (importMode === 'text' && !textInput) || !selectedSubject}
+                                variant="outline"
+                                className="px-6 py-3 text-lg h-auto border-blue-300 text-blue-700 hover:bg-blue-50"
+                            >
+                                <AlertCircle className="w-5 h-5 mr-2" />
+                                Validate Content
+                            </Button>
+                            
                             <Button
                                 onClick={handleImport}
                                 disabled={(importMode === 'file' && !file) || (importMode === 'text' && !textInput) || importing}
