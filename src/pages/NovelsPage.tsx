@@ -19,34 +19,8 @@ export function NovelsPage() {
   const [selectedNovel, setSelectedNovel] = useState<Novel | null>(null);
   const [activeTab, setActiveTab] = useState<'summary' | 'themes' | 'characters' | 'quotes'>('summary');
 
-  // Sample novels data (in production, this would come from the database)
+  // TODO: Load novels data from database
   const novels: Novel[] = [
-    {
-      id: '1',
-      title: 'Things Fall Apart',
-      author: 'Chinua Achebe',
-      examType: 'BOTH',
-      year: '2024',
-      summary: 'Things Fall Apart tells the story of Okonkwo, a respected warrior in the Igbo community of Umuofia. The novel explores the clash between traditional African values and European colonialism in late 19th-century Nigeria.',
-      themes: [
-        'Colonialism and its impact on traditional society',
-        'Masculinity and gender roles',
-        'Tradition vs. Change',
-        'Fate and free will',
-        'Language and culture'
-      ],
-      characters: [
-        { name: 'Okonkwo', description: 'The protagonist, a respected warrior who struggles with change' },
-        { name: 'Nwoye', description: "Okonkwo's eldest son who converts to Christianity" },
-        { name: 'Ezinma', description: "Okonkwo's favorite daughter" },
-        { name: 'Obierika', description: "Okonkwo's best friend and voice of reason" }
-      ],
-      keyQuotes: [
-        '"The world has no end, and what is good among one people is an abomination with others."',
-        '"A man who calls his kinsmen to a feast does not do so to save them from starving."',
-        '"When a man says yes his chi says yes also."'
-      ]
-    },
     {
       id: '2',
       title: 'The Lion and the Jewel',
@@ -68,37 +42,8 @@ export function NovelsPage() {
         { name: 'Sadiku', description: "Baroka's head wife" }
       ],
       keyQuotes: [
-        '"I am the lion of Ilujinle."',
-        '"The stranger has no claim to the village."',
-        '"Progress is what we make it."'
-      ]
-    },
-    {
-      id: '3',
-      title: 'The Last Days at Forcados High School',
-      author: 'A.H. Mohammed',
-      examType: 'JAMB',
-      year: '2024',
-      summary: 'A novel about the experiences of students in their final year at Forcados High School, dealing with academic pressure, friendship, and coming of age.',
-      themes: [
-        'Education and academic pressure',
-        'Friendship and loyalty',
-        'Coming of age',
-        'Social issues in schools',
-        'Dreams and aspirations'
-      ],
-      characters: [
-        { name: 'Jimi', description: 'The protagonist, a final year student' },
-        { name: 'Ansa', description: "Jimi's best friend" },
-        { name: 'Mr. Mallum', description: 'The strict principal' },
-        { name: 'Tina', description: 'A fellow student and love interest' }
-      ],
-      keyQuotes: [
-        '"Education is the key to success."',
-        '"True friendship is tested in difficult times."',
-        '"The future belongs to those who prepare for it."'
-      ]
-    }
+        // Sample data removed - load from database
+      }
   ];
 
   const getExamTypeBadgeColor = (examType: 'JAMB' | 'WAEC' | 'BOTH'): string => {

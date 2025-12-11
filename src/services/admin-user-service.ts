@@ -84,7 +84,7 @@ export class AdminUserService {
     try {
       const { error } = await supabase
         .from('user_profiles')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id);
 
       if (error) {

@@ -42,44 +42,9 @@ export function VideosPage() {
     s => selectedExamType === 'ALL' || s.exam_type === selectedExamType || s.exam_type === 'BOTH'
   );
 
-  // Sample video lessons (in production, these would come from the database)
+  // TODO: Load video lessons from database
   const sampleVideos: VideoLesson[] = [
-    {
-      id: '1',
-      title: 'Introduction to the Topic',
-      description: 'A comprehensive introduction covering the fundamental concepts and principles.',
-      duration: '15:30',
-      thumbnail: 'https://via.placeholder.com/320x180/2563EB/FFFFFF?text=Video+1',
-      url: 'https://www.youtube.com/watch?v=example1',
-      topic: 'Fundamentals'
-    },
-    {
-      id: '2',
-      title: 'Core Concepts Explained',
-      description: 'Deep dive into the essential concepts with practical examples and demonstrations.',
-      duration: '22:45',
-      thumbnail: 'https://via.placeholder.com/320x180/7C3AED/FFFFFF?text=Video+2',
-      url: 'https://www.youtube.com/watch?v=example2',
-      topic: 'Core Concepts'
-    },
-    {
-      id: '3',
-      title: 'Problem Solving Techniques',
-      description: 'Learn effective strategies for solving common problems and exam questions.',
-      duration: '18:20',
-      thumbnail: 'https://via.placeholder.com/320x180/059669/FFFFFF?text=Video+3',
-      url: 'https://www.youtube.com/watch?v=example3',
-      topic: 'Practice'
-    },
-    {
-      id: '4',
-      title: 'Advanced Applications',
-      description: 'Explore advanced topics and their real-world applications.',
-      duration: '25:10',
-      thumbnail: 'https://via.placeholder.com/320x180/DC2626/FFFFFF?text=Video+4',
-      url: 'https://www.youtube.com/watch?v=example4',
-      topic: 'Advanced'
-    }
+    // Sample data removed - load from database
   ];
 
   if (loading) {

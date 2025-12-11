@@ -42,30 +42,8 @@ export function HomePage() {
   const [isQuickLinksLoading, setIsQuickLinksLoading] = useState(true);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
 
-  // Sample events data - in production, this would come from an API
-  const upcomingEvents: EventData[] = [
-    {
-      id: '1',
-      title: 'JAMB 2025 Registration Opens',
-      date: new Date('2025-01-15'),
-      description: 'Registration for JAMB UTME 2025 begins',
-      type: 'announcement',
-    },
-    {
-      id: '2',
-      title: 'WAEC Exam Period',
-      date: new Date('2025-05-20'),
-      description: 'WAEC examinations commence',
-      type: 'exam',
-    },
-    {
-      id: '3',
-      title: 'Mock Exam Deadline',
-      date: new Date('2025-03-01'),
-      description: 'Last day to register for mock exams',
-      type: 'deadline',
-    },
-  ];
+  // TODO: Load events data from API/database
+  const upcomingEvents: EventData[] = [];
 
   // Performance monitoring
   useEffect(() => {

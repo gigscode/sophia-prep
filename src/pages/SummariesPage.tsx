@@ -39,42 +39,8 @@ export function SummariesPage() {
     s => selectedExamType === 'ALL' || s.exam_type === selectedExamType || s.exam_type === 'BOTH'
   );
 
-  // Sample topic summaries (in production, these would come from the database)
-  const sampleSummaries: TopicSummary[] = [
-    {
-      id: '1',
-      title: 'Introduction to the Topic',
-      content: 'This section provides a comprehensive overview of the fundamental concepts and principles.',
-      keyPoints: [
-        'Understanding basic definitions and terminology',
-        'Historical context and development',
-        'Real-world applications and examples',
-        'Common misconceptions to avoid'
-      ]
-    },
-    {
-      id: '2',
-      title: 'Core Concepts',
-      content: 'Deep dive into the essential concepts that form the foundation of this subject area.',
-      keyPoints: [
-        'Key theories and frameworks',
-        'Mathematical or logical foundations',
-        'Practical problem-solving approaches',
-        'Connections to other topics'
-      ]
-    },
-    {
-      id: '3',
-      title: 'Advanced Topics',
-      content: 'Exploration of more complex ideas and their applications in various contexts.',
-      keyPoints: [
-        'Advanced techniques and methods',
-        'Case studies and examples',
-        'Common exam questions',
-        'Tips for mastery'
-      ]
-    }
-  ];
+  // TODO: Load topic summaries from database
+  const sampleSummaries: TopicSummary[] = [];
 
   if (loading) {
     return (

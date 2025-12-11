@@ -5,37 +5,8 @@ import { UpcomingEventsSection } from './UpcomingEventsSection';
  * Example usage of UpcomingEventsSection component
  */
 export function UpcomingEventsSectionExample() {
-  // Sample event data
-  const sampleEvents = [
-    {
-      id: '1',
-      title: 'JAMB UTME 2025',
-      date: new Date('2025-05-15'),
-      description: 'Unified Tertiary Matriculation Examination',
-      type: 'exam' as const,
-    },
-    {
-      id: '2',
-      title: 'WAEC Registration Deadline',
-      date: new Date('2025-03-31'),
-      description: 'Last day to register for WAEC examinations',
-      type: 'deadline' as const,
-    },
-    {
-      id: '3',
-      title: 'New Study Materials Available',
-      date: new Date('2025-02-10'),
-      description: 'Updated past questions and video lessons',
-      type: 'announcement' as const,
-    },
-    {
-      id: '4',
-      title: 'Mock Exam Week',
-      date: new Date('2025-04-20'),
-      description: 'Practice exams for all subjects',
-      type: 'exam' as const,
-    },
-  ];
+  // TODO: Load event data from API/database
+  const sampleEvents = [];
 
   const handleViewAll = () => {
     console.log('View All clicked');

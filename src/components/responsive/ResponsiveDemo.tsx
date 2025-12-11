@@ -14,37 +14,8 @@ import { QuickLinksSection } from '../home/QuickLinksSection';
 import { UpcomingEventsSection, EventData } from '../home/UpcomingEventsSection';
 
 export function ResponsiveDemo() {
-  // Sample events data for testing
-  const sampleEvents: EventData[] = [
-    {
-      id: '1',
-      title: 'JAMB 2025 Registration Opens',
-      date: new Date('2025-01-15'),
-      description: 'Registration for JAMB UTME 2025 begins',
-      type: 'announcement',
-    },
-    {
-      id: '2',
-      title: 'WAEC Exam Period',
-      date: new Date('2025-05-20'),
-      description: 'WAEC examinations commence',
-      type: 'exam',
-    },
-    {
-      id: '3',
-      title: 'Mock Exam Deadline',
-      date: new Date('2025-03-01'),
-      description: 'Last day to register for mock exams',
-      type: 'deadline',
-    },
-    {
-      id: '4',
-      title: 'Results Release',
-      date: new Date('2025-06-15'),
-      description: 'JAMB results will be released',
-      type: 'announcement',
-    },
-  ];
+  // TODO: Load events data from API/database
+  const sampleEvents: EventData[] = [];
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
