@@ -64,3 +64,17 @@ coverage/**/*
 # Uncomment only if you manage lockfiles elsewhere
 # pnpm-lock.yaml
 .vercel
+
+# Local Scripts and Tools
+*.bat
+*.ps1
+.kiro/
+
+# Linting Output
+lint-output.txt
+lint-fix-output.txt
+
+# Temporary Directories
+tmp/
+temp/
+
