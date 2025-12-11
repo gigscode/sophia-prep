@@ -43,7 +43,8 @@ export function NovelsPage() {
       ],
       keyQuotes: [
         // Sample data removed - load from database
-      }
+      ]
+    }
   ];
 
   const getExamTypeBadgeColor = (examType: 'JAMB' | 'WAEC' | 'BOTH'): string => {

@@ -3,6 +3,15 @@ import type { Database } from '../integrations/supabase/types';
 
 export type AdminUser = Database['public']['Tables']['user_profiles']['Row'];
 
+export type UserUpdate = {
+  email?: string;
+  full_name?: string | null;
+  subscription_plan?: string | null;
+  last_login?: string | null;
+  is_active?: boolean;
+  exam_type?: 'JAMB' | 'WAEC' | 'BOTH' | null;
+};
+
 export type UserFilters = {
   search?: string;
   subscription?: string;
@@ -80,11 +89,11 @@ export class AdminUserService {
     }
   }
 
-  async updateUser(id: string, updates: Database['public']['Tables']['user_profiles']['Update']): Promise<boolean> {
+  async updateUser(id: string, updates: UserUpdate): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update(updates as any)
+      const { error } = await (supabase
+        .from('user_profiles') as any)
+        .update(updates)
         .eq('id', id);
 
       if (error) {
