@@ -9,7 +9,7 @@ import PWAInstall from './components/PWAInstall';
 import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
-import { AppUpdateNotification } from './components/AppUpdateNotification';
+
 import { LegacyQuizRedirect } from './components/quiz/LegacyQuizRedirect';
 import { NavigationDebug } from './components/NavigationDebug';
 import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator, UrlPersistenceProvider } from './components/routing';
@@ -61,7 +61,7 @@ export function App() {
             <ScrollToTop />
             <WhatsAppButton />
             <PWAInstall />
-            <AppUpdateNotification />
+
             <ToastContainer />
             <NavigationDebug />
             <RouteErrorBoundary>
