@@ -3,3 +3,4 @@
  */
 
 export * from './quiz-config';
+export * from './database';

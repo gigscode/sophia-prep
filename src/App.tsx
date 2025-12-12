@@ -20,6 +20,9 @@ import { routePreloader } from './utils/route-preloading';
 // Import NotFoundPage directly since it's used outside the route config
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(module => ({ default: module.NotFoundPage })));
 
+// Import TestNewSchema for testing
+import TestNewSchema from './components/TestNewSchema';
+
 // Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -122,6 +125,13 @@ export function App() {
               {/* Events - placeholder routes until EventsPage is created */}
               <Route path="/events" element={<Navigate to="/" replace />} />
               <Route path="/events/:id" element={<Navigate to="/" replace />} />
+
+              {/* TEST ROUTE - Remove this after testing */}
+              <Route path="/test-schema" element={
+                <Layout showFooter={false}>
+                  <TestNewSchema />
+                </Layout>
+              } />
 
               {/* Fallback - 404 Page */}
               <Route path="*" element={<NotFoundPage />} />
