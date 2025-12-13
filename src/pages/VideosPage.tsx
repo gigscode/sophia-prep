@@ -84,15 +84,6 @@ export function VideosPage() {
           >
             JAMB
           </button>
-          <button
-            onClick={() => setSelectedExamType('WAEC')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'WAEC'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            WAEC
-          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

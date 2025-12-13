@@ -22,7 +22,7 @@ export function StudyHub() {
               <ListChecks className="w-8 h-8 text-blue-600" />
               <h3 className="text-xl font-semibold">Syllabus</h3>
             </div>
-            <p className="text-gray-600">Official JAMB and WAEC syllabi organized by subjects</p>
+            <p className="text-gray-600">Official JAMB syllabi organized by subjects</p>
           </button>
 
           <button 

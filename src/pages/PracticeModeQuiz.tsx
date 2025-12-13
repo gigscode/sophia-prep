@@ -45,56 +45,43 @@ export function PracticeModeQuiz() {
   const initialTypeParam = params.get('type');
   const [subjectSel, setSubjectSel] = useState<string | undefined>(initialSubject);
   const [yearSel, setYearSel] = useState<'ALL' | number>(initialYearParam === 'ALL' ? 'ALL' : (initialYearParam ? Number(initialYearParam) : 'ALL'));
-  const [typeSel, setTypeSel] = useState<'ALL' | 'JAMB' | 'WAEC'>(
-    initialTypeParam === 'JAMB' || initialTypeParam === 'WAEC' || initialTypeParam === 'ALL'
-      ? (initialTypeParam as 'ALL' | 'JAMB' | 'WAEC')
-      : 'ALL'
-  );
+  const [typeSel] = useState<'JAMB'>('JAMB');
   const [showSelectionPage, setShowSelectionPage] = useState(!initialSubject);
 
-  const applyParams = (sub?: string | undefined, yr?: 'ALL' | number, typ?: 'ALL' | 'JAMB' | 'WAEC') => {
+  const applyParams = (sub?: string | undefined, yr?: 'ALL' | number) => {
     const sp = new URLSearchParams();
     const s = sub ?? subjectSel;
     const y = yr ?? yearSel;
-    const t = typ ?? typeSel;
     if (s) sp.set('subject', s);
     if (y) sp.set('year', y === 'ALL' ? 'ALL' : String(y));
-    if (t) sp.set('type', t);
+    sp.set('type', 'JAMB');
     const url = `${window.location.pathname}?${sp.toString()}`;
     window.history.replaceState({}, '', url);
   };
 
-  // Load subjects when exam type is selected
+  // Load subjects for JAMB
   useEffect(() => {
-    if (typeSel !== 'ALL') {
-      (async () => {
-        setLoadingSubjects(true);
-        try {
-          const subjects = await subjectService.getSubjectsByExamType(typeSel);
-          setAvailableSubjects(subjects);
-        } catch (e) {
-          console.error('Failed to load subjects:', e);
-          setAvailableSubjects([]);
-        } finally {
-          setLoadingSubjects(false);
-        }
-      })();
-    }
-  }, [typeSel]);
+    (async () => {
+      setLoadingSubjects(true);
+      try {
+        const subjects = await subjectService.getSubjectsByExamType('JAMB');
+        setAvailableSubjects(subjects);
+      } catch (e) {
+        console.error('Failed to load subjects:', e);
+        setAvailableSubjects([]);
+      } finally {
+        setLoadingSubjects(false);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
-      // Don't load questions if type is not selected yet
-      if (typeSel === 'ALL') {
-        setLoading(false);
-        return;
-      }
-
       setLoading(true);
       try {
         const subject = subjectSel;
         const exam_year = yearSel;
-        const exam_type = typeSel as 'JAMB' | 'WAEC'; // At this point, exam_type is 'JAMB' | 'WAEC', never 'ALL' (guarded by check above)
+        const exam_type = 'JAMB';
         let qs: any[] = [];
         if (subject) {
           const rows = await questionService.getQuestionsBySubjectSlug(subject, { exam_year: typeof exam_year === 'number' ? exam_year : undefined, exam_type: exam_type, limit: 50 });
@@ -191,73 +178,18 @@ export function PracticeModeQuiz() {
     return () => window.removeEventListener('keydown', onKey);
   }, [onSelect, pool.length, showFeedback, next]);
 
-  // Exam Type Selection Screen
-  if (typeSel === 'ALL') {
-    return (
-      <div className="container mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold text-center mb-8">Select Exam Type</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
-          <button
-            onClick={() => {
-              setTypeSel('WAEC');
-              applyParams(undefined, undefined, 'WAEC');
-            }}
-            className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-green-500 text-left"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-4 bg-green-100 rounded-full group-hover:bg-green-200 transition-colors">
-                <BookOpen className="w-8 h-8 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800">WAEC</h2>
-            </div>
-            <p className="text-gray-600 text-lg">
-              No time Limits!
-              Practice with past questions and mock exams specifically designed for the West African Senior School Certificate Examination. Immediate feedback after each answer with explanations.
-            </p>
-          </button>
 
-          <button
-            onClick={() => {
-              setTypeSel('JAMB');
-              applyParams(undefined, undefined, 'JAMB');
-            }}
-            className="group p-8 bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-500 text-left"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className="p-4 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-                <GraduationCap className="w-8 h-8 text-blue-600" />
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800">JAMB</h2>
-            </div>
-            <p className="text-gray-600 text-lg">
-              Immediate feedback after each answer with explanations.
-              Prepare for the Joint Admissions and Matriculation Board examination with our comprehensive question bank.
-            </p>
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Subject and Year Selection Screen
-  if (showSelectionPage && (typeSel === 'JAMB' || typeSel === 'WAEC')) {
-    // const examTypeColor = typeSel === 'WAEC' ? 'green' : 'blue'; // Unused
-    const examTypeBg = typeSel === 'WAEC' ? 'bg-green-50' : 'bg-blue-50';
-    const examTypeBorder = typeSel === 'WAEC' ? 'border-green-500' : 'border-blue-500';
-    const examTypeText = typeSel === 'WAEC' ? 'text-green-700' : 'text-blue-700';
-
+  if (showSelectionPage) {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className={`inline-flex items-center gap-2 px-4 py-2 ${examTypeBg} ${examTypeBorder} border-2 rounded-full mb-4`}>
-              {typeSel === 'WAEC' ? (
-                <BookOpen className={`w-5 h-5 ${examTypeText}`} />
-              ) : (
-                <GraduationCap className={`w-5 h-5 ${examTypeText}`} />
-              )}
-              <span className={`font-semibold ${examTypeText}`}>{typeSel} Practice</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border-blue-500 border-2 rounded-full mb-4">
+              <GraduationCap className="w-5 h-5 text-blue-700" />
+              <span className="font-semibold text-blue-700">JAMB Practice</span>
             </div>
             <h1 className="text-3xl font-bold mb-2">Practice Mode</h1>
             <p className="text-gray-600">Select your subject and exam year to begin</p>
@@ -280,10 +212,7 @@ export function PracticeModeQuiz() {
                   <select
                     value={subjectSel || ''}
                     onChange={(e) => setSubjectSel(e.target.value || undefined)}
-                    className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
-                      ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                      : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                      }`}
+                    className="w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 border-blue-300 focus:border-blue-500 focus:ring-blue-200"
                   >
                     <option value="">Select a subject</option>
                     {availableSubjects.map((subject) => (
@@ -306,10 +235,7 @@ export function PracticeModeQuiz() {
                     const value = e.target.value;
                     setYearSel(value === 'ALL' ? 'ALL' : Number(value));
                   }}
-                  className={`w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 ${typeSel === 'WAEC'
-                    ? 'border-green-300 focus:border-green-500 focus:ring-green-200'
-                    : 'border-blue-300 focus:border-blue-500 focus:ring-blue-200'
-                    }`}
+                  className="w-full px-4 py-3 border-2 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 border-blue-300 focus:border-blue-500 focus:ring-blue-200"
                 >
                   <option value="ALL">All Years</option>
                   <option value="2024">2024</option>

@@ -8,7 +8,7 @@ import type { QuestionInput } from '../services/admin-question-service';
  */
 describe('Admin Question Import - Exam Metadata Support', () => {
   /**
-   * Requirement 12.1: WHEN an administrator imports questions THEN the Quiz System SHALL accept exam_type field with values JAMB or WAEC
+   * Requirement 12.1: WHEN an administrator imports questions THEN the Quiz System SHALL accept exam_type field with value JAMB
    */
   it('should accept exam_type field with JAMB value', () => {
     const question: QuestionInput = {
@@ -27,28 +27,7 @@ describe('Admin Question Import - Exam Metadata Support', () => {
 
     // Verify the question object has the correct exam_type
     expect(question.exam_type).toBe('JAMB');
-    expect(['JAMB', 'WAEC', null, undefined]).toContain(question.exam_type);
-  });
-
-  it('should accept exam_type field with WAEC value', () => {
-    const question: QuestionInput = {
-      subject_id: 'test-subject-id',
-      topic_id: 'test-topic-id',
-      question_text: 'What is 2 + 2?',
-      option_a: '2',
-      option_b: '3',
-      option_c: '4',
-      option_d: '5',
-      correct_answer: 'C',
-      explanation: 'Addition of two numbers',
-      exam_type: 'WAEC',
-      exam_year: 2023,
-      is_active: true,
-    };
-
-    // Verify the question object has the correct exam_type
-    expect(question.exam_type).toBe('WAEC');
-    expect(['JAMB', 'WAEC', null, undefined]).toContain(question.exam_type);
+    expect(['JAMB', null, undefined]).toContain(question.exam_type);
   });
 
   /**
@@ -176,7 +155,7 @@ describe('Admin Question Import - Exam Metadata Support', () => {
         option_c: '4',
         option_d: '5',
         correct_answer: 'C',
-        exam_type: 'WAEC',
+        exam_type: 'JAMB',
         is_active: true,
       },
       {
@@ -199,7 +178,7 @@ describe('Admin Question Import - Exam Metadata Support', () => {
     expect(questions[0].exam_year).toBe(2023);
     expect(questions[1].exam_type).toBeUndefined();
     expect(questions[1].exam_year).toBeUndefined();
-    expect(questions[2].exam_type).toBe('WAEC');
+    expect(questions[2].exam_type).toBe('JAMB');
     expect(questions[2].exam_year).toBeUndefined();
     expect(questions[3].exam_type).toBeUndefined();
     expect(questions[3].exam_year).toBe(2022);

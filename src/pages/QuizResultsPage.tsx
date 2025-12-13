@@ -14,7 +14,7 @@ interface QuizQuestion {
   correct?: string;
   explanation?: string;
   exam_year?: number | null;
-  exam_type?: 'JAMB' | 'WAEC' | null;
+  exam_type?: 'JAMB' | null;
   topic?: string;
 }
 
@@ -25,7 +25,7 @@ interface QuizResultsData {
   totalQuestions: number;
   timeTaken?: number;
   quizMode?: string;
-  examType?: 'JAMB' | 'WAEC';
+  examType?: 'JAMB';
   subject?: string;
   year?: number;
   config?: QuizConfig;

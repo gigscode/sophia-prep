@@ -243,18 +243,18 @@ describe('useUniversalQuizConfig', () => {
     expect(validation.errors).toContain('Exam year is required for CBT mode');
   });
 
-  it('validates WAEC configuration correctly', () => {
+  it('validates JAMB configuration with insufficient subjects', () => {
     const { result } = renderHook(() => useUniversalQuizConfig());
-    
+
     act(() => {
-      result.current.setExamType({ ...mockExamType, slug: 'waec' });
-      result.current.setQuizMode('PRACTICE', mockPracticeModeConfig);
-      result.current.setSelectedSubjects(['math', 'english']); // Only 2 subjects
+      result.current.setExamType(mockExamType);
+      result.current.setQuizMode('CBT_EXAM', mockCBTModeConfig);
+      result.current.setSelectedSubjects(['math', 'english']); // Only 2 subjects, need 4
     });
-    
+
     const validation = result.current.validateConfiguration();
     expect(validation.isValid).toBe(false);
-    expect(validation.errors).toContain('WAEC requires 6-9 subjects');
+    expect(validation.errors).toContain('JAMB requires exactly 4 subjects');
   });
 
   it('provides configuration summary', () => {

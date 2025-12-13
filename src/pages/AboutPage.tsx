@@ -7,7 +7,7 @@ export function AboutPage() {
     <>
       <PageHeader
         title="About Us"
-        description="Sophia Prep empowers students to excel in JAMB and WAEC through engaging practice, mock exams, and guided study."
+        description="Sophia Prep empowers students to excel in JAMB through engaging practice, mock exams, and guided study."
         icon={<Sparkles className="w-8 h-8" />}
         breadcrumbs={[{ label: 'About Us' }]}
       />

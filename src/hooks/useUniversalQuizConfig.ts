@@ -4,7 +4,7 @@ import type { UniversalQuizModeConfig } from '../components/quiz/UniversalQuizMo
 
 /**
  * Universal Quiz Configuration Interface
- * Supports both JAMB and WAEC exam types with Practice and CBT modes
+ * Supports JAMB exam type with Practice and CBT modes
  */
 export interface UniversalQuizConfiguration {
   // Exam type selection
@@ -335,13 +335,6 @@ export function useUniversalQuizConfig() {
         errors.push('JAMB requires exactly 4 subjects');
       }
       // Note: English requirement validation would be implemented in subject selection
-    }
-
-    // WAEC-specific validation
-    if (config.examType?.slug === 'waec') {
-      if (config.selectedSubjects.length < 6 || config.selectedSubjects.length > 9) {
-        errors.push('WAEC requires 6-9 subjects');
-      }
     }
 
     // CBT mode specific validation

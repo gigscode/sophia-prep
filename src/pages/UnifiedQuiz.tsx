@@ -19,10 +19,10 @@ interface UnifiedQuizProps {
 
 /**
  * UnifiedQuiz Component
- * 
+ *
  * A unified quiz component that handles both practice and exam simulation modes
- * for WAEC and JAMB examinations with subject or year-based question selection.
- * 
+ * for JAMB examinations with subject or year-based question selection.
+ *
  * Requirements: 2.2, 2.3, 5.1, 5.2, 5.3, 5.4, 6.2, 6.3, 6.4, 7.1, 7.2, 11.1, 11.2, 11.3
  */
 export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
@@ -184,8 +184,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
           console.log(`Loading questions for category: ${config.classCategory}, subjects:`, config.subjectSlugs);
 
           // For JAMB: 40 questions per subject (4 subjects = 160 total)
-          // For WAEC: 40 questions per subject (can vary by category)
-          const questionsPerSubject = config.examType === 'JAMB' ? 40 : 40;
+          const questionsPerSubject = 40;
 
           loadedQuestions = await questionService.getQuestionsBySubjectSlugs(
             config.subjectSlugs,

@@ -4,7 +4,6 @@ import { updatedSubjectService } from '../../services/updated-subject-service';
 import { universalValidationService } from '../../services/universal-validation-service';
 import type { SubjectWithDetails, ExamTypeRecord } from '../../types/database';
 import type { JAMBValidationResult } from '../../services/jamb-validation-service';
-import type { WAECValidationResult } from '../../services/waec-validation-service';
 import type { UniversalValidationResult } from '../../services/universal-validation-service';
 import * as LucideIcons from 'lucide-react';
 
@@ -35,7 +34,6 @@ export function UniversalSubjectSelector({
   const [error, setError] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [jambValidation, setJambValidation] = useState<JAMBValidationResult | null>(null);
-  const [waecValidation, setWaecValidation] = useState<WAECValidationResult | null>(null);
   const [universalValidation, setUniversalValidation] = useState<UniversalValidationResult | null>(null);
   const [realTimeStatus, setRealTimeStatus] = useState<{
     status: 'incomplete' | 'invalid' | 'valid';
@@ -100,12 +98,9 @@ export function UniversalSubjectSelector({
     
     // Set specific validation results for detailed feedback
     const isJAMB = examType.slug.toLowerCase() === 'jamb';
-    const isWAEC = examType.slug.toLowerCase() === 'waec';
-    
+
     if (isJAMB && universalResult.validationDetails) {
       setJambValidation(universalResult.validationDetails as JAMBValidationResult);
-    } else if (isWAEC && universalResult.validationDetails) {
-      setWaecValidation(universalResult.validationDetails as WAECValidationResult);
     }
     
     // Combine all error types for display
@@ -375,59 +370,6 @@ export function UniversalSubjectSelector({
                     {jambValidation.suggestions.map((suggestion, index) => (
                       <li key={index} className="flex items-start gap-2">
                         <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                        {suggestion}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* WAEC Specific Feedback */}
-        {waecValidation && examType.slug.toLowerCase() === 'waec' && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-            <h4 className="font-semibold text-green-900 mb-2">WAEC Selection Details</h4>
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-green-800">Subject Count:</span>
-                <span className={`font-medium ${
-                  waecValidation.subjectCount >= 6 && waecValidation.subjectCount <= 9 
-                    ? 'text-green-600' 
-                    : 'text-orange-600'
-                }`}>
-                  {waecValidation.subjectCount} (6-9 allowed)
-                </span>
-              </div>
-              
-              {Object.keys(waecValidation.categoryDistribution).length > 0 && (
-                <div>
-                  <span className="text-green-800">Category Distribution:</span>
-                  <div className="mt-1 flex flex-wrap gap-2">
-                    {Object.entries(waecValidation.categoryDistribution).map(([category, count]) => (
-                      <span key={category} className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                        {category}: {count}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {realTimeStatus?.categoryBalance && (
-                <div className="flex items-center justify-between">
-                  <span className="text-green-800">Balance:</span>
-                  <span className="text-green-700 text-sm">{realTimeStatus.categoryBalance}</span>
-                </div>
-              )}
-              
-              {waecValidation.suggestions.length > 0 && (
-                <div className="mt-3">
-                  <p className="text-green-800 font-medium mb-1">Suggestions:</p>
-                  <ul className="text-green-700 space-y-1">
-                    {waecValidation.suggestions.map((suggestion, index) => (
-                      <li key={index} className="flex items-start gap-2">
-                        <div className="w-1.5 h-1.5 bg-green-600 rounded-full mt-2 flex-shrink-0"></div>
                         {suggestion}
                       </li>
                     ))}

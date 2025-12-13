@@ -160,12 +160,6 @@ describe('Final Testing and Polish - Component Rendering', () => {
         date: new Date('2025-05-20'),
         type: 'exam' as const,
       },
-      {
-        id: '2',
-        title: 'WAEC Exam',
-        date: new Date('2025-06-15'),
-        type: 'exam' as const,
-      },
     ];
 
     it('should render event cards', () => {
@@ -173,7 +167,6 @@ describe('Final Testing and Polish - Component Rendering', () => {
 
       expect(screen.getByText('Upcoming Events')).toBeInTheDocument();
       expect(screen.getByText('JAMB 2025')).toBeInTheDocument();
-      expect(screen.getByText('WAEC Exam')).toBeInTheDocument();
     });
 
     it('should show View All link when more than 3 events', () => {

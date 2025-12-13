@@ -1,4 +1,4 @@
-export type ExamType = 'JAMB' | 'WAEC' | 'BOTH';
+export type ExamType = 'JAMB';
 export type SubjectCategory = 'SCIENCE' | 'COMMERCIAL' | 'ARTS' | 'GENERAL' | 'LANGUAGE';
 export type CombinationType = 'SCIENCE' | 'COMMERCIAL' | 'ARTS' | 'CUSTOM';
 
@@ -52,7 +52,7 @@ export interface Question {
   correct_answer: CorrectAnswer;
   explanation: string | null;
   exam_year: number | null;
-  exam_type: 'JAMB' | 'WAEC' | null;
+  exam_type: 'JAMB' | null;
   question_number: number | null;
   is_active: boolean;
   created_at: string;
@@ -61,7 +61,7 @@ export interface Question {
 
 export interface TimerConfiguration {
   id: string;
-  exam_type: 'JAMB' | 'WAEC';
+  exam_type: 'JAMB';
   subject_slug: string | null;
   year: number | null;
   duration_seconds: number;
@@ -224,7 +224,7 @@ export interface Database {
           created_at: string;
           last_login: string | null;
           is_active: boolean;
-          exam_type: 'JAMB' | 'WAEC' | 'BOTH' | null;
+          exam_type: 'JAMB' | null;
         };
         Insert: {
           id: string;
@@ -234,7 +234,7 @@ export interface Database {
           created_at?: string;
           last_login?: string | null;
           is_active?: boolean;
-          exam_type?: 'JAMB' | 'WAEC' | 'BOTH' | null;
+          exam_type?: 'JAMB' | null;
         };
         Update: {
           id?: string;
@@ -244,7 +244,7 @@ export interface Database {
           created_at?: string;
           last_login?: string | null;
           is_active?: boolean;
-          exam_type?: 'JAMB' | 'WAEC' | 'BOTH' | null;
+          exam_type?: 'JAMB' | null;
         };
       };
     };

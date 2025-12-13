@@ -36,7 +36,7 @@ describe('Question Import Integration - Exam Metadata', () => {
         correct_answer: "C",
         explanation: "Subtract 5 from both sides",
         exam_year: 2022,
-        exam_type: "WAEC",
+        exam_type: "JAMB",
         topic: "Algebra",
         subject: "Mathematics"
       }
@@ -46,7 +46,7 @@ describe('Question Import Integration - Exam Metadata', () => {
     expect(jsonData).toHaveLength(2);
     expect(jsonData[0].exam_type).toBe('JAMB');
     expect(jsonData[0].exam_year).toBe(2023);
-    expect(jsonData[1].exam_type).toBe('WAEC');
+    expect(jsonData[1].exam_type).toBe('JAMB');
     expect(jsonData[1].exam_year).toBe(2022);
   });
 
@@ -90,16 +90,16 @@ describe('Question Import Integration - Exam Metadata', () => {
     expect(question.question_text).toBe('What is 2 + 2?');
   });
 
-  it('should validate that exam_type only accepts JAMB or WAEC', () => {
-    const validTypes = ['JAMB', 'WAEC'];
-    const invalidTypes = ['NECO', 'GCE', 'INVALID'];
+  it('should validate that exam_type only accepts JAMB', () => {
+    const validTypes = ['JAMB'];
+    const invalidTypes = ['NECO', 'GCE', 'WAEC', 'INVALID'];
 
     validTypes.forEach(type => {
-      expect(['JAMB', 'WAEC']).toContain(type);
+      expect(['JAMB']).toContain(type);
     });
 
     invalidTypes.forEach(type => {
-      expect(['JAMB', 'WAEC']).not.toContain(type);
+      expect(['JAMB']).not.toContain(type);
     });
   });
 
@@ -122,20 +122,15 @@ describe('Question Import Integration - Exam Metadata', () => {
   it('should support filtering questions by exam_type', () => {
     const allQuestions = [
       { id: '1', exam_type: 'JAMB', question_text: 'Q1' },
-      { id: '2', exam_type: 'WAEC', question_text: 'Q2' },
+      { id: '2', exam_type: 'JAMB', question_text: 'Q2' },
       { id: '3', exam_type: 'JAMB', question_text: 'Q3' },
       { id: '4', exam_type: null, question_text: 'Q4' },
     ];
 
     // Filter by JAMB
     const jambQuestions = allQuestions.filter(q => q.exam_type === 'JAMB');
-    expect(jambQuestions).toHaveLength(2);
+    expect(jambQuestions).toHaveLength(3);
     expect(jambQuestions.every(q => q.exam_type === 'JAMB')).toBe(true);
-
-    // Filter by WAEC
-    const waecQuestions = allQuestions.filter(q => q.exam_type === 'WAEC');
-    expect(waecQuestions).toHaveLength(1);
-    expect(waecQuestions.every(q => q.exam_type === 'WAEC')).toBe(true);
   });
 
   it('should support filtering questions by exam_year', () => {
@@ -160,20 +155,20 @@ describe('Question Import Integration - Exam Metadata', () => {
   it('should support filtering questions by both exam_type and exam_year', () => {
     const allQuestions = [
       { id: '1', exam_type: 'JAMB', exam_year: 2023, question_text: 'Q1' },
-      { id: '2', exam_type: 'WAEC', exam_year: 2023, question_text: 'Q2' },
+      { id: '2', exam_type: 'JAMB', exam_year: 2023, question_text: 'Q2' },
       { id: '3', exam_type: 'JAMB', exam_year: 2022, question_text: 'Q3' },
-      { id: '4', exam_type: 'WAEC', exam_year: 2022, question_text: 'Q4' },
+      { id: '4', exam_type: 'JAMB', exam_year: 2022, question_text: 'Q4' },
       { id: '5', exam_type: null, exam_year: null, question_text: 'Q5' },
     ];
 
     // Filter by JAMB 2023
     const jamb2023 = allQuestions.filter(q => q.exam_type === 'JAMB' && q.exam_year === 2023);
-    expect(jamb2023).toHaveLength(1);
+    expect(jamb2023).toHaveLength(2);
     expect(jamb2023[0].id).toBe('1');
 
-    // Filter by WAEC 2022
-    const waec2022 = allQuestions.filter(q => q.exam_type === 'WAEC' && q.exam_year === 2022);
-    expect(waec2022).toHaveLength(1);
-    expect(waec2022[0].id).toBe('4');
+    // Filter by JAMB 2022
+    const jamb2022 = allQuestions.filter(q => q.exam_type === 'JAMB' && q.exam_year === 2022);
+    expect(jamb2022).toHaveLength(2);
+    expect(jamb2022[0].id).toBe('3');
   });
 });

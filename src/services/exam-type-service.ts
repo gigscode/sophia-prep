@@ -1,6 +1,6 @@
 /**
  * Exam Type Service
- * Handles operations related to exam types (JAMB, WAEC, etc.)
+ * Handles operations related to exam types (JAMB)
  */
 
 import { supabase } from '../integrations/supabase/client';
