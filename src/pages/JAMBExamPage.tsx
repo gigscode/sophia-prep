@@ -315,9 +315,9 @@ export function JAMBExamPage() {
             )}
           </div>
 
-          {/* Other Subjects */}
+          {/* Other Subjects - Grouped by Category */}
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">
               Select 3 Additional Subjects ({selectedOthers.length}/3)
             </h3>
             
@@ -327,38 +327,200 @@ export function JAMBExamPage() {
                 <p className="text-gray-600 mt-4">Loading subjects...</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {otherSubjects.map((subject) => {
-                  const isSelected = selectedSubjects.includes(subject.id);
-                  const canSelect = selectedOthers.length < 3 || isSelected;
+              <div className="space-y-8">
+                {/* Science Subjects */}
+                {(() => {
+                  const scienceSubjects = otherSubjects.filter(s => s.subject_category === 'SCIENCE');
+                  if (scienceSubjects.length === 0) return null;
                   
                   return (
-                    <button
-                      key={subject.id}
-                      onClick={() => handleSubjectToggle(subject.id)}
-                      disabled={!canSelect}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        isSelected
-                          ? 'border-blue-500 bg-blue-50'
-                          : canSelect
-                          ? 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                          : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        {isSelected && <CheckCircle className="w-5 h-5 text-blue-600" />}
-                        <h4 className={`font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
-                          {subject.name}
-                        </h4>
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        Science Subjects
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {scienceSubjects.map((subject) => {
+                          const isSelected = selectedSubjects.includes(subject.id);
+                          const canSelect = selectedOthers.length < 3 || isSelected;
+                          
+                          return (
+                            <button
+                              key={subject.id}
+                              onClick={() => handleSubjectToggle(subject.id)}
+                              disabled={!canSelect}
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-green-500 bg-green-50'
+                                  : canSelect
+                                  ? 'border-gray-200 hover:border-green-300 hover:bg-green-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {isSelected && <CheckCircle className="w-5 h-5 text-green-600" />}
+                                <h5 className={`font-medium ${isSelected ? 'text-green-900' : 'text-gray-900'}`}>
+                                  {subject.name}
+                                </h5>
+                              </div>
+                              {subject.description && (
+                                <p className={`text-sm ${isSelected ? 'text-green-700' : 'text-gray-600'}`}>
+                                  {subject.description}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
                       </div>
-                      {subject.description && (
-                        <p className={`text-sm ${isSelected ? 'text-blue-700' : 'text-gray-600'}`}>
-                          {subject.description}
-                        </p>
-                      )}
-                    </button>
+                    </div>
                   );
-                })}
+                })()}
+
+                {/* Commercial Subjects */}
+                {(() => {
+                  const commercialSubjects = otherSubjects.filter(s => s.subject_category === 'COMMERCIAL');
+                  if (commercialSubjects.length === 0) return null;
+                  
+                  return (
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        Commercial Subjects
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {commercialSubjects.map((subject) => {
+                          const isSelected = selectedSubjects.includes(subject.id);
+                          const canSelect = selectedOthers.length < 3 || isSelected;
+                          
+                          return (
+                            <button
+                              key={subject.id}
+                              onClick={() => handleSubjectToggle(subject.id)}
+                              disabled={!canSelect}
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-blue-500 bg-blue-50'
+                                  : canSelect
+                                  ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {isSelected && <CheckCircle className="w-5 h-5 text-blue-600" />}
+                                <h5 className={`font-medium ${isSelected ? 'text-blue-900' : 'text-gray-900'}`}>
+                                  {subject.name}
+                                </h5>
+                              </div>
+                              {subject.description && (
+                                <p className={`text-sm ${isSelected ? 'text-blue-700' : 'text-gray-600'}`}>
+                                  {subject.description}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Arts Subjects */}
+                {(() => {
+                  const artsSubjects = otherSubjects.filter(s => s.subject_category === 'ARTS');
+                  if (artsSubjects.length === 0) return null;
+                  
+                  return (
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                        Arts Subjects
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {artsSubjects.map((subject) => {
+                          const isSelected = selectedSubjects.includes(subject.id);
+                          const canSelect = selectedOthers.length < 3 || isSelected;
+                          
+                          return (
+                            <button
+                              key={subject.id}
+                              onClick={() => handleSubjectToggle(subject.id)}
+                              disabled={!canSelect}
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-purple-500 bg-purple-50'
+                                  : canSelect
+                                  ? 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {isSelected && <CheckCircle className="w-5 h-5 text-purple-600" />}
+                                <h5 className={`font-medium ${isSelected ? 'text-purple-900' : 'text-gray-900'}`}>
+                                  {subject.name}
+                                </h5>
+                              </div>
+                              {subject.description && (
+                                <p className={`text-sm ${isSelected ? 'text-purple-700' : 'text-gray-600'}`}>
+                                  {subject.description}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* General/Other Subjects */}
+                {(() => {
+                  const generalSubjects = otherSubjects.filter(s => 
+                    !['SCIENCE', 'COMMERCIAL', 'ARTS'].includes(s.subject_category || '')
+                  );
+                  if (generalSubjects.length === 0) return null;
+                  
+                  return (
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-gray-500 rounded-full"></div>
+                        General Subjects
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {generalSubjects.map((subject) => {
+                          const isSelected = selectedSubjects.includes(subject.id);
+                          const canSelect = selectedOthers.length < 3 || isSelected;
+                          
+                          return (
+                            <button
+                              key={subject.id}
+                              onClick={() => handleSubjectToggle(subject.id)}
+                              disabled={!canSelect}
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-gray-500 bg-gray-50'
+                                  : canSelect
+                                  ? 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {isSelected && <CheckCircle className="w-5 h-5 text-gray-600" />}
+                                <h5 className={`font-medium ${isSelected ? 'text-gray-900' : 'text-gray-900'}`}>
+                                  {subject.name}
+                                </h5>
+                              </div>
+                              {subject.description && (
+                                <p className={`text-sm ${isSelected ? 'text-gray-700' : 'text-gray-600'}`}>
+                                  {subject.description}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>
