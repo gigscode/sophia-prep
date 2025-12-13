@@ -11,7 +11,6 @@ import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
 
 import { LegacyQuizRedirect } from './components/quiz/LegacyQuizRedirect';
-import { NavigationDebug } from './components/NavigationDebug';
 import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator } from './components/routing';
 import { EnhancedAuthProvider } from './components/auth';
 import { routeConfigs } from './config/routes';
@@ -81,7 +80,6 @@ export function App() {
               <PWAInstall />
 
               <ToastContainer />
-              <NavigationDebug />
               <RouteErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>

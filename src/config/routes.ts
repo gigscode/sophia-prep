@@ -39,6 +39,7 @@ const QuizModeSelectorPage = lazy(() => import('../pages/QuizModeSelectorPage').
 const ModeSelectionPage = lazy(() => import('../pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
 const ClassCategorySelectorPage = lazy(() => import('../pages/ClassCategorySelectorPage').then(module => ({ default: module.ClassCategorySelectorPage })));
 const OptimizedQuizPage = lazy(() => import('../pages/OptimizedQuizPage').then(module => ({ default: module.OptimizedQuizPage })));
+const PracticeModePage = lazy(() => import('../pages/PracticeModePage').then(module => ({ default: module.PracticeModePage })));
 const UnifiedQuiz = lazy(() => import('../pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
 const QuizResultsPage = lazy(() => import('../pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('../pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
@@ -137,6 +138,16 @@ export const routeConfigs: RouteConfig[] = [
     showFooter: true,
     title: 'Videos - Sophia Prep',
     description: 'Educational video content'
+  },
+
+  // Practice Mode
+  {
+    path: '/practice',
+    component: PracticeModePage,
+    requireAuth: false,
+    showFooter: false,
+    title: 'Practice Mode - Sophia Prep',
+    description: 'Practice questions by subject and topic'
   },
 
   // Quiz Routes

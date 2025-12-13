@@ -1,18 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, BookOpen, Clock, Calendar, BookMarked } from 'lucide-react';
-import { useNavigation } from '../hooks/useNavigation';
-import type { ExamType, QuizMode, SelectionMethod, QuizConfig } from '../types/quiz-config';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, ArrowRight, BookOpen, Clock, Calendar } from 'lucide-react';
+import type { QuizMode, SelectionMethod, QuizConfig } from '../types/quiz-config';
 import { QuizConfigHelpers } from '../types/quiz-config';
 import { subjectService } from '../services/subject-service';
 import { supabase } from '../integrations/supabase/client';
 import type { Subject } from '../integrations/supabase/types';
 
-type WizardStep = 'exam-type' | 'mode' | 'method' | 'selection';
+type WizardStep = 'mode' | 'method' | 'selection';
 
 interface ModeSelectionState {
   step: WizardStep;
-  examType: ExamType | null;
   mode: QuizMode | null;
   selectionMethod: SelectionMethod | null;
   subjectSlug: string | null;
@@ -20,14 +18,13 @@ interface ModeSelectionState {
 }
 
 export function ModeSelectionPage() {
-  const { navigate } = useNavigation();
+  const navigate = useNavigate();
   const location = useLocation();
   const preselectedMode = (location.state as { preselectedMode?: QuizMode })?.preselectedMode;
   
   const [state, setState] = useState<ModeSelectionState>({
-    step: 'exam-type',
-    examType: null,
-    mode: null,
+    step: preselectedMode ? 'method' : 'mode',
+    mode: preselectedMode || null,
     selectionMethod: null,
     subjectSlug: null,
     year: null,
@@ -38,21 +35,11 @@ export function ModeSelectionPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Handle preselected mode from navigation
-  useEffect(() => {
-    if (preselectedMode && state.step === 'exam-type' && !state.mode) {
-      // Store the preselected mode to apply after exam type selection
-      setState(prev => ({ ...prev, mode: preselectedMode }));
-    }
-  }, [preselectedMode, state.step, state.mode]);
-
   const loadSubjects = useCallback(async () => {
-    if (!state.examType) return;
-    
     setLoading(true);
     setError(null);
     try {
-      const data = await subjectService.getSubjectsByExamType(state.examType);
+      const data = await subjectService.getSubjectsByExamType('JAMB');
       setSubjects(data);
     } catch (err) {
       console.error('Failed to load subjects:', err);
@@ -60,25 +47,21 @@ export function ModeSelectionPage() {
     } finally {
       setLoading(false);
     }
-  }, [state.examType]);
+  }, []);
 
   const loadAvailableYears = useCallback(async () => {
-    if (!state.examType) return;
-    
     setLoading(true);
     setError(null);
     try {
-      // Query distinct exam years for the selected exam type
       const { data, error: queryError } = await supabase
         .from('questions')
         .select('exam_year')
-        .eq('exam_type', state.examType)
+        .eq('exam_type', 'JAMB')
         .not('exam_year', 'is', null)
         .order('exam_year', { ascending: false });
 
       if (queryError) throw queryError;
 
-      // Extract unique years
       const years = Array.from(
         new Set((data || []).map((q: { exam_year: number }) => q.exam_year).filter((y: number | null) => y != null))
       ).sort((a, b) => (b as number) - (a as number));
@@ -90,44 +73,15 @@ export function ModeSelectionPage() {
     } finally {
       setLoading(false);
     }
-  }, [state.examType]);
+  }, []);
 
-  // Load subjects when exam type is selected (for both methods)
+  // Load subjects and years when reaching selection step
   useEffect(() => {
-    if (state.examType && state.step === 'selection') {
+    if (state.step === 'selection') {
       loadSubjects();
-    }
-  }, [state.examType, state.step, loadSubjects]);
-
-  // Load available years when exam type is selected (for both methods)
-  useEffect(() => {
-    if (state.examType && state.step === 'selection') {
       loadAvailableYears();
     }
-  }, [state.examType, state.step, loadAvailableYears]);
-
-  const handleExamTypeSelect = (examType: ExamType) => {
-    // If mode is preselected, skip the mode selection step
-    if (preselectedMode) {
-      setState({
-        step: 'method',
-        examType,
-        mode: preselectedMode,
-        selectionMethod: null,
-        subjectSlug: null,
-        year: null,
-      });
-    } else {
-      setState({
-        step: 'mode',
-        examType,
-        mode: null,
-        selectionMethod: null,
-        subjectSlug: null,
-        year: null,
-      });
-    }
-  };
+  }, [state.step, loadSubjects, loadAvailableYears]);
 
   const handleModeSelect = (mode: QuizMode) => {
     setState(prev => ({
@@ -160,7 +114,7 @@ export function ModeSelectionPage() {
   };
 
   const handleBack = () => {
-    const stepOrder: WizardStep[] = ['exam-type', 'mode', 'method', 'selection'];
+    const stepOrder: WizardStep[] = ['mode', 'method', 'selection'];
     const currentIndex = stepOrder.indexOf(state.step);
     
     if (currentIndex > 0) {
@@ -175,7 +129,7 @@ export function ModeSelectionPage() {
   };
 
   const handleStartQuiz = () => {
-    if (!state.examType || !state.mode || !state.selectionMethod) {
+    if (!state.mode || !state.selectionMethod) {
       setError('Please complete all selections');
       return;
     }
@@ -192,7 +146,7 @@ export function ModeSelectionPage() {
 
     try {
       const config: QuizConfig = {
-        examType: state.examType,
+        examType: 'JAMB',
         mode: state.mode,
         selectionMethod: state.selectionMethod,
         subjectSlug: state.subjectSlug || undefined,
@@ -205,8 +159,6 @@ export function ModeSelectionPage() {
         return;
       }
 
-      // Navigate to unified quiz with config
-      // Store in sessionStorage and navigate
       sessionStorage.setItem('quizConfig', JSON.stringify(config));
       navigate('/quiz/unified');
     } catch (err) {
@@ -218,41 +170,34 @@ export function ModeSelectionPage() {
   const canProceed = () => {
     if (state.step === 'selection') {
       if (state.selectionMethod === 'subject') {
-        // Subject is required, year is optional
         return state.subjectSlug !== null && state.subjectSlug !== '';
       }
       if (state.selectionMethod === 'year') {
-        // Year is required, subject is optional
         return state.year !== null;
       }
     }
     return false;
   };
 
+  const getStepNumber = () => {
+    const steps: WizardStep[] = ['mode', 'method', 'selection'];
+    return steps.indexOf(state.step) + 1;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        {/* Skip link */}
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded"
-        >
-          Skip to main content
-        </a>
-
         {/* Header */}
         <div className="mb-8">
           <button
             onClick={handleBack}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-4"
-            aria-label="Go back to previous step"
           >
-            <ArrowLeft className="w-5 h-5" aria-hidden="true" />
+            <ArrowLeft className="w-5 h-5" />
             Back
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Start a Quiz</h1>
-          <p className="text-gray-600 mt-2" role="status" aria-live="polite">
-            {state.step === 'exam-type' && 'Select your exam type'}
+          <h1 className="text-3xl font-bold text-gray-900">JAMB Quiz</h1>
+          <p className="text-gray-600 mt-2">
             {state.step === 'mode' && 'Choose your quiz mode'}
             {state.step === 'method' && 'How would you like to practice?'}
             {state.step === 'selection' && state.selectionMethod === 'subject' && 'Select a subject'}
@@ -261,17 +206,15 @@ export function ModeSelectionPage() {
         </div>
 
         {/* Progress Indicator */}
-        <nav className="mb-8" aria-label="Quiz setup progress">
-          <ol className="flex items-center justify-between">
-            {['exam-type', 'mode', 'method', 'selection'].map((step, index) => {
-              const stepOrder: WizardStep[] = ['exam-type', 'mode', 'method', 'selection'];
-              const stepLabels = ['Exam Type', 'Quiz Mode', 'Practice Method', 'Selection'];
-              const currentIndex = stepOrder.indexOf(state.step);
-              const isActive = index === currentIndex;
-              const isCompleted = index < currentIndex;
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            {['Quiz Mode', 'Practice Method', 'Selection'].map((label, index) => {
+              const stepNum = index + 1;
+              const isActive = stepNum === getStepNumber();
+              const isCompleted = stepNum < getStepNumber();
 
               return (
-                <li key={step} className="flex items-center flex-1">
+                <div key={label} className="flex items-center flex-1">
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
                       isActive
@@ -280,24 +223,21 @@ export function ModeSelectionPage() {
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-300 text-gray-600'
                     }`}
-                    aria-label={`Step ${index + 1}: ${stepLabels[index]}`}
-                    aria-current={isActive ? 'step' : undefined}
                   >
-                    {index + 1}
+                    {stepNum}
                   </div>
-                  {index < 3 && (
+                  {index < 2 && (
                     <div
                       className={`flex-1 h-1 mx-2 ${
                         isCompleted ? 'bg-green-500' : 'bg-gray-300'
                       }`}
-                      aria-hidden="true"
                     />
                   )}
-                </li>
+                </div>
               );
             })}
-          </ol>
-        </nav>
+          </div>
+        </div>
 
         {/* Error Message */}
         {error && (
@@ -307,32 +247,8 @@ export function ModeSelectionPage() {
         )}
 
         {/* Step Content */}
-        <main id="main-content" className="bg-white rounded-lg shadow-lg p-8" tabIndex={-1}>
-          {/* Step 1: Exam Type Selection */}
-          {state.step === 'exam-type' && (
-            <div className="space-y-4">
-              <h2 className="text-2xl font-semibold mb-6">Select Exam Type</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4" role="group" aria-label="Exam type options">
-                <button
-                  onClick={() => handleExamTypeSelect('JAMB')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Select JAMB examination"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <BookMarked className="w-8 h-8 text-blue-600" aria-hidden="true" />
-                    <h3 className="text-xl font-semibold">JAMB</h3>
-                  </div>
-                  <p className="text-gray-600">
-                    Joint Admissions and Matriculation Board examination
-                  </p>
-                </button>
-
-
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Mode Selection */}
+        <main className="bg-white rounded-lg shadow-lg p-8">
+          {/* Step 1: Mode Selection */}
           {state.step === 'mode' && (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold mb-6">Choose Quiz Mode</h2>
@@ -352,7 +268,7 @@ export function ModeSelectionPage() {
 
                 <button
                   onClick={() => handleModeSelect('exam')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-orange-500 hover:bg-orange-50 transition-all text-left"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <Clock className="w-8 h-8 text-orange-600" />
@@ -366,14 +282,14 @@ export function ModeSelectionPage() {
             </div>
           )}
 
-          {/* Step 3: Method Selection */}
+          {/* Step 2: Method Selection */}
           {state.step === 'method' && (
             <div className="space-y-4">
               <h2 className="text-2xl font-semibold mb-6">Select Practice Method</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={() => handleMethodSelect('subject')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition-all text-left"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <BookOpen className="w-8 h-8 text-purple-600" />
@@ -386,7 +302,7 @@ export function ModeSelectionPage() {
 
                 <button
                   onClick={() => handleMethodSelect('year')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left"
+                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-all text-left"
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <Calendar className="w-8 h-8 text-indigo-600" />
@@ -400,11 +316,11 @@ export function ModeSelectionPage() {
             </div>
           )}
 
-          {/* Step 4: Specific Selection with Dropdowns */}
+          {/* Step 3: Specific Selection */}
           {state.step === 'selection' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold mb-6">
-                {state.selectionMethod === 'subject' ? 'Select Subject and Year' : 'Select Year and Subject'}
+                {state.selectionMethod === 'subject' ? 'Select Subject' : 'Select Year'}
               </h2>
               
               {loading ? (
@@ -414,7 +330,7 @@ export function ModeSelectionPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Subject Dropdown */}
+                  {/* Subject Selection */}
                   {state.selectionMethod === 'subject' && (
                     <div>
                       <label htmlFor="subject-select" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -422,7 +338,7 @@ export function ModeSelectionPage() {
                       </label>
                       {subjects.length === 0 ? (
                         <div className="text-center py-4 text-gray-600 bg-gray-50 rounded-lg">
-                          No subjects available for {state.examType}
+                          No subjects available
                         </div>
                       ) : (
                         <select
@@ -439,10 +355,33 @@ export function ModeSelectionPage() {
                           ))}
                         </select>
                       )}
+
+                      {/* Optional Year Filter */}
+                      {state.subjectSlug && (
+                        <div className="mt-4">
+                          <label htmlFor="year-filter" className="block text-sm font-semibold text-gray-700 mb-2">
+                            Filter by Year (Optional)
+                          </label>
+                          <select
+                            id="year-filter"
+                            value={state.year || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setState(prev => ({ ...prev, year: val ? Number(val) : null }));
+                            }}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
+                          >
+                            <option value="">All Years</option>
+                            {availableYears.map((year) => (
+                              <option key={year} value={year}>{year}</option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {/* Year Dropdown */}
+                  {/* Year Selection */}
                   {state.selectionMethod === 'year' && (
                     <div>
                       <label htmlFor="year-select" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -450,7 +389,7 @@ export function ModeSelectionPage() {
                       </label>
                       {availableYears.length === 0 ? (
                         <div className="text-center py-4 text-gray-600 bg-gray-50 rounded-lg">
-                          No past exam papers available for {state.examType}
+                          No past exam papers available
                         </div>
                       ) : (
                         <select
@@ -461,67 +400,35 @@ export function ModeSelectionPage() {
                         >
                           <option value="">Select a year</option>
                           {availableYears.map((year) => (
-                            <option key={year} value={year}>
-                              {year}
-                            </option>
+                            <option key={year} value={year}>{year}</option>
                           ))}
                         </select>
                       )}
-                    </div>
-                  )}
 
-                  {/* Optional: Add year filter for subject selection */}
-                  {state.selectionMethod === 'subject' && state.subjectSlug && (
-                    <div>
-                      <label htmlFor="year-filter" className="block text-sm font-semibold text-gray-700 mb-2">
-                        Filter by Year (Optional)
-                      </label>
-                      <select
-                        id="year-filter"
-                        value={state.year || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setState(prev => ({ ...prev, year: val ? Number(val) : null }));
-                        }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
-                      >
-                        <option value="">All Years</option>
-                        <option value="2024">2024</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                        <option value="2020">2020</option>
-                        <option value="2019">2019</option>
-                        <option value="2018">2018</option>
-                        <option value="2017">2017</option>
-                        <option value="2016">2016</option>
-                        <option value="2015">2015</option>
-                      </select>
-                    </div>
-                  )}
-
-                  {/* Optional: Add subject filter for year selection */}
-                  {state.selectionMethod === 'year' && state.year && subjects.length > 0 && (
-                    <div>
-                      <label htmlFor="subject-filter" className="block text-sm font-semibold text-gray-700 mb-2">
-                        Filter by Subject (Optional)
-                      </label>
-                      <select
-                        id="subject-filter"
-                        value={state.subjectSlug || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setState(prev => ({ ...prev, subjectSlug: val || null }));
-                        }}
-                        className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
-                      >
-                        <option value="">All Subjects</option>
-                        {subjects.map((subject) => (
-                          <option key={subject.id} value={subject.slug}>
-                            {subject.name}
-                          </option>
-                        ))}
-                      </select>
+                      {/* Optional Subject Filter */}
+                      {state.year && subjects.length > 0 && (
+                        <div className="mt-4">
+                          <label htmlFor="subject-filter" className="block text-sm font-semibold text-gray-700 mb-2">
+                            Filter by Subject (Optional)
+                          </label>
+                          <select
+                            id="subject-filter"
+                            value={state.subjectSlug || ''}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setState(prev => ({ ...prev, subjectSlug: val || null }));
+                            }}
+                            className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg font-medium transition-all focus:outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-200"
+                          >
+                            <option value="">All Subjects</option>
+                            {subjects.map((subject) => (
+                              <option key={subject.id} value={subject.slug}>
+                                {subject.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -529,7 +436,7 @@ export function ModeSelectionPage() {
             </div>
           )}
 
-          {/* Action Buttons */}
+          {/* Start Quiz Button */}
           {state.step === 'selection' && (
             <div className="mt-8 flex justify-end">
               <button
@@ -549,15 +456,11 @@ export function ModeSelectionPage() {
         </main>
 
         {/* Summary Panel */}
-        {(state.examType || state.mode || state.selectionMethod) && (
+        {(state.mode || state.selectionMethod) && (
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <h3 className="font-semibold text-blue-900 mb-2">Your Selection</h3>
             <div className="space-y-1 text-sm text-blue-800">
-              {state.examType && (
-                <p>
-                  <span className="font-medium">Exam Type:</span> {state.examType}
-                </p>
-              )}
+              <p><span className="font-medium">Exam:</span> JAMB</p>
               {state.mode && (
                 <p>
                   <span className="font-medium">Mode:</span>{' '}

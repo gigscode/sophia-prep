@@ -31,11 +31,11 @@ export function QuizModesSection({
   const navigate = useNavigate();
 
   const handlePracticeModeClick = () => {
-    navigate('/quiz/mode-selection', { state: { preselectedMode: 'practice' } });
+    navigate('/practice');
   };
 
   const handleCBTQuizClick = () => {
-    navigate('/quiz/mode-selection', { state: { preselectedMode: 'exam' } });
+    navigate('/quiz/optimized');
   };
 
   return (

@@ -1,7 +1,6 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Home, BookOpen, ClipboardList, Layers, MoreHorizontal } from 'lucide-react';
 import { generateAriaLabel } from '../../utils/accessibility';
-import { useNavigation } from '../../hooks/useNavigation';
 
 /**
  * BottomNavigation Component
@@ -29,11 +28,11 @@ const navItems: NavItem[] = [
     description: 'Go to home page with quiz modes and quick links'
   },
   {
-    id: 'subjects',
-    label: 'Subjects',
-    icon: Layers,
-    route: '/subjects',
-    description: 'Browse all available subjects'
+    id: 'practice',
+    label: 'Practice',
+    icon: BookOpen,
+    route: '/practice',
+    description: 'Practice questions by subject and topic'
   },
   {
     id: 'quiz',
@@ -45,7 +44,7 @@ const navItems: NavItem[] = [
   {
     id: 'study',
     label: 'Study',
-    icon: BookOpen,
+    icon: Layers,
     route: '/study',
     description: 'Access study materials and learning resources'
   },
@@ -60,13 +59,18 @@ const navItems: NavItem[] = [
 
 export function BottomNavigation() {
   const location = useLocation();
-  const { navigate, isNavigating } = useNavigation();
+  const navigate = useNavigate();
 
   const isActive = (route: string): boolean => {
     if (route === '/') {
       return location.pathname === '/';
     }
     return location.pathname.startsWith(route);
+  };
+
+  const handleNavigation = (route: string) => {
+    // Direct navigation without delays
+    navigate(route);
   };
 
   return (
@@ -87,8 +91,7 @@ export function BottomNavigation() {
           return (
             <button
               key={item.id}
-              onClick={() => navigate(item.route)}
-              disabled={isNavigating}
+              onClick={() => handleNavigation(item.route)}
               className={`
                 touch-target-interactive
                 flex flex-col items-center justify-center flex-1 h-full
@@ -96,7 +99,6 @@ export function BottomNavigation() {
                 focus-visible-ring
                 interactive-element
                 ${active ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}
-                ${isNavigating ? 'opacity-50 cursor-not-allowed' : ''}
               `}
               aria-label={generateAriaLabel(item.label, item.description)}
               aria-current={active ? 'page' : undefined}
