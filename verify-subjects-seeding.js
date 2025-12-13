@@ -1,7 +1,7 @@
 /**
  * Sophia Prep - Subject Seeding Verification Script
  * 
- * This script verifies that all 21 JAMB/WAEC subjects have been seeded
+ * This script verifies that all JAMB subjects have been seeded
  * into the database.
  * 
  * Requirements: 1.1, 1.2, 1.3
@@ -33,24 +33,22 @@ const expectedSubjects = [
   { name: 'Biology', slug: 'biology', exam_type: 'BOTH', subject_category: 'SCIENCE', is_mandatory: false },
   { name: 'Further Mathematics', slug: 'further-mathematics', exam_type: 'BOTH', subject_category: 'SCIENCE', is_mandatory: false },
   { name: 'Geography', slug: 'geography', exam_type: 'BOTH', subject_category: 'GENERAL', is_mandatory: false },
-  { name: 'Food & Nutrition', slug: 'food-nutrition', exam_type: 'WAEC', subject_category: 'SCIENCE', is_mandatory: false },
+
   { name: 'Commerce', slug: 'commerce', exam_type: 'BOTH', subject_category: 'COMMERCIAL', is_mandatory: false },
   { name: 'Accounting', slug: 'accounting', exam_type: 'BOTH', subject_category: 'COMMERCIAL', is_mandatory: false },
   { name: 'Economics', slug: 'economics', exam_type: 'BOTH', subject_category: 'COMMERCIAL', is_mandatory: false },
-  { name: 'Marketing', slug: 'marketing', exam_type: 'WAEC', subject_category: 'COMMERCIAL', is_mandatory: false },
-  { name: 'Civic Education', slug: 'civic-education', exam_type: 'WAEC', subject_category: 'GENERAL', is_mandatory: false },
+
   { name: 'Literature in English', slug: 'literature-in-english', exam_type: 'BOTH', subject_category: 'ARTS', is_mandatory: false },
   { name: 'Government', slug: 'government', exam_type: 'BOTH', subject_category: 'ARTS', is_mandatory: false },
   { name: 'CRS/IRS', slug: 'crs-irs', exam_type: 'BOTH', subject_category: 'ARTS', is_mandatory: false },
-  { name: 'Music', slug: 'music', exam_type: 'WAEC', subject_category: 'ARTS', is_mandatory: false },
-  { name: 'History', slug: 'history', exam_type: 'WAEC', subject_category: 'ARTS', is_mandatory: false },
+
   { name: 'Yoruba', slug: 'yoruba', exam_type: 'BOTH', subject_category: 'LANGUAGE', is_mandatory: false },
   { name: 'Hausa', slug: 'hausa', exam_type: 'BOTH', subject_category: 'LANGUAGE', is_mandatory: false },
   { name: 'Igbo', slug: 'igbo', exam_type: 'BOTH', subject_category: 'LANGUAGE', is_mandatory: false },
 ];
 
 async function verifySubjects() {
-  console.log('🔍 Verifying JAMB/WAEC subjects seeding...\n');
+  console.log('🔍 Verifying JAMB subjects seeding...\n');
 
   try {
     // Query all subjects
@@ -75,8 +73,8 @@ async function verifySubjects() {
     console.log(`✅ Found ${subjects.length} subjects in database\n`);
 
     // Verify count
-    if (subjects.length !== 21) {
-      console.warn(`⚠️  Warning: Expected 21 subjects, found ${subjects.length}`);
+    if (subjects.length !== 16) {
+      console.warn(`⚠️  Warning: Expected 16 subjects, found ${subjects.length}`);
     }
 
     // Verify each subject category
@@ -90,7 +88,6 @@ async function verifySubjects() {
 
     const examTypeCounts = {
       JAMB: 0,
-      WAEC: 0,
       BOTH: 0,
     };
 
@@ -107,8 +104,8 @@ async function verifySubjects() {
     console.log(`   LANGUAGE: ${categoryCounts.LANGUAGE} subjects`);
 
     console.log('\n📊 Exam Types:');
-    console.log(`   BOTH (JAMB & WAEC): ${examTypeCounts.BOTH} subjects`);
-    console.log(`   WAEC only: ${examTypeCounts.WAEC} subjects`);
+    console.log(`   JAMB: ${examTypeCounts.JAMB} subjects`);
+    console.log(`   BOTH (JAMB compatible): ${examTypeCounts.BOTH} subjects`);
 
     // Verify mandatory subject
     const mandatorySubjects = subjects.filter(s => s.is_mandatory);
@@ -137,8 +134,8 @@ async function verifySubjects() {
       console.log(`   ${mandatoryFlag} ${index + 1}. ${subject.name} (${subject.exam_type}, ${subject.subject_category})`);
     });
 
-    console.log('\n✅ All 21 JAMB/WAEC subjects have been successfully seeded!');
-    console.log('✅ Task 1.6 Complete: Seed JAMB/WAEC subjects data');
+    console.log('\n✅ All JAMB subjects have been successfully seeded!');
+    console.log('✅ Task 1.6 Complete: Seed JAMB subjects data');
     
     return true;
 

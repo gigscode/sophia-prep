@@ -327,19 +327,7 @@ export function ModeSelectionPage() {
                   </p>
                 </button>
 
-                <button
-                  onClick={() => handleExamTypeSelect('WAEC')}
-                  className="p-6 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-left focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                  aria-label="Select WAEC examination"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <BookMarked className="w-8 h-8 text-green-600" aria-hidden="true" />
-                    <h3 className="text-xl font-semibold">WAEC</h3>
-                  </div>
-                  <p className="text-gray-600">
-                    West African Examinations Council examination
-                  </p>
-                </button>
+
               </div>
             </div>
           )}

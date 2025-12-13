@@ -23,7 +23,7 @@ describe('QuizConfigHelpers', () => {
 
     it('should correctly identify exam mode', () => {
       const config: QuizConfig = {
-        examType: 'WAEC',
+        examType: 'JAMB',
         mode: 'exam',
         selectionMethod: 'year',
         year: 2023,
@@ -49,7 +49,7 @@ describe('QuizConfigHelpers', () => {
 
     it('should correctly identify year-based selection', () => {
       const config: QuizConfig = {
-        examType: 'WAEC',
+        examType: 'JAMB',
         mode: 'exam',
         selectionMethod: 'year',
         year: 2022,
@@ -68,7 +68,7 @@ describe('QuizConfigHelpers', () => {
 
     it('should return correct exam type labels', () => {
       expect(QuizConfigHelpers.getExamTypeLabel('JAMB')).toBe('JAMB');
-      expect(QuizConfigHelpers.getExamTypeLabel('WAEC')).toBe('WAEC');
+
     });
 
     it('should generate correct quiz mode identifiers', () => {
@@ -81,7 +81,7 @@ describe('QuizConfigHelpers', () => {
       expect(QuizConfigHelpers.getQuizModeIdentifier(practiceSubject)).toBe('practice-subject');
 
       const examYear: QuizConfig = {
-        examType: 'WAEC',
+        examType: 'JAMB',
         mode: 'exam',
         selectionMethod: 'year',
         year: 2023,
@@ -113,7 +113,7 @@ describe('QuizConfigHelpers', () => {
 
     it('should create correct initial state for exam mode', () => {
       const config: QuizConfig = {
-        examType: 'WAEC',
+        examType: 'JAMB',
         mode: 'exam',
         selectionMethod: 'year',
         year: 2023,
@@ -141,7 +141,7 @@ describe('QuizConfigHelpers', () => {
           subjectSlug: 'mathematics',
         },
         {
-          examType: 'WAEC',
+          examType: 'JAMB',
           mode: 'exam',
           selectionMethod: 'year',
           year: 2023,
@@ -194,7 +194,7 @@ describe('QuizConfigHelpers', () => {
 
     it('should reject year-based config without year', () => {
       const config: QuizConfig = {
-        examType: 'WAEC',
+        examType: 'JAMB',
         mode: 'exam',
         selectionMethod: 'year',
       };
@@ -213,7 +213,7 @@ describe('QuizConfigHelpers', () => {
       expect(QuizConfigHelpers.validateConfig(configTooOld)).toContain('Invalid year');
 
       const configTooNew: QuizConfig = {
-        examType: 'WAEC',
+        examType: 'JAMB',
         mode: 'exam',
         selectionMethod: 'year',
         year: 2099,
@@ -236,11 +236,11 @@ describe('QuizConfigHelpers', () => {
     });
 
     it('should create exam mode configurations', () => {
-      const config = QuizConfigHelpers.createExamConfig('WAEC', 'year', {
+      const config = QuizConfigHelpers.createExamConfig('JAMB', 'year', {
         year: 2023,
       });
 
-      expect(config.examType).toBe('WAEC');
+      expect(config.examType).toBe('JAMB');
       expect(config.mode).toBe('exam');
       expect(config.selectionMethod).toBe('year');
       expect(config.year).toBe(2023);

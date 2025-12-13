@@ -41,7 +41,7 @@ supabase/
 
 ```bash
 # From project root
-node scripts/import-jamb-waec-questions.js
+node scripts/import-jamb-questions.js
 ```
 
 ---
@@ -51,7 +51,7 @@ node scripts/import-jamb-waec-questions.js
 ### Tables (15 total)
 
 **Core Content (3 tables)**
-- `subjects` - 21 JAMB/WAEC subjects
+- `subjects` - JAMB subjects
 - `topics` - Topics within subjects
 - `questions` - Quiz questions with options
 

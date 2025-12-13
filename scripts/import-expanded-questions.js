@@ -116,7 +116,7 @@ async function importQuestions(subjectKey, questions) {
           option_d: q.option_d,
           correct_answer: q.correct_answer,
           explanation: q.explanation,
-          difficulty_level: q.difficulty_level,
+
           exam_year: q.exam_year,
           exam_type: q.exam_type,
           is_active: true

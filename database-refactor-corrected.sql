@@ -8,8 +8,8 @@
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS exam_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL UNIQUE, -- 'JAMB', 'WAEC', 'NECO', etc.
-  slug TEXT NOT NULL UNIQUE, -- 'jamb', 'waec', 'neco'
+  name TEXT NOT NULL UNIQUE, -- 'JAMB', 'NECO', etc.
+  slug TEXT NOT NULL UNIQUE, -- 'jamb', 'neco'
   description TEXT,
   full_name TEXT, -- 'Joint Admissions and Matriculation Board'
   duration_minutes INTEGER, -- Standard exam duration
@@ -124,7 +124,6 @@ CREATE INDEX idx_questions_new_active ON questions_new(is_active);
 -- Insert exam types
 INSERT INTO exam_types (name, slug, description, full_name, duration_minutes, total_questions, passing_score) VALUES
 ('JAMB', 'jamb', 'Joint Admissions and Matriculation Board examination', 'Joint Admissions and Matriculation Board', 180, 180, 180),
-('WAEC', 'waec', 'West African Examinations Council examination', 'West African Examinations Council', 180, 50, 50),
 ('NECO', 'neco', 'National Examinations Council examination', 'National Examinations Council', 180, 50, 50);
 
 -- Insert subject categories

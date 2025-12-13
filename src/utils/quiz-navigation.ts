@@ -42,7 +42,7 @@ export function parseLegacyQuizParams(searchParams: URLSearchParams): LegacyQuiz
     : undefined;
     
   // Parse type, treating "ALL" as undefined and validating against ExamType
-  const type = typeParam && typeParam !== 'ALL' && (typeParam === 'JAMB' || typeParam === 'WAEC')
+  const type = typeParam && typeParam !== 'ALL' && (typeParam === 'JAMB')
     ? typeParam as ExamType
     : undefined;
   

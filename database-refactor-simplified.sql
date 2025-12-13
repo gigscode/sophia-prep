@@ -8,8 +8,8 @@
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS exam_types (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL UNIQUE, -- 'JAMB', 'WAEC', 'NECO'
-  slug TEXT NOT NULL UNIQUE, -- 'jamb', 'waec', 'neco'
+  name TEXT NOT NULL UNIQUE, -- 'JAMB', 'NECO'
+  slug TEXT NOT NULL UNIQUE, -- 'jamb', 'neco'
   description TEXT,
   full_name TEXT, -- 'Joint Admissions and Matriculation Board'
   duration_minutes INTEGER, -- Standard exam duration
@@ -167,8 +167,7 @@ CREATE INDEX idx_quiz_attempts_new_mode ON quiz_attempts_new(quiz_mode);
 
 -- Insert exam types
 INSERT INTO exam_types (name, slug, description, full_name, duration_minutes, total_questions, passing_score) VALUES
-('JAMB', 'jamb', 'Joint Admissions and Matriculation Board examination - English (mandatory) + 3 other subjects = 4 total', 'Joint Admissions and Matriculation Board', 180, 180, 180),
-('WAEC', 'waec', 'West African Examinations Council examination', 'West African Examinations Council', 180, 50, 50);
+('JAMB', 'jamb', 'Joint Admissions and Matriculation Board examination - English (mandatory) + 3 other subjects = 4 total', 'Joint Admissions and Matriculation Board', 180, 180, 180);
 
 -- Insert subject categories
 INSERT INTO subject_categories (name, slug, description, color_theme, icon) VALUES
@@ -387,7 +386,6 @@ SELECT
   5, -- Minimum 5 questions
   CASE 
     WHEN et.slug = 'jamb' THEN 180 -- JAMB max 180 (45 questions per subject × 4 subjects)
-    WHEN et.slug = 'waec' THEN 50  -- WAEC max 50
     ELSE 100 -- Default max
   END,
   1.0, -- 1 minute per question
@@ -522,9 +520,9 @@ $$ LANGUAGE plpgsql;
 
 -- Example 4: Student requests too many questions (will be capped to max)
 -- SELECT * FROM get_cbt_exam_questions_with_validation(
---   'waec',
+--   'jamb',
 --   ARRAY['english-uuid', 'math-uuid']::UUID[],
---   100  -- Requested 100, but WAEC max is 50, so will get 50
+--   100  -- Requested 100, but JAMB max is 180, so will get 100
 -- );
 
 -- ============================================================================

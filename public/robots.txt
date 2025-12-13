@@ -1,4 +1,4 @@
-# Sophia Prep - JAMB/WAEC Exam Preparation Platform
+# Sophia Prep - JAMB Exam Preparation Platform
 # https://sophiaprep.app
 
 User-agent: *

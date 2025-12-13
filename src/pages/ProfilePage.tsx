@@ -205,7 +205,7 @@ export function ProfilePage() {
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
                   <div className="p-3 bg-white rounded-lg">
                     <p className="text-sm font-semibold text-gray-900">✓ All Subjects</p>
-                    <p className="text-xs text-gray-600">Access to JAMB & WAEC subjects</p>
+                    <p className="text-xs text-gray-600">Access to JAMB subjects</p>
                   </div>
                   <div className="p-3 bg-white rounded-lg">
                     <p className="text-sm font-semibold text-gray-900">✓ Unlimited Quizzes</p>

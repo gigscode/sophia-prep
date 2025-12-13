@@ -72,7 +72,7 @@ describe('Route Validation', () => {
       expect(validateClassCategory('primary')).toBe(true);
       expect(validateClassCategory('secondary')).toBe(true);
       expect(validateClassCategory('jamb')).toBe(true);
-      expect(validateClassCategory('waec')).toBe(true);
+
       expect(validateClassCategory('PRIMARY')).toBe(true); // case insensitive
     });
 

@@ -40,7 +40,7 @@ const supabase = USE_SUPABASE ? createClient(SUPABASE_URL, SUPABASE_KEY, { auth:
 
 function buildLocalRows() {
   const extra = loadJSON(path.join('data', 'extra-quizzes.json')) || [];
-  const jamb = loadJSON(path.join('data', 'jamb-waec-questions.json')) || {};
+  const jamb = loadJSON(path.join('data', 'jamb-questions.json')) || {};
   const rows = [];
   Object.keys(jamb).forEach(subjectKey => {
     const arr = jamb[subjectKey];
@@ -149,7 +149,7 @@ function normalizeJambEntry(e) {
 
 app.get('/api/preview-import', (req, res) => {
   const extra = loadJSON(path.join('data', 'extra-quizzes.json')) || [];
-  const jamb = loadJSON(path.join('data', 'jamb-waec-questions.json')) || {};
+  const jamb = loadJSON(path.join('data', 'jamb-questions.json')) || {};
   const rows = [];
   Object.keys(jamb).forEach(subjectKey => {
     const arr = jamb[subjectKey];
@@ -260,7 +260,7 @@ app.post('/api/import-quizzes', async (req, res) => {
   }
 
   try {
-    const jamb = loadJSON(path.join('data', 'jamb-waec-questions.json')) || {};
+    const jamb = loadJSON(path.join('data', 'jamb-questions.json')) || {};
     const extra = loadJSON(path.join('data', 'extra-quizzes.json')) || [];
     const rows = [];
     Object.keys(jamb).forEach(subjectKey => {

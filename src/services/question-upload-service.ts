@@ -8,7 +8,7 @@ import type {
   QuestionRecord, 
   ExamTypeRecord, 
   SubjectRecord,
-  DifficultyLevel 
+
 } from '../types/database';
 
 export interface QuestionUploadData {
@@ -21,7 +21,7 @@ export interface QuestionUploadData {
   optionD: string;
   correctAnswer: 'A' | 'B' | 'C' | 'D';
   explanation?: string;
-  difficultyLevel?: DifficultyLevel;
+
   examYear?: number;
   questionNumber?: number;
 }
@@ -134,9 +134,7 @@ export class QuestionUploadService {
       errors.push('Correct answer must be A, B, C, or D');
     }
 
-    if (question.difficultyLevel && !['EASY', 'MEDIUM', 'HARD'].includes(question.difficultyLevel)) {
-      errors.push('Difficulty level must be EASY, MEDIUM, or HARD');
-    }
+
 
     if (question.examYear && (question.examYear < 2000 || question.examYear > new Date().getFullYear())) {
       errors.push('Exam year must be between 2000 and current year');
@@ -194,7 +192,7 @@ export class QuestionUploadService {
           option_d: questionData.optionD.trim(),
           correct_answer: questionData.correctAnswer,
           explanation: questionData.explanation?.trim() || null,
-          difficulty_level: questionData.difficultyLevel || 'MEDIUM',
+
           exam_year: questionData.examYear || null,
           question_number: questionData.questionNumber || null,
           is_active: true
@@ -294,7 +292,7 @@ export class QuestionUploadService {
           optionD: item.option_d || item.optionD || item.d || item.D || '',
           correctAnswer: (item.correct_answer || item.correctAnswer || item.correct || item.answer || '').toUpperCase(),
           explanation: item.explanation || item.explain || null,
-          difficultyLevel: (item.difficulty_level || item.difficultyLevel || item.difficulty || 'MEDIUM').toUpperCase(),
+
           examYear: item.exam_year || item.examYear || item.year || null,
           questionNumber: item.question_number || item.questionNumber || item.number || null
         };

@@ -8,7 +8,7 @@ import type {
   QuestionRecord, 
   PracticeQuestionResponse, 
   CBTQuestionResponse,
-  DifficultyLevel 
+
 } from '../types/database';
 
 export class UpdatedQuestionService {
@@ -19,7 +19,6 @@ export class UpdatedQuestionService {
     subjectIds: string[],
     options?: {
       limit?: number;
-      difficulty?: DifficultyLevel;
     }
   ): Promise<PracticeQuestionResponse[]> {
     try {
@@ -27,7 +26,7 @@ export class UpdatedQuestionService {
         .rpc('get_practice_questions', {
           p_subject_ids: subjectIds,
           p_limit: options?.limit || 20,
-          p_difficulty: options?.difficulty || null
+          p_difficulty: null
         });
 
       if (error) {
@@ -164,7 +163,6 @@ export class UpdatedQuestionService {
     filters?: {
       examTypeId?: string;
       examYear?: number;
-      difficulty?: DifficultyLevel;
       limit?: number;
     }
   ): Promise<QuestionRecord[]> {
@@ -181,9 +179,6 @@ export class UpdatedQuestionService {
       }
       if (filters?.examYear) {
         query = query.eq('exam_year', filters.examYear);
-      }
-      if (filters?.difficulty) {
-        query = query.eq('difficulty_level', filters.difficulty);
       }
       if (filters?.limit) {
         query = query.limit(filters.limit);
@@ -211,7 +206,6 @@ export class UpdatedQuestionService {
     filters?: {
       examTypeId?: string;
       examYear?: number;
-      difficulty?: DifficultyLevel;
       questionsPerSubject?: number;
     }
   ): Promise<QuestionRecord[]> {
@@ -230,9 +224,6 @@ export class UpdatedQuestionService {
       }
       if (filters?.examYear) {
         query = query.eq('exam_year', filters.examYear);
-      }
-      if (filters?.difficulty) {
-        query = query.eq('difficulty_level', filters.difficulty);
       }
 
       const { data, error } = await query;

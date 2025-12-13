@@ -11,7 +11,7 @@ export class QuestionService {
     subjectId: string,
     filters?: {
       exam_year?: number;
-      exam_type?: 'JAMB' | 'WAEC';
+      exam_type?: 'JAMB';
       limit?: number;
     }
   ): Promise<Question[]> {
@@ -45,7 +45,7 @@ export class QuestionService {
    * Maintains same method signature for backward compatibility
    * Requirements: 1.1, 1.2, 3.1, 3.2, 3.3
    */
-  async getQuestionsBySubjectSlug(slug: string, filters?: { exam_year?: number; exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<Question[]> {
+  async getQuestionsBySubjectSlug(slug: string, filters?: { exam_year?: number; exam_type?: 'JAMB'; limit?: number }): Promise<Question[]> {
     // First, get the subject by slug
     const { data: subject, error: subjectError } = await supabase
       .from('subjects')
@@ -101,7 +101,7 @@ export class QuestionService {
    * Get questions by year with optional exam_type filter
    * Requirements: 4.2
    */
-  async getQuestionsByYear(year: number, filters?: { exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<Question[]> {
+  async getQuestionsByYear(year: number, filters?: { exam_type?: 'JAMB'; limit?: number }): Promise<Question[]> {
     let q = supabase
       .from('questions')
       .select('*')
@@ -125,7 +125,7 @@ export class QuestionService {
     subjectSlugs: string[],
     filters?: {
       exam_year?: number;
-      exam_type?: 'JAMB' | 'WAEC';
+      exam_type?: 'JAMB';
       questionsPerSubject?: number;
     }
   ): Promise<(Question & { subject_slug?: string; subject_name?: string })[]> {
@@ -224,7 +224,7 @@ export class QuestionService {
    * Requirements: 3.3, 7.3
    */
   async getQuestionsByFilters(filters: {
-    exam_type?: 'JAMB' | 'WAEC';
+    exam_type?: 'JAMB';
     exam_year?: number;
     subject_slug?: string;
     subject_id?: string;
@@ -279,12 +279,12 @@ export type QuizQuestion = {
   correct?: string;
   explanation?: string;
   exam_year?: number | null;
-  exam_type?: 'JAMB' | 'WAEC' | null;
+  exam_type?: 'JAMB' | null;
   subject_slug?: string;
   subject_name?: string;
 };
 
-export function normalizeQuestions(rows: any[], filters?: { exam_year?: number | 'ALL'; exam_type?: 'JAMB' | 'WAEC' | 'ALL' }): QuizQuestion[] {
+export function normalizeQuestions(rows: any[], filters?: { exam_year?: number | 'ALL'; exam_type?: 'JAMB' | 'ALL' }): QuizQuestion[] {
   const list: QuizQuestion[] = (rows || []).filter(r => !!r).map((r: unknown) => {
     const opts = [
       { key: 'A', text: r.option_a },

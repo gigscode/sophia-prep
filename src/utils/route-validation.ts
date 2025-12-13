@@ -44,7 +44,7 @@ export const validateQuizMode = (mode: string): boolean => {
 export const validateClassCategory = (category: string): boolean => {
   if (!category || typeof category !== 'string') return false;
   
-  const validCategories = ['primary', 'secondary', 'tertiary', 'jamb', 'waec', 'neco'];
+  const validCategories = ['primary', 'secondary', 'tertiary', 'jamb', 'neco'];
   return validCategories.includes(category.toLowerCase());
 };
 

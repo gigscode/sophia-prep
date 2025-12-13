@@ -3,7 +3,7 @@
 -- ============================================================================
 -- Version: 1.0.0
 -- Date: 2025-01-21
--- Description: Complete database schema for Sophia Prep JAMB/WAEC platform
+-- Description: Complete database schema for Sophia Prep JAMB platform
 -- 
 -- INSTRUCTIONS:
 -- 1. Open Supabase Dashboard > SQL Editor
@@ -18,7 +18,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- ============================================================================
 -- 1. SUBJECTS TABLE
 -- ============================================================================
--- Stores JAMB/WAEC exam subjects
+-- Stores JAMB exam subjects
 CREATE TABLE IF NOT EXISTS subjects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS subjects (
   description TEXT,
   icon TEXT,
   color_theme TEXT,
-  exam_type TEXT CHECK (exam_type IN ('JAMB', 'WAEC', 'BOTH')) DEFAULT 'BOTH',
+  exam_type TEXT CHECK (exam_type IN ('JAMB')) DEFAULT 'JAMB',
   subject_category TEXT CHECK (subject_category IN ('SCIENCE', 'COMMERCIAL', 'ARTS', 'GENERAL', 'LANGUAGE')) DEFAULT 'GENERAL',
   is_mandatory BOOLEAN DEFAULT FALSE,
   is_active BOOLEAN DEFAULT TRUE,
@@ -73,9 +73,9 @@ CREATE TABLE IF NOT EXISTS questions (
   option_d TEXT NOT NULL,
   correct_answer TEXT NOT NULL CHECK (correct_answer IN ('A', 'B', 'C', 'D')),
   explanation TEXT,
-  difficulty_level TEXT CHECK (difficulty_level IN ('EASY', 'MEDIUM', 'HARD')) DEFAULT 'MEDIUM',
+
   exam_year INTEGER,
-  exam_type TEXT CHECK (exam_type IN ('JAMB', 'WAEC')),
+  exam_type TEXT CHECK (exam_type IN ('JAMB')),
   question_number INTEGER,
   metadata JSONB DEFAULT '{}',
   is_active BOOLEAN DEFAULT TRUE,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS questions (
 );
 
 CREATE INDEX idx_questions_topic_id ON questions(topic_id);
-CREATE INDEX idx_questions_difficulty ON questions(difficulty_level);
+
 CREATE INDEX idx_questions_exam_year ON questions(exam_year);
 CREATE INDEX idx_questions_exam_type ON questions(exam_type);
 CREATE INDEX idx_questions_active ON questions(is_active);
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   email TEXT,
   full_name TEXT,
   phone_number TEXT,
-  exam_type TEXT CHECK (exam_type IN ('JAMB', 'WAEC', 'BOTH')),
+  exam_type TEXT CHECK (exam_type IN ('JAMB')),
   target_exam_date DATE,
   preferred_subjects TEXT[],
   avatar_url TEXT,
@@ -122,7 +122,7 @@ CREATE INDEX idx_user_profiles_subscription_plan ON user_profiles(subscription_p
 CREATE TABLE IF NOT EXISTS subject_combinations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  exam_type TEXT NOT NULL CHECK (exam_type IN ('JAMB', 'WAEC', 'BOTH')),
+  exam_type TEXT NOT NULL CHECK (exam_type IN ('JAMB')),
   combination_type TEXT CHECK (combination_type IN ('SCIENCE', 'COMMERCIAL', 'ARTS', 'CUSTOM')),
   subjects TEXT[] NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW()
@@ -252,7 +252,7 @@ CREATE INDEX idx_study_targets_achieved ON study_targets(is_achieved);
 CREATE TABLE IF NOT EXISTS mock_exam_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  exam_type TEXT CHECK (exam_type IN ('JAMB', 'WAEC')) NOT NULL,
+  exam_type TEXT CHECK (exam_type IN ('JAMB')) NOT NULL,
   subjects TEXT[] NOT NULL,
   total_questions INTEGER NOT NULL,
   correct_answers INTEGER DEFAULT 0,

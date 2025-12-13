@@ -11,32 +11,30 @@
 -- ============================================================================
 
 -- ============================================================================
--- SEED SUBJECTS (21 JAMB/WAEC Subjects)
+-- SEED SUBJECTS (JAMB Subjects)
 -- ============================================================================
 
 INSERT INTO subjects (name, slug, description, exam_type, subject_category, is_mandatory, sort_order) VALUES
 -- Mandatory Subjects
-('English Language', 'english', 'English Language for JAMB and WAEC', 'BOTH', 'LANGUAGE', true, 1),
-('Mathematics', 'mathematics', 'Mathematics for JAMB and WAEC', 'BOTH', 'GENERAL', true, 2),
+('English Language', 'english', 'English Language for JAMB', 'JAMB', 'LANGUAGE', true, 1),
+('Mathematics', 'mathematics', 'Mathematics for JAMB', 'JAMB', 'GENERAL', true, 2),
 
 -- Science Subjects
-('Physics', 'physics', 'Physics for JAMB and WAEC', 'BOTH', 'SCIENCE', false, 3),
-('Chemistry', 'chemistry', 'Chemistry for JAMB and WAEC', 'BOTH', 'SCIENCE', false, 4),
-('Biology', 'biology', 'Biology for JAMB and WAEC', 'BOTH', 'SCIENCE', false, 5),
-('Agricultural Science', 'agricultural-science', 'Agricultural Science for JAMB and WAEC', 'BOTH', 'SCIENCE', false, 6),
+('Physics', 'physics', 'Physics for JAMB', 'JAMB', 'SCIENCE', false, 3),
+('Chemistry', 'chemistry', 'Chemistry for JAMB', 'JAMB', 'SCIENCE', false, 4),
+('Biology', 'biology', 'Biology for JAMB', 'JAMB', 'SCIENCE', false, 5),
+('Agricultural Science', 'agricultural-science', 'Agricultural Science for JAMB', 'JAMB', 'SCIENCE', false, 6),
 
 -- Commercial Subjects
-('Economics', 'economics', 'Economics for JAMB and WAEC', 'BOTH', 'COMMERCIAL', false, 7),
-('Commerce', 'commerce', 'Commerce for JAMB and WAEC', 'BOTH', 'COMMERCIAL', false, 8),
-('Accounting', 'accounting', 'Accounting for JAMB and WAEC', 'BOTH', 'COMMERCIAL', false, 9),
-('Business Studies', 'business-studies', 'Business Studies for WAEC', 'WAEC', 'COMMERCIAL', false, 10),
+('Economics', 'economics', 'Economics for JAMB', 'JAMB', 'COMMERCIAL', false, 7),
+('Commerce', 'commerce', 'Commerce for JAMB', 'JAMB', 'COMMERCIAL', false, 8),
+('Accounting', 'accounting', 'Accounting for JAMB', 'JAMB', 'COMMERCIAL', false, 9),
 
 -- Arts Subjects
-('Literature in English', 'literature', 'Literature in English for JAMB and WAEC', 'BOTH', 'ARTS', false, 11),
-('Government', 'government', 'Government for JAMB and WAEC', 'BOTH', 'ARTS', false, 12),
-('History', 'history', 'History for JAMB and WAEC', 'BOTH', 'ARTS', false, 13),
-('Christian Religious Studies', 'crs', 'Christian Religious Studies for JAMB and WAEC', 'BOTH', 'ARTS', false, 14),
-('Islamic Religious Studies', 'irs', 'Islamic Religious Studies for JAMB and WAEC', 'BOTH', 'ARTS', false, 15),
+('Literature in English', 'literature', 'Literature in English for JAMB', 'JAMB', 'ARTS', false, 10),
+('Government', 'government', 'Government for JAMB', 'JAMB', 'ARTS', false, 11),
+('Christian Religious Studies', 'crs', 'Christian Religious Studies for JAMB', 'JAMB', 'ARTS', false, 12),
+('Islamic Religious Studies', 'irs', 'Islamic Religious Studies for JAMB', 'JAMB', 'ARTS', false, 13),
 ('Geography', 'geography', 'Geography for JAMB and WAEC', 'BOTH', 'ARTS', false, 16),
 
 -- Language Subjects

@@ -3,10 +3,10 @@
  * Supports the new normalized structure with exam_types, subject_categories, etc.
  */
 
-export type ExamType = 'JAMB' | 'WAEC' | 'NECO';
+export type ExamType = 'JAMB';
 export type QuizMode = 'PRACTICE' | 'CBT_EXAM';
 export type SubjectCategory = 'SCIENCE' | 'COMMERCIAL' | 'ARTS' | 'LANGUAGE' | 'GENERAL';
-export type DifficultyLevel = 'EASY' | 'MEDIUM' | 'HARD';
+
 
 /**
  * Exam Types Table
@@ -86,7 +86,7 @@ export interface QuestionRecord {
   option_d: string;
   correct_answer: 'A' | 'B' | 'C' | 'D';
   explanation?: string;
-  difficulty_level: DifficultyLevel;
+
   exam_year?: number;
   question_number?: number;
   metadata?: Record<string, any>;
@@ -204,7 +204,6 @@ export interface CBTQuestionResponse {
   option_d: string;
   correct_answer: string;
   explanation?: string;
-  difficulty_level: string;
   subject_name: string;
   exam_type_name: string;
   questions_count: number;
@@ -225,6 +224,5 @@ export interface PracticeQuestionResponse {
   option_d: string;
   correct_answer: string;
   explanation?: string;
-  difficulty_level: string;
   subject_name: string;
 }

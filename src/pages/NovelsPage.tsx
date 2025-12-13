@@ -7,7 +7,7 @@ interface Novel {
   id: string;
   title: string;
   author: string;
-  examType: 'JAMB' | 'WAEC' | 'BOTH';
+  examType: 'JAMB';
   year: string;
   summary: string;
   themes: string[];
@@ -25,7 +25,7 @@ export function NovelsPage() {
       id: '2',
       title: 'The Lion and the Jewel',
       author: 'Wole Soyinka',
-      examType: 'WAEC',
+      examType: 'JAMB',
       year: '2024',
       summary: 'A play that explores the conflict between tradition and modernity in a Nigerian village through the story of Sidi, a beautiful village belle, and her two suitors.',
       themes: [
@@ -47,14 +47,12 @@ export function NovelsPage() {
     }
   ];
 
-  const getExamTypeBadgeColor = (examType: 'JAMB' | 'WAEC' | 'BOTH'): string => {
+  const getExamTypeBadgeColor = (examType: 'JAMB'): string => {
     switch (examType) {
       case 'JAMB':
         return 'bg-blue-100 text-blue-800';
-      case 'WAEC':
-        return 'bg-green-100 text-green-800';
-      case 'BOTH':
-        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
 

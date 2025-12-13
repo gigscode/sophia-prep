@@ -2,7 +2,7 @@
 
 **Divinely Inspired to Reign in Knowledge**
 
-A comprehensive exam preparation platform for JAMB and WAEC students in Nigeria.
+A comprehensive exam preparation platform for JAMB students in Nigeria.
 
 ---
 
@@ -272,9 +272,9 @@ For questions or issues:
 
 ## 🎯 Features
 
-- ✅ JAMB and WAEC exam preparation
-- ✅ 21 subjects with comprehensive question banks
-- ✅ Multiple quiz modes (Practice, Timed, Mock Exam)
+- ✅ JAMB exam preparation optimized
+- ✅ Comprehensive question banks with subject, topic, and year selection
+- ✅ Enhanced quiz modes (Practice by topic, Exam by year)
 - ✅ Progress tracking and analytics
 - ✅ Study materials (videos, PDFs, syllabus)
 - ✅ Subscription plans with tiered access

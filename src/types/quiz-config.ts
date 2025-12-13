@@ -2,7 +2,7 @@
  * Unified Quiz Configuration Types
  * 
  * This module defines the core types and interfaces for the exam modes system,
- * supporting both WAEC and JAMB examinations with practice and simulation modes.
+ * supporting JAMB examinations with practice and simulation modes.
  * 
  * Requirements: 1.1, 2.1, 2.2, 2.3
  */
@@ -12,7 +12,7 @@ import type { TimerHandle } from '../services/timer-service';
 /**
  * Exam type enumeration
  */
-export type ExamType = 'JAMB' | 'WAEC';
+export type ExamType = 'JAMB';
 
 /**
  * Quiz mode enumeration
@@ -30,7 +30,7 @@ export type QuizMode = 'practice' | 'exam';
 export type SelectionMethod = 'subject' | 'year' | 'category';
 
 /**
- * Class category for JAMB/WAEC exams
+ * Class category for JAMB exams
  */
 export type ClassCategory = 'SCIENCE' | 'ARTS' | 'COMMERCIAL';
 
@@ -39,7 +39,7 @@ export type ClassCategory = 'SCIENCE' | 'ARTS' | 'COMMERCIAL';
  * Defines all parameters needed to configure a quiz session
  */
 export interface QuizConfig {
-  /** Exam type (WAEC or JAMB) */
+  /** Exam type (JAMB) */
   examType: ExamType;
 
   /** Quiz mode (practice or exam simulation) */
@@ -266,8 +266,8 @@ export const QuizConfigHelpers = {
    */
   validateConfig(config: QuizConfig): string | null {
     // Check exam type
-    if (!['JAMB', 'WAEC'].includes(config.examType)) {
-      return 'Invalid exam type. Must be JAMB or WAEC.';
+    if (!['JAMB'].includes(config.examType)) {
+      return 'Invalid exam type. Must be JAMB.';
     }
 
     // Check mode

@@ -38,6 +38,7 @@ const VideosPage = lazy(() => import('../pages/VideosPage').then(module => ({ de
 const QuizModeSelectorPage = lazy(() => import('../pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
 const ModeSelectionPage = lazy(() => import('../pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
 const ClassCategorySelectorPage = lazy(() => import('../pages/ClassCategorySelectorPage').then(module => ({ default: module.ClassCategorySelectorPage })));
+const OptimizedQuizPage = lazy(() => import('../pages/OptimizedQuizPage').then(module => ({ default: module.OptimizedQuizPage })));
 const UnifiedQuiz = lazy(() => import('../pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
 const QuizResultsPage = lazy(() => import('../pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('../pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
@@ -178,6 +179,14 @@ export const routeConfigs: RouteConfig[] = [
     showFooter: false,
     title: 'Quiz Results - Sophia Prep',
     description: 'View your quiz results and performance'
+  },
+  {
+    path: '/quiz/optimized',
+    component: OptimizedQuizPage,
+    requireAuth: false,
+    showFooter: false,
+    title: 'JAMB Quiz Practice - Sophia Prep',
+    description: 'Practice JAMB questions by subject, topic, and year'
   },
 
   // Help & Info
