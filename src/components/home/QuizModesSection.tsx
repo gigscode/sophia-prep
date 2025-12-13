@@ -35,7 +35,7 @@ export function QuizModesSection({
   };
 
   const handleCBTQuizClick = () => {
-    navigate('/quiz/optimized');
+    navigate('/jamb-exam');
   };
 
   return (

@@ -38,8 +38,8 @@ const navItems: NavItem[] = [
     id: 'quiz',
     label: 'CBT Exam',
     icon: ClipboardList,
-    route: '/quiz/optimized',
-    description: 'Take full CBT exam simulations'
+    route: '/jamb-exam',
+    description: 'Take JAMB CBT exam simulation'
   },
   {
     id: 'study',
