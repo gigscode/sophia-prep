@@ -3,7 +3,7 @@ import { FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { PageHeader } from '../components/layout';
 import { subjectService } from '../services/subject-service';
 import { Card } from '../components/ui/Card';
-import type { Subject, ExamType } from '../integrations/supabase/types';
+import type { Subject } from '../integrations/supabase/types';
 
 interface TopicSummary {
   id: string;
@@ -16,7 +16,7 @@ export function SummariesPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
-  const [selectedExamType, setSelectedExamType] = useState<ExamType | 'ALL'>('ALL');
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -35,9 +35,8 @@ export function SummariesPage() {
     }
   };
 
-  const filteredSubjects = subjects.filter(
-    s => selectedExamType === 'ALL' || s.exam_type === selectedExamType || s.exam_type === 'BOTH'
-  );
+  // Filter subjects for JAMB only
+  const filteredSubjects = subjects.filter(s => s.is_active);
 
   // TODO: Load topic summaries from database
   const sampleSummaries: TopicSummary[] = [];
@@ -54,41 +53,11 @@ export function SummariesPage() {
     <div className="min-h-screen bg-gray-50">
       <PageHeader
         title="Topic Summaries"
-        description="Comprehensive summaries with key concepts for each subject"
+        description="Comprehensive summaries with key concepts for JAMB subjects"
         icon={<FileText className="w-8 h-8" />}
       />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          <button
-            onClick={() => setSelectedExamType('ALL')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'ALL'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            All Subjects
-          </button>
-          <button
-            onClick={() => setSelectedExamType('JAMB')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'JAMB'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            JAMB
-          </button>
-          <button
-            onClick={() => setSelectedExamType('WAEC')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'WAEC'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            WAEC
-          </button>
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Subjects Sidebar */}

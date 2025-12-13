@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Play, RotateCcw, BookOpen, Target, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, RotateCcw, BookOpen, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import { PageHeader } from '../components/layout';
 import { supabase } from '../integrations/supabase/client';
 import type { Subject } from '../integrations/supabase/types';
@@ -26,11 +26,11 @@ interface QuizQuestion {
   exam_year?: number;
 }
 
-type ViewState = 'subject-selection' | 'topic-selection' | 'quiz' | 'results';
+type ViewState = 'selection' | 'quiz' | 'results';
 
 export function PracticeModePage() {
   const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState<ViewState>('subject-selection');
+  const [currentView, setCurrentView] = useState<ViewState>('selection');
   
   // Selection state
   const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -91,15 +91,23 @@ export function PracticeModePage() {
     }
   };
 
-  const handleSubjectSelect = async (subject: Subject) => {
-    setSelectedSubject(subject);
-    await loadTopics(subject.id);
-    setCurrentView('topic-selection');
+  const handleSubjectSelect = async (subjectId: string) => {
+    const subject = subjects.find(s => s.id === subjectId);
+    if (subject) {
+      setSelectedSubject(subject);
+      await loadTopics(subject.id);
+      setSelectedTopic(null); // Reset topic selection
+    }
   };
 
-  const handleTopicSelect = async (topic: Topic | null) => {
-    setSelectedTopic(topic);
-    await loadQuestions(selectedSubject!.id, topic?.id);
+  const handleTopicSelect = (topicId: string) => {
+    const topic = topics.find(t => t.id === topicId);
+    setSelectedTopic(topic || null);
+  };
+
+  const handleStartQuiz = async () => {
+    if (!selectedSubject) return;
+    await loadQuestions(selectedSubject.id, selectedTopic?.id);
   };
 
   const loadQuestions = async (subjectId: string, topicId?: string) => {
@@ -187,7 +195,7 @@ export function PracticeModePage() {
   };
 
   const handleRestart = () => {
-    setCurrentView('subject-selection');
+    setCurrentView('selection');
     setSelectedSubject(null);
     setSelectedTopic(null);
     setQuestions([]);
@@ -199,12 +207,8 @@ export function PracticeModePage() {
 
   const goBack = () => {
     switch (currentView) {
-      case 'topic-selection':
-        setCurrentView('subject-selection');
-        setSelectedSubject(null);
-        break;
       case 'quiz':
-        setCurrentView('topic-selection');
+        setCurrentView('selection');
         setQuestions([]);
         setAnswers({});
         break;
@@ -222,116 +226,113 @@ export function PracticeModePage() {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  // Subject Selection View
-  if (currentView === 'subject-selection') {
+  // Selection View with Dropdowns
+  if (currentView === 'selection') {
     return (
       <div className="min-h-screen bg-gray-50">
         <PageHeader
           title="Practice Mode"
-          description="Choose a subject to practice"
-          showBackButton
-          onBack={() => navigate('/')}
+          description="Select subject and topic to start practicing"
         />
         
         <div className="container mx-auto px-4 py-6">
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-red-800">{error}</p>
             </div>
           )}
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Loading subjects...</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {subjects.map((subject) => (
-                <button
-                  key={subject.id}
-                  onClick={() => handleSubjectSelect(subject)}
-                  className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all text-left"
-                >
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-                    <BookOpen className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900 text-sm">{subject.name}</h3>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white rounded-xl shadow-sm border p-6">
+              <div className="space-y-6">
+                {/* Subject Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Select Subject *
+                  </label>
+                  {loading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                      <span className="ml-2 text-gray-600">Loading subjects...</span>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <select
+                        value={selectedSubject?.id || ''}
+                        onChange={(e) => handleSubjectSelect(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                      >
+                        <option value="">Choose a subject...</option>
+                        {subjects.map((subject) => (
+                          <option key={subject.id} value={subject.id}>
+                            {subject.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    </div>
+                  )}
+                </div>
 
-  // Topic Selection View
-  if (currentView === 'topic-selection') {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <PageHeader
-          title={selectedSubject?.name || 'Select Topic'}
-          description="Choose a topic or practice all"
-          showBackButton
-          onBack={goBack}
-        />
-        
-        <div className="container mx-auto px-4 py-6">
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Loading topics...</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* All Topics Option */}
-              <button
-                onClick={() => handleTopicSelect(null)}
-                className="w-full p-4 bg-blue-50 border-2 border-blue-200 rounded-xl hover:border-blue-500 hover:bg-blue-100 transition-all text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
-                    <Target className="w-6 h-6 text-white" />
-                  </div>
+                {/* Topic Selection */}
+                {selectedSubject && (
                   <div>
-                    <h3 className="font-semibold text-blue-900">All Topics</h3>
-                    <p className="text-sm text-blue-700">Practice questions from all topics</p>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Select Topic (Optional)
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedTopic?.id || ''}
+                        onChange={(e) => handleTopicSelect(e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                      >
+                        <option value="">All topics</option>
+                        {topics.map((topic) => (
+                          <option key={topic.id} value={topic.id}>
+                            {topic.name}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    </div>
+                    {topics.length === 0 && (
+                      <p className="text-sm text-gray-500 mt-1">No specific topics available for this subject</p>
+                    )}
                   </div>
-                </div>
-              </button>
+                )}
 
-              {/* Individual Topics */}
-              {topics.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {topics.map((topic) => (
-                    <button
-                      key={topic.id}
-                      onClick={() => handleTopicSelect(topic)}
-                      className="p-4 bg-white border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:shadow-md transition-all text-left"
-                    >
-                      <h3 className="font-semibold text-gray-900">{topic.name}</h3>
-                      <p className="text-sm text-gray-600 mt-1">Focus on this topic</p>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-gray-600 py-4">No specific topics available</p>
-              )}
-            </div>
-          )}
+                {/* Selection Summary */}
+                {selectedSubject && (
+                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="font-medium text-blue-900 mb-2">Practice Setup</h3>
+                    <div className="space-y-1 text-sm text-blue-700">
+                      <p><span className="font-medium">Subject:</span> {selectedSubject.name}</p>
+                      <p><span className="font-medium">Topic:</span> {selectedTopic ? selectedTopic.name : 'All topics'}</p>
+                      <p><span className="font-medium">Mode:</span> Practice with immediate feedback</p>
+                    </div>
+                  </div>
+                )}
 
-          {error && (
-            <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800">{error}</p>
-              <button
-                onClick={() => handleTopicSelect(null)}
-                className="mt-2 text-blue-600 hover:underline"
-              >
-                Try loading all questions
-              </button>
+                {/* Start Button */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => navigate('/')}
+                    className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleStartQuiz}
+                    disabled={!selectedSubject || loading}
+                    className="flex-2 px-8 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    <BookOpen className="w-5 h-5" />
+                    Start Practice
+                  </button>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     );

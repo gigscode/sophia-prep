@@ -22,7 +22,7 @@ interface ParsedQuestion {
     correct_answer: 'A' | 'B' | 'C' | 'D';
     explanation?: string;
     exam_year?: number;
-    exam_type?: 'JAMB' | 'WAEC';
+    exam_type?: 'JAMB';
     topic?: string;
     subject?: string;
 }
@@ -61,7 +61,7 @@ export function ImportQuestionsPage() {
     const [importing, setImporting] = useState(false);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [selectedSubject, setSelectedSubject] = useState<string>('');
-    const [selectedExamType, setSelectedExamType] = useState<'JAMB' | 'WAEC' | ''>('');
+    const [selectedExamType, setSelectedExamType] = useState<'JAMB' | ''>('JAMB');
     const [selectedExamYear, setSelectedExamYear] = useState<string>('');
     const [importResult, setImportResult] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +90,7 @@ export function ImportQuestionsPage() {
         const savedState = formPersistence.restoreFormState();
         if (savedState) {
             if (savedState.selectedSubject) setSelectedSubject(savedState.selectedSubject);
-            if (savedState.selectedExamType) setSelectedExamType(savedState.selectedExamType as 'JAMB' | 'WAEC');
+            if (savedState.selectedExamType) setSelectedExamType(savedState.selectedExamType as 'JAMB');
             if (savedState.selectedExamYear) setSelectedExamYear(savedState.selectedExamYear);
             if (savedState.format) setFormat(savedState.format as ImportFormat);
             if (savedState.importMode) setImportMode(savedState.importMode as 'file' | 'text');
@@ -220,7 +220,7 @@ export function ImportQuestionsPage() {
                 correct_answer: (question.correct_answer || 'A').toUpperCase() as 'A' | 'B' | 'C' | 'D',
                 explanation: question.explanation,
                 exam_year: question.exam_year ? parseInt(question.exam_year) : undefined,
-                exam_type: question.exam_type?.toUpperCase() as 'JAMB' | 'WAEC' | undefined,
+                exam_type: 'JAMB',
                 topic: question.topic,
                 subject: question.subject,
             });
@@ -249,7 +249,7 @@ export function ImportQuestionsPage() {
                             correct_answer: q.correct_answer.toUpperCase() as 'A' | 'B' | 'C' | 'D',
                             explanation: q.explanation?.trim(),
                             exam_year: q.exam_year ? parseInt(String(q.exam_year)) : undefined,
-                            exam_type: q.exam_type?.toUpperCase() as 'JAMB' | 'WAEC' | undefined,
+                            exam_type: 'JAMB',
                             topic: q.topic?.trim(),
                             subject: q.subject?.trim(),
                         });
@@ -274,7 +274,7 @@ export function ImportQuestionsPage() {
                                     correct_answer: q.correct_answer.toUpperCase() as 'A' | 'B' | 'C' | 'D',
                                     explanation: q.explanation?.trim(),
                                     exam_year: q.exam_year ? parseInt(String(q.exam_year)) : undefined,
-                                    exam_type: q.exam_type?.toUpperCase() as 'JAMB' | 'WAEC' | undefined,
+                                    exam_type: 'JAMB',
                                     topic: q.topic?.trim(),
                                     subject: q.subject?.trim() || key.trim(),
                                 });
@@ -451,7 +451,7 @@ export function ImportQuestionsPage() {
                     correct_answer: pq.correct_answer,
                     explanation: pq.explanation,
                     exam_year: selectedExamYear ? parseInt(selectedExamYear) : pq.exam_year,
-                    exam_type: selectedExamType || pq.exam_type,
+                    exam_type: 'JAMB',
                     is_active: true,
                 });
             }
@@ -498,7 +498,7 @@ export function ImportQuestionsPage() {
         if (templateFormat === 'csv') {
             content = `question_text,option_a,option_b,option_c,option_d,correct_answer,explanation,exam_year,exam_type,topic,subject
 "What is 2 + 2?","2","3","4","5","C","Addition of two numbers","2023","JAMB","Arithmetic","Mathematics"
-"Solve: x + 5 = 10","3","4","5","6","C","Subtract 5 from both sides: x = 10 - 5 = 5","2023","WAEC","Algebra","Mathematics"`;
+"Solve: x + 5 = 10","3","4","5","6","C","Subtract 5 from both sides: x = 10 - 5 = 5","2023","JAMB","Algebra","Mathematics"`;
             filename = 'questions_template.csv';
         } else if (templateFormat === 'simple') {
             content = `Q: What is 2 + 2?
@@ -542,7 +542,7 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                     correct_answer: "C",
                     explanation: "Subtract 5 from both sides: x = 10 - 5 = 5",
                     exam_year: 2023,
-                    exam_type: "WAEC",
+                    exam_type: "JAMB",
                     topic: "Algebra",
                     subject: "Mathematics"
                 }
@@ -739,25 +739,10 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-2">Exam Type (Optional)</label>
-                                <Select
-                                    value={selectedExamType}
-                                    onChange={(e) => {
-                                        const value = e.target.value as 'JAMB' | 'WAEC' | '';
-                                        setSelectedExamType(value);
-                                        formPersistence.autoSaveFormState({
-                                            selectedSubject,
-                                            selectedExamType: value,
-                                            selectedExamYear,
-                                            format,
-                                            importMode
-                                        });
-                                    }}
-                                    options={[
-                                        { value: '', label: 'Select Exam Type' },
-                                        { value: 'JAMB', label: 'JAMB' },
-                                        { value: 'WAEC', label: 'WAEC' },
-                                    ]}
-                                />
+                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <span className="text-blue-800 font-medium">JAMB</span>
+                                    <p className="text-sm text-blue-600 mt-1">All questions are imported for JAMB exam</p>
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-medium mb-2">Exam Year (Optional)</label>

@@ -35,16 +35,12 @@ INSERT INTO subjects (name, slug, description, exam_type, subject_category, is_m
 ('Government', 'government', 'Government for JAMB', 'JAMB', 'ARTS', false, 11),
 ('Christian Religious Studies', 'crs', 'Christian Religious Studies for JAMB', 'JAMB', 'ARTS', false, 12),
 ('Islamic Religious Studies', 'irs', 'Islamic Religious Studies for JAMB', 'JAMB', 'ARTS', false, 13),
-('Geography', 'geography', 'Geography for JAMB and WAEC', 'BOTH', 'ARTS', false, 16),
+('Geography', 'geography', 'Geography for JAMB', 'JAMB', 'ARTS', false, 16),
 
--- Language Subjects
-('French', 'french', 'French Language for WAEC', 'WAEC', 'LANGUAGE', false, 17),
-('Yoruba', 'yoruba', 'Yoruba Language for WAEC', 'WAEC', 'LANGUAGE', false, 18),
-('Igbo', 'igbo', 'Igbo Language for WAEC', 'WAEC', 'LANGUAGE', false, 19),
-('Hausa', 'hausa', 'Hausa Language for WAEC', 'WAEC', 'LANGUAGE', false, 20),
+-- Language Subjects (removed WAEC-only languages as we focus on JAMB)
 
 -- Other Subjects
-('Civic Education', 'civic-education', 'Civic Education for JAMB and WAEC', 'BOTH', 'GENERAL', false, 21)
+('Civic Education', 'civic-education', 'Civic Education for JAMB', 'JAMB', 'GENERAL', false, 17)
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================================================
@@ -64,59 +60,48 @@ INSERT INTO subscription_plans (name, slug, description, price_ngn, duration_day
   1
 ),
 (
-  'WAEC Only',
-  'waec-only',
-  'Access to all WAEC subjects and practice materials',
-  3000.00,
-  120,
-  ARRAY['Unlimited practice quizzes', 'Mock exams', 'Past questions (2015-2024)', 'Progress tracking', 'Performance analytics', 'Study materials'],
-  ARRAY['english', 'mathematics', 'physics', 'chemistry', 'biology', 'agricultural-science', 'economics', 'commerce', 'accounting', 'business-studies', 'literature', 'government', 'history', 'crs', 'irs', 'geography', 'french', 'yoruba', 'igbo', 'hausa', 'civic-education'],
-  ARRAY['WAEC'],
-  2
-),
-(
   'Science Bundle',
   'science-bundle',
-  'JAMB + WAEC for Science students',
-  4500.00,
+  'JAMB for Science students',
+  3500.00,
   120,
-  ARRAY['All JAMB features', 'All WAEC features', 'Science subjects focus', 'Video lessons', 'Syllabus access'],
+  ARRAY['All JAMB features', 'Science subjects focus', 'Video lessons', 'Syllabus access', 'Mock exams'],
   ARRAY['english', 'mathematics', 'physics', 'chemistry', 'biology', 'agricultural-science'],
-  ARRAY['JAMB', 'WAEC'],
-  3
+  ARRAY['JAMB'],
+  2
 ),
 (
   'Commercial Bundle',
   'commercial-bundle',
-  'JAMB + WAEC for Commercial students',
-  4500.00,
+  'JAMB for Commercial students',
+  3500.00,
   120,
-  ARRAY['All JAMB features', 'All WAEC features', 'Commercial subjects focus', 'Video lessons', 'Syllabus access'],
+  ARRAY['All JAMB features', 'Commercial subjects focus', 'Video lessons', 'Syllabus access', 'Mock exams'],
   ARRAY['english', 'mathematics', 'economics', 'commerce', 'accounting', 'business-studies'],
-  ARRAY['JAMB', 'WAEC'],
-  4
+  ARRAY['JAMB'],
+  3
 ),
 (
   'Arts Bundle',
   'arts-bundle',
-  'JAMB + WAEC for Arts students',
-  4500.00,
+  'JAMB for Arts students',
+  3500.00,
   120,
-  ARRAY['All JAMB features', 'All WAEC features', 'Arts subjects focus', 'Video lessons', 'Syllabus access'],
+  ARRAY['All JAMB features', 'Arts subjects focus', 'Video lessons', 'Syllabus access', 'Mock exams'],
   ARRAY['english', 'mathematics', 'literature', 'government', 'history', 'crs', 'irs', 'geography', 'civic-education'],
-  ARRAY['JAMB', 'WAEC'],
-  5
+  ARRAY['JAMB'],
+  4
 ),
 (
   'Full Access',
   'full-access',
-  'Complete access to all subjects and features',
-  6000.00,
+  'Complete access to all JAMB subjects and features',
+  5000.00,
   180,
-  ARRAY['All subjects (21)', 'Unlimited practice', 'All mock exams', 'All past questions', 'Video lessons', 'Study materials', 'Priority support', 'Leaderboard access', 'Performance analytics'],
-  ARRAY['english', 'mathematics', 'physics', 'chemistry', 'biology', 'agricultural-science', 'economics', 'commerce', 'accounting', 'business-studies', 'literature', 'government', 'history', 'crs', 'irs', 'geography', 'french', 'yoruba', 'igbo', 'hausa', 'civic-education'],
-  ARRAY['JAMB', 'WAEC'],
-  6
+  ARRAY['All JAMB subjects', 'Unlimited practice', 'All mock exams', 'All past questions', 'Video lessons', 'Study materials', 'Priority support', 'Leaderboard access', 'Performance analytics'],
+  ARRAY['english', 'mathematics', 'physics', 'chemistry', 'biology', 'agricultural-science', 'economics', 'commerce', 'accounting', 'business-studies', 'literature', 'government', 'history', 'crs', 'irs', 'geography', 'civic-education'],
+  ARRAY['JAMB'],
+  5
 )
 ON CONFLICT (slug) DO NOTHING;
 

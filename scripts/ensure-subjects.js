@@ -27,7 +27,7 @@ function titleCase(s) {
 }
 
 async function main() {
-  const jamb = loadJSON('data/jamb-waec-questions.json') || {};
+  const jamb = loadJSON('data/jamb-questions.json') || {};
   const extra = loadJSON('data/extra-quizzes.json') || [];
 
   const slugs = new Set();
@@ -46,7 +46,7 @@ async function main() {
     rows.push({
       slug,
       name,
-      description: `${name} practice and past questions (JAMB/WAEC)` ,
+      description: `${name} practice and past questions (JAMB)` ,
       exam_type: 'BOTH',
       subject_category: 'GENERAL',
       is_active: true,
