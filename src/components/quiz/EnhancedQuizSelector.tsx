@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { BookOpen, Calendar, Target, ArrowRight, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BookOpen, Calendar, Target, ArrowLeft } from 'lucide-react';
 import { supabase } from '../../integrations/supabase/client';
 import type { Subject } from '../../integrations/supabase/types';
 
@@ -54,7 +54,7 @@ export function EnhancedQuizSelector({
     }
   }, [selection.subject]);
 
-when subject is selected (for exam mode)
+  // Load years when subject is selected (for exam mode)
   useEffect(() => {
     if (selection.subject && selection.mode === 'exam') {
       loadAvailableYears(selection.subject.id);
@@ -113,7 +113,7 @@ when subject is selected (for exam mode)
 
       if (error) throw error;
       
-      const years = [...new Set(data?.map(q => q.exam_year).filter(Boolean))] as number[];
+      const years = [...new Set((data || []).map((q: { exam_year: number | null }) => q.exam_year).filter(Boolean))] as number[];
       setAvailableYears(years);
     } catch (error) {
       console.error('Error loading available years:', error);
