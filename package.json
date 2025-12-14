@@ -33,6 +33,9 @@
     "pwa:generate": "node scripts/generate-icons.js && node scripts/generate-screenshots.js",
     "fix:vercel": "node fix-vercel-build.js",
     "import:quizzes": "node scripts/import-quizzes-to-supabase.js",
+    "cleanup:db": "node scripts/run-database-cleanup.js",
+    "add:topics": "node scripts/add-sample-topics.js",
+    "link:topics": "node scripts/link-questions-to-topics.js",
     "server": "node server/index.js"
   },
   "dependencies": {

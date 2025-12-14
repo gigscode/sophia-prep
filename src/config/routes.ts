@@ -33,9 +33,9 @@ const SyllabusPage = lazy(() => import('../pages/SyllabusPage').then(module => (
 const SummariesPage = lazy(() => import('../pages/SummariesPage').then(module => ({ default: module.SummariesPage })));
 const NovelsPage = lazy(() => import('../pages/NovelsPage').then(module => ({ default: module.NovelsPage })));
 const VideosPage = lazy(() => import('../pages/VideosPage').then(module => ({ default: module.VideosPage })));
-const QuizModeSelectorPage = lazy(() => import('../pages/QuizModeSelectorPage').then(module => ({ default: module.QuizModeSelectorPage })));
+
 const ModeSelectionPage = lazy(() => import('../pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
-const ClassCategorySelectorPage = lazy(() => import('../pages/ClassCategorySelectorPage').then(module => ({ default: module.ClassCategorySelectorPage })));
+
 const OptimizedQuizPage = lazy(() => import('../pages/OptimizedQuizPage').then(module => ({ default: module.OptimizedQuizPage })));
 const PracticeModePage = lazy(() => import('../pages/PracticeModePage').then(module => ({ default: module.PracticeModePage })));
 const JAMBExamPage = lazy(() => import('../pages/JAMBExamPage').then(module => ({ default: module.JAMBExamPage })));
@@ -135,14 +135,6 @@ export const routeConfigs: RouteConfig[] = [
 
   // Quiz Routes
   {
-    path: '/quiz',
-    component: QuizModeSelectorPage,
-    requireAuth: false,
-    showFooter: false,
-    title: 'Quiz Mode Selection - Sophia Prep',
-    description: 'Choose your quiz mode and preferences'
-  },
-  {
     path: '/quiz/mode-selection',
     component: ModeSelectionPage,
     requireAuth: false,
@@ -150,14 +142,7 @@ export const routeConfigs: RouteConfig[] = [
     title: 'Mode Selection - Sophia Prep',
     description: 'Select quiz mode and settings'
   },
-  {
-    path: '/quiz/class-category',
-    component: ClassCategorySelectorPage,
-    requireAuth: false,
-    showFooter: false,
-    title: 'Class Category - Sophia Prep',
-    description: 'Select your class category'
-  },
+
   {
     path: '/quiz/unified',
     component: UnifiedQuiz,

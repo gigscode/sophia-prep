@@ -807,7 +807,7 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
               )}
               <div className="mt-4">
                 <Button variant="primary" onClick={handleNext}>
-                  {currentIndex < questions.length - 1 ? 'Next Question' : 'Complete Quiz'}
+                  {currentIndex < questions.length - 1 ? 'Next Question' : 'View Results'}
                 </Button>
               </div>
             </div>
@@ -867,16 +867,45 @@ export function UnifiedQuiz({ config: propConfig }: UnifiedQuizProps) {
             </nav>
           )}
 
-          {/* Manual submit for practice mode (when not showing feedback) */}
-          {isPracticeMode && !showFeedback && (
-            <div className="mt-6 flex justify-end">
+          {/* Submit button for practice mode - always available */}
+          {isPracticeMode && (
+            <div className="mt-6 flex justify-between items-center">
+              {/* Navigation controls */}
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  onClick={handlePrevious}
+                  disabled={currentIndex === 0}
+                  className="px-3"
+                  aria-label="Go to previous question"
+                >
+                  Previous
+                </Button>
+                {!showFeedback && currentIndex < questions.length - 1 && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setCurrentIndex(prev => prev + 1);
+                      setShowFeedback(false);
+                      setSelectedAnswer(null);
+                      setAnnouncement(`Moving to question ${currentIndex + 2} of ${questions.length}`);
+                    }}
+                    aria-label="Go to next question"
+                  >
+                    Next
+                  </Button>
+                )}
+              </div>
+              
+              {/* Submit button - always available */}
               <Button
                 variant="primary"
                 onClick={handleManualSubmit}
                 disabled={submitting}
-                aria-label="Complete quiz and view results"
+                aria-label="Submit quiz and view results"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
-                {submitting ? 'Submitting...' : 'Complete Quiz'}
+                {submitting ? 'Submitting...' : 'Submit Quiz'}
               </Button>
             </div>
           )}
