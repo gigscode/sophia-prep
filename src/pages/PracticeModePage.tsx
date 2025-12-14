@@ -161,11 +161,21 @@ export function PracticeModePage() {
     // Don't show explanation immediately - wait for submit button
   };
 
-  const handleSubmitAnswer = () => {
-    setShowExplanation(true);
+  const handleSubmitQuiz = () => {
+    setCurrentView('results');
   };
 
   const handleNextQuestion = () => {
+    const currentQuestionId = questions[currentQuestionIndex]?.id;
+    const hasAnswered = !!answers[currentQuestionId];
+
+    // If user has selected an answer but hasn't seen explanation yet, show it first
+    if (hasAnswered && !showExplanation) {
+      setShowExplanation(true);
+      return;
+    }
+
+    // Move to next question or results
     setShowExplanation(false);
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -362,7 +372,7 @@ export function PracticeModePage() {
                 <ArrowLeft className="w-5 h-5" />
                 <span className="text-sm">Exit</span>
               </button>
-              
+
               <div className="text-center">
                 <p className="text-sm font-medium text-gray-900">
                   {currentQuestionIndex + 1} / {questions.length}
@@ -370,15 +380,19 @@ export function PracticeModePage() {
                 <p className="text-xs text-gray-500">{selectedSubject?.name}</p>
               </div>
 
-              <div className="text-sm text-gray-600">
-                {Object.keys(answers).filter(id => answers[id] === questions.find(q => q.id === id)?.correct_answer).length} correct
-              </div>
+              <button
+                onClick={handleSubmitQuiz}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+              >
+                <CheckCircle className="w-4 h-4" />
+                Submit Quiz
+              </button>
             </div>
-            
+
             {/* Progress bar */}
             <div className="mt-3">
               <div className="w-full bg-gray-200 rounded-full h-1.5">
-                <div 
+                <div
                   className="bg-blue-600 h-1.5 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
@@ -462,28 +476,14 @@ export function PracticeModePage() {
               Previous
             </button>
 
-            <div className="flex items-center gap-3">
-              {/* Submit button - only show if answer selected but explanation not shown yet */}
-              {currentAnswer && !showExplanation && (
-                <button
-                  onClick={handleSubmitAnswer}
-                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
-                >
-                  <CheckCircle className="w-5 h-5" />
-                  Submit Answer
-                </button>
-              )}
-
-              {/* Next button - only show after explanation is shown */}
-              {showExplanation && (
-                <button
-                  onClick={handleNextQuestion}
-                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
-                >
-                  {currentQuestionIndex === questions.length - 1 ? 'See Results' : 'Next Question'}
-                </button>
-              )}
-            </div>
+            {/* Next Question button - always visible */}
+            <button
+              onClick={handleNextQuestion}
+              disabled={!currentAnswer}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {currentQuestionIndex === questions.length - 1 ? 'See Results' : 'Next Question'}
+            </button>
           </div>
         </div>
       </div>
