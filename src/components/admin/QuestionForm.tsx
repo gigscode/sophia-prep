@@ -242,7 +242,6 @@ export function QuestionForm({ question, onSubmit, onCancel, isSubmitting = fals
             options={[
               { value: '', label: 'Not specified' },
               { value: 'JAMB', label: 'JAMB' },
-              { value: 'WAEC', label: 'WAEC' },
             ]}
           />
         </div>

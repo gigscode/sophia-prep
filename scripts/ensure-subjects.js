@@ -46,7 +46,7 @@ async function main() {
     rows.push({
       slug,
       name,
-      description: `${name} practice and past questions (JAMB)` ,
+      description: `${name} for JAMB CBT exam`,
       exam_type: 'BOTH',
       subject_category: 'GENERAL',
       is_active: true,

@@ -4,10 +4,9 @@
  */
 
 import { jambValidationService } from './jamb-validation-service';
-import { waecValidationService } from './waec-validation-service';
+// WAEC validation removed - app is JAMB-only
 import type { ExamTypeRecord, SubjectWithDetails } from '../types/database';
 import type { JAMBValidationResult } from './jamb-validation-service';
-import type { WAECValidationResult } from './waec-validation-service';
 
 export interface UniversalValidationResult {
   isValid: boolean;
@@ -17,7 +16,7 @@ export interface UniversalValidationResult {
   errors: string[];
   warnings: string[];
   suggestions: string[];
-  validationDetails: JAMBValidationResult | WAECValidationResult | null;
+  validationDetails: JAMBValidationResult | null;
   realTimeStatus: {
     status: 'incomplete' | 'invalid' | 'valid';
     message: string;
@@ -56,7 +55,7 @@ export class UniversalValidationService {
     
     try {
       const examSlug = examType.slug.toLowerCase();
-      let validationDetails: JAMBValidationResult | WAECValidationResult | null = null;
+      let validationDetails: JAMBValidationResult | null = null;
       let realTimeStatus: UniversalValidationResult['realTimeStatus'];
       
       const result: UniversalValidationResult = {
@@ -88,19 +87,6 @@ export class UniversalValidationService {
           result.errors.push(...jambResult.missingRequirements);
         }
         result.suggestions.push(...jambResult.suggestions);
-        
-      } else if (examSlug === 'waec') {
-        const waecResult = await waecValidationService.validateWAECSubjects(subjectIds);
-        validationDetails = waecResult;
-        realTimeStatus = waecValidationService.validateInRealTime(subjectIds, allSubjects);
-        
-        result.isValid = waecResult.isValid;
-        result.message = waecResult.message;
-        
-        if (!waecResult.isValid) {
-          result.errors.push(...waecResult.missingRequirements);
-        }
-        result.suggestions.push(...waecResult.suggestions);
         
       } else {
         // Generic validation for other exam types
@@ -188,25 +174,6 @@ export class UniversalValidationService {
           'Choose subjects relevant to your intended course of study',
           'Ensure good balance between Science, Arts, and Commercial subjects',
           'Consider your strengths when selecting optional subjects'
-        ]
-      };
-    } else if (examSlug === 'waec') {
-      return {
-        title: 'WAEC Requirements',
-        description: 'Select 6-9 subjects based on your career goals',
-        requirements: [
-          'Minimum: 6 subjects',
-          'Maximum: 9 subjects',
-          'Choose subjects relevant to your field of study'
-        ],
-        minSubjects: 6,
-        maxSubjects: 9,
-        mandatorySubjects: [],
-        recommendations: [
-          'Include English and Mathematics for better opportunities',
-          'Choose subjects that align with your career path',
-          'Consider a balanced mix from different categories',
-          'Select subjects you are confident in'
         ]
       };
     }

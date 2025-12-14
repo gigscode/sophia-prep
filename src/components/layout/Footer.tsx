@@ -25,7 +25,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-blue-200 text-sm mb-4">
-              Your comprehensive platform for JAMB and WAEC exam preparation.
+              Your comprehensive platform for JAMB exam preparation.
               Master your exams with interactive quizzes and study materials.
             </p>
             {/* Social Media Links */}
@@ -198,7 +198,7 @@ export function Footer() {
               © {currentYear} Sophia Prep. All rights reserved.
             </p>
             <p className="text-blue-300 text-sm text-center md:text-right">
-              Empowering students to excel in JAMB & WAEC examinations
+              Empowering students to excel in JAMB examinations
             </p>
           </div>
         </div>

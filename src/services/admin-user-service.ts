@@ -9,7 +9,7 @@ export type UserUpdate = {
   subscription_plan?: string | null;
   last_login?: string | null;
   is_active?: boolean;
-  exam_type?: 'JAMB' | 'WAEC' | 'BOTH' | null;
+  exam_type?: 'JAMB' | null;
 };
 
 export type UserFilters = {

@@ -49,7 +49,7 @@ export function HeroBannerExamples() {
           2. Feature Highlight (no icon)
         </h2>
         <HeroBanner
-          title="Master JAMB & WAEC with CBT Practice"
+          title="Master JAMB with CBT Practice"
           description="Experience real exam conditions with our timed CBT simulator. Practice with thousands of past questions and track your progress."
           buttonText="Start Practicing"
           buttonAction={handlePremiumClick}
@@ -79,7 +79,7 @@ export function HeroBannerExamples() {
         </h2>
         <HeroBanner
           title="Explore Our Study Hub"
-          description="Access comprehensive study materials, video tutorials, and expert-curated content for all JAMB and WAEC subjects."
+          description="Access comprehensive study materials, video tutorials, and expert-curated content for all JAMB subjects."
           buttonText="Browse Resources"
           buttonAction={() => console.log('Navigate to study hub')}
           gradientColors={['#3B82F6', '#1D4ED8']}

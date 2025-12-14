@@ -103,7 +103,7 @@ export const QuickQuestionUploader: React.FC = () => {
     <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
       <h3 className="font-medium mb-2">📚 Quick Question Upload (For Testing)</h3>
       <p className="text-sm text-gray-600 mb-3">
-        Upload 5 sample questions to test the new schema (2 JAMB Math, 1 each for English/Physics/Chemistry, 1 WAEC Math)
+        Upload 5 sample questions to test the new schema (5 JAMB questions: Math, English, Physics, Chemistry, Biology)
       </p>
       
       <button

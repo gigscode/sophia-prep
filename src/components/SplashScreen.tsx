@@ -74,7 +74,7 @@ export const SplashScreen = ({ onComplete, duration = 2500 }: SplashScreenProps)
             className="text-lg md:text-xl mt-4"
             style={{ fontFamily: 'Poppins, sans-serif', color: '#D4A855' }}
           >
-            JAMB • WAEC Exam Preparation
+            JAMB Exam Preparation
           </motion.p>
 
           {/* Loading indicator */}

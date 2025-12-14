@@ -6,7 +6,7 @@ export interface QuizAttempt {
   subject_id: string | null;
   topic_id: string | null;
   quiz_mode: 'PRACTICE' | 'MOCK_EXAM' | 'READER' | 'PAST_QUESTIONS' | string;
-  exam_type?: 'JAMB' | 'WAEC' | null;
+  exam_type?: 'JAMB' | null;
   exam_year: number | null;
   total_questions: number;
   correct_answers: number;
@@ -63,7 +63,7 @@ class AnalyticsService {
     subject_id?: string;
     topic_id?: string;
     quiz_mode: 'practice' | 'cbt' | 'mock' | 'reader' | string;
-    exam_type?: 'JAMB' | 'WAEC';
+    exam_type?: 'JAMB';
     exam_year?: number;
     total_questions: number;
     correct_answers: number;

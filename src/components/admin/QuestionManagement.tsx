@@ -92,7 +92,7 @@ export function QuestionManagement() {
   const handleFilterChange = (key: keyof QuestionFilters, value: string) => {
     const newFilters = { ...filters };
     if (key === 'examType') {
-      newFilters[key] = value === 'all' ? 'all' : value as 'JAMB' | 'WAEC';
+      newFilters[key] = value === 'all' ? 'all' : value as 'JAMB';
     } else if (key === 'status') {
       newFilters[key] = value === 'all' ? 'all' : value as 'active' | 'inactive';
     } else if (key === 'year') {

@@ -108,10 +108,7 @@ export function SubjectSelectionWizard({ userId, onComplete, onCancel }: Subject
   };
 
   const canProceedToStep3 = () => {
-    if (examType === 'JAMB') {
-      return selectedSubjects.length === 4;
-    }
-    return selectedSubjects.length >= 1; // WAEC requires at least English
+    return selectedSubjects.length === 4; // JAMB requires exactly 4 subjects
   };
 
   return (
@@ -141,30 +138,20 @@ export function SubjectSelectionWizard({ userId, onComplete, onCancel }: Subject
         {/* Step 1: Exam Type Selection */}
         {step === 1 && (
           <div>
-            <h2 className="text-2xl font-bold mb-4">Select Your Exam Type</h2>
+            <h2 className="text-2xl font-bold mb-4">JAMB Subject Selection</h2>
             <p className="text-gray-600 mb-6">
-              Choose the examination you're preparing for
+              Set up your JAMB subject combination for exam preparation
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="max-w-md mx-auto">
               <button
                 onClick={() => handleExamTypeSelect('JAMB')}
-                className="p-6 border-2 border-gray-300 rounded-lg hover:border-blue-600 hover:bg-blue-50 transition-all text-left"
+                className="w-full p-6 border-2 border-blue-600 bg-blue-50 rounded-lg text-left"
               >
                 <h3 className="text-xl font-semibold mb-2">JAMB</h3>
                 <p className="text-gray-600 text-sm">
                   Joint Admissions and Matriculation Board - University entrance exam
                 </p>
                 <p className="text-sm text-blue-600 mt-2">4 subjects required</p>
-              </button>
-              <button
-                onClick={() => handleExamTypeSelect('WAEC')}
-                className="p-6 border-2 border-gray-300 rounded-lg hover:border-green-600 hover:bg-green-50 transition-all text-left"
-              >
-                <h3 className="text-xl font-semibold mb-2">WAEC</h3>
-                <p className="text-gray-600 text-sm">
-                  West African Examinations Council - Secondary school leaving exam
-                </p>
-                <p className="text-sm text-green-600 mt-2">Up to 9 subjects</p>
               </button>
             </div>
           </div>

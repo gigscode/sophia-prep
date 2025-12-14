@@ -19,7 +19,7 @@ export interface ExamItem {
 }
 
 export class ExamItemService {
-  async getExamItemsBySubjectSlug(slug: string, filters?: { item_type?: 'ESSAY' | 'PRACTICAL'; exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<ExamItem[]> {
+  async getExamItemsBySubjectSlug(slug: string, filters?: { item_type?: 'ESSAY' | 'PRACTICAL'; exam_type?: 'JAMB'; limit?: number }): Promise<ExamItem[]> {
     const { data: subject } = await supabase
       .from('subjects')
       .select('*')
@@ -41,7 +41,7 @@ export class ExamItemService {
     return (data as ExamItem[]) || [];
   }
 
-  async getExamItemsByTopic(topicId: string, filters?: { item_type?: 'ESSAY' | 'PRACTICAL'; exam_type?: 'JAMB' | 'WAEC'; limit?: number }): Promise<ExamItem[]> {
+  async getExamItemsByTopic(topicId: string, filters?: { item_type?: 'ESSAY' | 'PRACTICAL'; exam_type?: 'JAMB'; limit?: number }): Promise<ExamItem[]> {
     let q = supabase
       .from('exam_items')
       .select('*')

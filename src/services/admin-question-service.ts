@@ -6,7 +6,7 @@ export type QuestionFilters = {
   search?: string;
   subjectId?: string;
   topicId?: string;
-  examType?: 'JAMB' | 'WAEC' | 'all';
+  examType?: 'JAMB' | 'all';
   year?: number | 'all';
   status?: 'active' | 'inactive' | 'all';
 };
@@ -22,7 +22,7 @@ export type QuestionInput = {
   correct_answer: 'A' | 'B' | 'C' | 'D';
   explanation?: string | null;
   exam_year?: number | null;
-  exam_type?: 'JAMB' | 'WAEC' | null;
+  exam_type?: 'JAMB' | null;
   question_number?: number | null;
   is_active?: boolean;
 };
@@ -304,7 +304,7 @@ export class AdminQuestionService {
         .from('questions')
         .select('exam_type, exam_year');
 
-      const byExamType: Record<string, number> = { JAMB: 0, WAEC: 0 };
+      const byExamType: Record<string, number> = { JAMB: 0 };
       const byYear: Record<number, number> = {};
 
       questions?.forEach((q: any) => {

@@ -177,7 +177,7 @@ export class AdminAnalyticsService {
         .from('questions')
         .select('exam_type');
 
-      const questionsByExamType: Record<string, number> = { JAMB: 0, WAEC: 0 };
+      const questionsByExamType: Record<string, number> = { JAMB: 0 };
 
       questions?.forEach((q: any) => {
         if (q.exam_type) questionsByExamType[q.exam_type]++;
