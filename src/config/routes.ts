@@ -28,8 +28,6 @@ export interface RouteConfig {
  * Lazy load all page components with proper error handling
  */
 const HomePage = lazy(() => import('../pages/HomePage').then(module => ({ default: module.HomePage })));
-const SubjectsPage = lazy(() => import('../pages/SubjectsPage').then(module => ({ default: module.SubjectsPage })));
-const SubjectDetailPage = lazy(() => import('../pages/SubjectDetailPage').then(module => ({ default: module.SubjectDetailPage })));
 const StudyHub = lazy(() => import('../pages/StudyHub').then(module => ({ default: module.StudyHub })));
 const SyllabusPage = lazy(() => import('../pages/SyllabusPage').then(module => ({ default: module.SyllabusPage })));
 const SummariesPage = lazy(() => import('../pages/SummariesPage').then(module => ({ default: module.SummariesPage })));
@@ -71,32 +69,6 @@ export const routeConfigs: RouteConfig[] = [
     showFooter: true,
     title: 'Home - Sophia Prep',
     description: 'Your comprehensive exam preparation platform'
-  },
-
-  // Subjects
-  {
-    path: '/subjects',
-    component: SubjectsPage,
-    requireAuth: false,
-    showFooter: false,
-    title: 'Subjects - Sophia Prep',
-    description: 'Browse all available subjects'
-  },
-  {
-    path: '/subjects/:slug',
-    component: SubjectDetailPage,
-    requireAuth: false,
-    showFooter: true,
-    paramValidation: [
-      {
-        name: 'slug',
-        validator: validateSlug,
-        required: true,
-        errorMessage: 'Invalid subject identifier'
-      }
-    ],
-    title: 'Subject Details - Sophia Prep',
-    description: 'Detailed information about the subject'
   },
 
   // Study Resources

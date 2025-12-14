@@ -53,7 +53,7 @@ export function NotFoundPage() {
       suggestions.push({ label: 'Take a Quiz', path: '/quiz' });
     }
     if (path.includes('subject') || path.includes('course')) {
-      suggestions.push({ label: 'Browse Subjects', path: '/subjects' });
+      suggestions.push({ label: 'Practice Questions', path: '/practice' });
     }
     if (path.includes('study') || path.includes('learn')) {
       suggestions.push({ label: 'Study Hub', path: '/study' });
@@ -68,7 +68,7 @@ export function NotFoundPage() {
     // Default suggestions if no specific matches
     if (suggestions.length === 0) {
       suggestions.push(
-        { label: 'Browse Subjects', path: '/subjects' },
+        { label: 'Practice Questions', path: '/practice' },
         { label: 'Take a Quiz', path: '/quiz' },
         { label: 'Study Hub', path: '/study' }
       );

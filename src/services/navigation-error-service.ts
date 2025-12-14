@@ -373,7 +373,7 @@ export class NavigationErrorService {
       if (path.includes('/quiz')) features.add('Quiz System');
       if (path.includes('/admin')) features.add('Admin Panel');
       if (path.includes('/profile')) features.add('User Profile');
-      if (path.includes('/subjects')) features.add('Subject Navigation');
+      if (path.includes('/practice')) features.add('Practice Navigation');
       if (path.includes('/login') || path.includes('/signup')) features.add('Authentication');
       if (path === '/') features.add('Home Page');
     });

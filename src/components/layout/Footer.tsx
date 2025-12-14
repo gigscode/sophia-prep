@@ -81,12 +81,12 @@ export function Footer() {
                 </button>
               </li>
               <li>
-                <button 
-                  onClick={() => navigate('/subjects')}
+                <button
+                  onClick={() => navigate('/practice')}
                   disabled={isNavigating}
                   className="text-blue-200 transition-colors footer-link hover:text-white disabled:opacity-50"
                 >
-                  Subjects
+                  Practice
                 </button>
               </li>
               <li>

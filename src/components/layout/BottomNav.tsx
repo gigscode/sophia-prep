@@ -6,8 +6,8 @@ export function BottomNav() {
 
   const navItems = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/subjects', label: 'Subjects', icon: BookOpen },
     { to: '/practice', label: 'Practice', icon: Target },
+    { to: '/jamb-exam', label: 'CBT Exam', icon: BookOpen },
     { to: '/study', label: 'Study', icon: Trophy },
     { to: '/profile', label: 'Profile', icon: User },
   ];

@@ -38,7 +38,7 @@ export function QuickLinksSection({
       icon: <BookOpen size={40} />,
       backgroundColor: 'hsl(var(--color-sky-blue))', // Sky blue pastel
       iconColor: 'hsl(var(--color-primary-blue))',
-      route: '/subjects',
+      route: '/practice',
     },
     {
       id: 'video-lessons',

@@ -199,12 +199,12 @@ export class RoutePreloader {
     const relatedPaths: string[] = [];
 
     // Simple heuristic: if user visited /subjects, they might visit /quiz
-    if (currentRoute.startsWith('/subjects')) {
+    if (currentRoute.startsWith('/practice')) {
       relatedPaths.push('/quiz', '/study');
     } else if (currentRoute.startsWith('/quiz')) {
-      relatedPaths.push('/quiz/results', '/subjects');
+      relatedPaths.push('/quiz/results', '/practice');
     } else if (currentRoute === '/') {
-      relatedPaths.push('/subjects', '/quiz', '/study');
+      relatedPaths.push('/practice', '/quiz', '/study');
     }
 
     return allRoutes.filter(route => relatedPaths.includes(route.path));

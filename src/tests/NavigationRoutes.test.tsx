@@ -53,7 +53,7 @@ describe('Navigation Routes', () => {
   });
 
   describe('QuickLinksSection Navigation', () => {
-    it('should navigate to /subjects when Study Past Questions is clicked', () => {
+    it('should navigate to /practice when Study Past Questions is clicked', () => {
       const mockNavigate = vi.fn();
       vi.mocked(useNavigate).mockReturnValue(mockNavigate);
 
@@ -65,9 +65,9 @@ describe('Navigation Routes', () => {
 
       const pastQuestionsCard = screen.getByText('Study Past Questions').closest('article');
       expect(pastQuestionsCard).toBeTruthy();
-      
+
       fireEvent.click(pastQuestionsCard!);
-      expect(mockNavigate).toHaveBeenCalledWith('/subjects');
+      expect(mockNavigate).toHaveBeenCalledWith('/practice');
     });
 
     it('should navigate to /videos when Video Lessons is clicked', () => {
@@ -233,14 +233,13 @@ describe('Navigation Routes', () => {
     it('should have correct study routes defined', () => {
       const expectedStudyRoutes = [
         '/study',
-        '/subjects',
         '/videos',
         '/novels',
         '/syllabus',
         '/summaries',
       ];
 
-      expect(expectedStudyRoutes).toHaveLength(6);
+      expect(expectedStudyRoutes).toHaveLength(5);
     });
 
     it('should have correct navigation routes defined', () => {

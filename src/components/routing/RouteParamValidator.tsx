@@ -90,7 +90,7 @@ export function RouteParamValidator({
           updateRouteParams(params as Record<string, string>);
           
           // Preserve query parameters for important routes
-          const importantRoutes = ['/quiz', '/subjects', '/study'];
+          const importantRoutes = ['/quiz', '/practice', '/study'];
           if (importantRoutes.some(route => routeConfig.path.startsWith(route))) {
             preserveCurrentParams();
           }

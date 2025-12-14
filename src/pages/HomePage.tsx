@@ -90,10 +90,10 @@ export function HomePage() {
   };
 
   const handleHeroBannerAction = () => {
-    // If user is logged in, go to subjects page
+    // If user is logged in, go to practice page
     // If not logged in, go to signup page
     if (user) {
-      navigate('/subjects');
+      navigate('/practice');
     } else {
       navigate('/signup');
     }
