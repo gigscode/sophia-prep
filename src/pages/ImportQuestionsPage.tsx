@@ -737,13 +737,7 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                     ]}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Exam Type (Optional)</label>
-                                <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                    <span className="text-blue-800 font-medium">JAMB</span>
-                                    <p className="text-sm text-blue-600 mt-1">All questions are imported for JAMB exam</p>
-                                </div>
-                            </div>
+
                             <div>
                                 <label className="block text-sm font-medium mb-2">Exam Year (Optional)</label>
                                 <input

@@ -273,10 +273,6 @@ export function QuestionManagement() {
             <div className="text-xs sm:text-sm text-gray-600">JAMB Questions</div>
             <div className="text-lg sm:text-2xl font-bold">{stats.byExamType.JAMB || 0}</div>
           </div>
-          <div className="bg-white p-3 sm:p-4 rounded-lg shadow">
-            <div className="text-xs sm:text-sm text-gray-600">WAEC Questions</div>
-            <div className="text-lg sm:text-2xl font-bold">{stats.byExamType.WAEC || 0}</div>
-          </div>
         </div>
       )}
 
@@ -296,15 +292,7 @@ export function QuestionManagement() {
             ...subjects.map(s => ({ value: s.id, label: s.name }))
           ]}
         />
-        <Select
-          value={filters.examType || 'all'}
-          onChange={(e) => handleFilterChange('examType', e.target.value)}
-          options={[
-            { value: 'all', label: 'All Exam Types' },
-            { value: 'JAMB', label: 'JAMB' },
-            { value: 'WAEC', label: 'WAEC' },
-          ]}
-        />
+
         <Select
           value={filters.status || 'all'}
           onChange={(e) => handleFilterChange('status', e.target.value)}

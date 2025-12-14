@@ -19,7 +19,6 @@ interface VideoLesson {
 export function VideosPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
-  const [selectedExamType, setSelectedExamType] = useState<ExamType | 'ALL'>('ALL');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,10 +36,6 @@ export function VideosPage() {
       setLoading(false);
     }
   };
-
-  const filteredSubjects = subjects.filter(
-    s => selectedExamType === 'ALL' || s.exam_type === selectedExamType || s.exam_type === 'BOTH'
-  );
 
   // TODO: Load video lessons from database
   const sampleVideos: VideoLesson[] = [
@@ -64,35 +59,13 @@ export function VideosPage() {
       />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          <button
-            onClick={() => setSelectedExamType('ALL')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'ALL'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            All Subjects
-          </button>
-          <button
-            onClick={() => setSelectedExamType('JAMB')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${selectedExamType === 'JAMB'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-          >
-            JAMB
-          </button>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Subjects Sidebar */}
           <div className="lg:col-span-1">
             <Card className="sticky top-4">
               <h3 className="font-semibold text-gray-800 mb-4">Select Subject</h3>
               <div className="space-y-2">
-                {filteredSubjects.map((subject) => (
+                {subjects.map((subject) => (
                   <button
                     key={subject.id}
                     onClick={() => setSelectedSubject(subject)}

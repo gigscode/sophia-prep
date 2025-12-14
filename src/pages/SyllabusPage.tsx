@@ -8,18 +8,12 @@ import type { Subject, ExamType } from '../integrations/supabase/types';
 
 export function SyllabusPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [filteredSubjects, setFilteredSubjects] = useState<Subject[]>([]);
-  const [selectedExamType, setSelectedExamType] = useState<ExamType | 'ALL'>('ALL');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadSubjects();
   }, []);
-
-  useEffect(() => {
-    filterSubjects();
-  }, [subjects, selectedExamType]);
 
   const loadSubjects = async () => {
     try {
@@ -31,18 +25,6 @@ export function SyllabusPage() {
       setError(err instanceof Error ? err.message : 'Failed to load subjects');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const filterSubjects = () => {
-    if (selectedExamType === 'ALL') {
-      setFilteredSubjects(subjects);
-    } else {
-      setFilteredSubjects(
-        subjects.filter(
-          s => s.exam_type === selectedExamType || s.exam_type === 'BOTH'
-        )
-      );
     }
   };
 
@@ -80,33 +62,9 @@ export function SyllabusPage() {
       />
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filter Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          <button
-            onClick={() => setSelectedExamType('ALL')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'ALL'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            All Subjects
-          </button>
-          <button
-            onClick={() => setSelectedExamType('JAMB')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors whitespace-nowrap ${
-              selectedExamType === 'JAMB'
-                ? 'bg-blue-600 text-white'
-                : 'bg-white text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            JAMB Only
-          </button>
-        </div>
-
         {/* Subjects Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSubjects.map((subject) => (
+          {subjects.map((subject) => (
             <Card key={subject.id} className="hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -147,9 +105,9 @@ export function SyllabusPage() {
           ))}
         </div>
 
-        {filteredSubjects.length === 0 && (
+        {subjects.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500">No subjects found for the selected exam type.</p>
+            <p className="text-gray-500">No subjects found.</p>
           </div>
         )}
       </div>

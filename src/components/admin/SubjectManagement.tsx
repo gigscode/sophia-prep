@@ -25,7 +25,7 @@ export function SubjectManagement() {
     description: '',
     icon: 'BookOpen',
     color_theme: '#2563EB',
-    exam_type: 'BOTH',
+    exam_type: 'JAMB',
     subject_category: 'GENERAL',
     is_active: true,
     sort_order: 0,
@@ -58,7 +58,7 @@ export function SubjectManagement() {
       description: '',
       icon: 'BookOpen',
       color_theme: '#2563EB',
-      exam_type: 'BOTH',
+      exam_type: 'JAMB',
       subject_category: 'GENERAL',
       is_active: true,
       sort_order: subjects.length,
@@ -211,16 +211,7 @@ export function SubjectManagement() {
             { value: 'LANGUAGE', label: 'Language' },
           ]}
         />
-        <Select
-          value={filters.examType || 'all'}
-          onChange={(e) => handleFilterChange('examType', e.target.value)}
-          options={[
-            { value: 'all', label: 'All Exam Types' },
-            { value: 'JAMB', label: 'JAMB' },
-            { value: 'WAEC', label: 'WAEC' },
-            { value: 'BOTH', label: 'Both' },
-          ]}
-        />
+
         <Select
           value={filters.status || 'all'}
           onChange={(e) => handleFilterChange('status', e.target.value)}
@@ -277,16 +268,13 @@ export function SubjectManagement() {
                 { value: 'LANGUAGE', label: 'Language' },
               ]}
             />
-            <Select
-              label="Exam Type *"
-              value={formData.exam_type}
-              onChange={(e) => setFormData({ ...formData, exam_type: e.target.value as any })}
-              options={[
-                { value: 'JAMB', label: 'JAMB' },
-                { value: 'WAEC', label: 'WAEC' },
-                { value: 'BOTH', label: 'Both' },
-              ]}
-            />
+            <div>
+              <label className="block text-sm font-medium mb-2">Exam Type *</label>
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <span className="text-blue-800 font-medium">JAMB</span>
+                <p className="text-sm text-blue-600 mt-1">All subjects are for JAMB exam</p>
+              </div>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Input
