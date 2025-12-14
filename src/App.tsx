@@ -10,7 +10,6 @@ import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
 
-import { LegacyQuizRedirect } from './components/quiz/LegacyQuizRedirect';
 import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator } from './components/routing';
 import { EnhancedAuthProvider } from './components/auth';
 import { routeConfigs } from './config/routes';
@@ -112,10 +111,6 @@ export function App() {
                   />
                 );
               })}
-
-              {/* Legacy routes - redirect to new unified system */}
-              <Route path="/quiz/practice" element={<LegacyQuizRedirect mode="practice" />} />
-              <Route path="/quiz/cbt" element={<LegacyQuizRedirect mode="exam" />} />
 
               {/* Events - placeholder routes until EventsPage is created */}
               <Route path="/events" element={<Navigate to="/" replace />} />

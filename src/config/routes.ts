@@ -34,12 +34,8 @@ const SummariesPage = lazy(() => import('../pages/SummariesPage').then(module =>
 const NovelsPage = lazy(() => import('../pages/NovelsPage').then(module => ({ default: module.NovelsPage })));
 const VideosPage = lazy(() => import('../pages/VideosPage').then(module => ({ default: module.VideosPage })));
 
-const ModeSelectionPage = lazy(() => import('../pages/ModeSelectionPage').then(module => ({ default: module.ModeSelectionPage })));
-
-const OptimizedQuizPage = lazy(() => import('../pages/OptimizedQuizPage').then(module => ({ default: module.OptimizedQuizPage })));
 const PracticeModePage = lazy(() => import('../pages/PracticeModePage').then(module => ({ default: module.PracticeModePage })));
 const JAMBExamPage = lazy(() => import('../pages/JAMBExamPage').then(module => ({ default: module.JAMBExamPage })));
-const UnifiedQuiz = lazy(() => import('../pages/UnifiedQuiz').then(module => ({ default: module.UnifiedQuiz })));
 const QuizResultsPage = lazy(() => import('../pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('../pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
 const AboutPage = lazy(() => import('../pages/AboutPage').then(module => ({ default: module.AboutPage })));
@@ -135,37 +131,12 @@ export const routeConfigs: RouteConfig[] = [
 
   // Quiz Routes
   {
-    path: '/quiz/mode-selection',
-    component: ModeSelectionPage,
-    requireAuth: false,
-    showFooter: false,
-    title: 'Mode Selection - Sophia Prep',
-    description: 'Select quiz mode and settings'
-  },
-
-  {
-    path: '/quiz/unified',
-    component: UnifiedQuiz,
-    requireAuth: false,
-    showFooter: false,
-    title: 'Quiz - Sophia Prep',
-    description: 'Take your quiz'
-  },
-  {
     path: '/quiz/results',
     component: QuizResultsPage,
     requireAuth: false,
     showFooter: false,
     title: 'Quiz Results - Sophia Prep',
     description: 'View your quiz results and performance'
-  },
-  {
-    path: '/quiz/optimized',
-    component: OptimizedQuizPage,
-    requireAuth: false,
-    showFooter: false,
-    title: 'JAMB Quiz Practice - Sophia Prep',
-    description: 'Practice JAMB questions by subject, topic, and year'
   },
 
   // Help & Info

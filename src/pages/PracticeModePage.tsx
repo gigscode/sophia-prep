@@ -153,11 +153,15 @@ export function PracticeModePage() {
 
   const handleAnswerSelect = (questionId: string, answer: string) => {
     if (answers[questionId]) return; // Already answered
-    
+
     setAnswers(prev => ({
       ...prev,
       [questionId]: answer
     }));
+    // Don't show explanation immediately - wait for submit button
+  };
+
+  const handleSubmitAnswer = () => {
     setShowExplanation(true);
   };
 
@@ -458,13 +462,28 @@ export function PracticeModePage() {
               Previous
             </button>
 
-            <button
-              onClick={handleNextQuestion}
-              disabled={!currentAnswer}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {currentQuestionIndex === questions.length - 1 ? 'See Results' : 'Next Question'}
-            </button>
+            <div className="flex items-center gap-3">
+              {/* Submit button - only show if answer selected but explanation not shown yet */}
+              {currentAnswer && !showExplanation && (
+                <button
+                  onClick={handleSubmitAnswer}
+                  className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors"
+                >
+                  <CheckCircle className="w-5 h-5" />
+                  Submit Answer
+                </button>
+              )}
+
+              {/* Next button - only show after explanation is shown */}
+              {showExplanation && (
+                <button
+                  onClick={handleNextQuestion}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
+                >
+                  {currentQuestionIndex === questions.length - 1 ? 'See Results' : 'Next Question'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
