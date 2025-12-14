@@ -50,7 +50,7 @@ export function FeatureCardExamples() {
         <div className="max-w-sm">
           <FeatureCard
             title="CBT Quiz (Past Questions)"
-            description="Timed quiz simulating real JAMB/WAEC exam conditions. Automatic submission after time elapses."
+            description="Timed quiz simulating real JAMB exam conditions. Automatic submission after time elapses."
             icon={<ClipboardIcon />}
             iconBackgroundColor="hsl(var(--color-pastel-mint))"
             backgroundColor="hsl(var(--color-bg-card))"

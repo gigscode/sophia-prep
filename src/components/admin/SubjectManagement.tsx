@@ -142,11 +142,6 @@ export function SubjectManagement() {
       ),
     },
     {
-      key: 'exam_type',
-      label: 'Exam Type',
-      render: (subject: Subject) => subject.exam_type,
-    },
-    {
       key: 'is_active',
       label: 'Status',
       render: (subject: Subject) => (
@@ -255,27 +250,18 @@ export function SubjectManagement() {
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Brief description of the subject"
           />
-          <div className="grid grid-cols-2 gap-4">
-            <Select
-              label="Category *"
-              value={formData.subject_category}
-              onChange={(e) => setFormData({ ...formData, subject_category: e.target.value as any })}
-              options={[
-                { value: 'SCIENCE', label: 'Science' },
-                { value: 'COMMERCIAL', label: 'Commercial' },
-                { value: 'ARTS', label: 'Arts' },
-                { value: 'GENERAL', label: 'General' },
-                { value: 'LANGUAGE', label: 'Language' },
-              ]}
-            />
-            <div>
-              <label className="block text-sm font-medium mb-2">Exam Type *</label>
-              <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <span className="text-blue-800 font-medium">JAMB</span>
-                <p className="text-sm text-blue-600 mt-1">All subjects are for JAMB exam</p>
-              </div>
-            </div>
-          </div>
+          <Select
+            label="Category *"
+            value={formData.subject_category}
+            onChange={(e) => setFormData({ ...formData, subject_category: e.target.value as any })}
+            options={[
+              { value: 'SCIENCE', label: 'Science' },
+              { value: 'COMMERCIAL', label: 'Commercial' },
+              { value: 'ARTS', label: 'Arts' },
+              { value: 'GENERAL', label: 'General' },
+              { value: 'LANGUAGE', label: 'Language' },
+            ]}
+          />
           <div className="grid grid-cols-2 gap-4">
             <Input
               label="Icon"

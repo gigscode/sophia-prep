@@ -200,11 +200,6 @@ export function QuestionManagement() {
       ),
     },
     {
-      key: 'exam_type',
-      label: 'Exam Type',
-      render: (q: QuestionWithDetails) => q.exam_type || 'N/A',
-    },
-    {
       key: 'exam_year',
       label: 'Year',
       render: (q: QuestionWithDetails) => q.exam_year || 'N/A',

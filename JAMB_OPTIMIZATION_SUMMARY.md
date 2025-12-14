@@ -101,23 +101,62 @@ All WAEC-related features, filters, and UI elements have been removed from the a
 
 ## Files Modified
 
+### Phase 1: Initial Optimization
 1. ✅ `src/pages/ImportQuestionsPage.tsx`
 2. ✅ `src/pages/SyllabusPage.tsx`
 3. ✅ `src/pages/VideosPage.tsx`
 4. ✅ `src/components/admin/QuestionManagement.tsx`
 5. ✅ `src/components/admin/SubjectManagement.tsx`
 
-**Total Files Modified:** 5
+### Phase 2: Admin Table Columns & Example Files
+6. ✅ `src/components/admin/QuestionManagement.tsx` (removed exam_type column)
+7. ✅ `src/components/admin/SubjectManagement.tsx` (removed exam_type column & form display)
+8. ✅ `src/components/cards/FeatureCard.example.tsx`
+9. ✅ `src/components/cards/QuizModeCard.example.tsx`
+10. ✅ `src/components/cards/QuizModeCard.README.md`
+
+**Total Files Modified:** 8 unique files
+
+---
+
+## Additional Changes (Phase 2)
+
+### 6. Admin - Question Management Table
+
+**Changes:**
+- ✅ Removed "Exam Type" column from questions table
+- Table now shows: ID, Question Text, Subject, Year, Status, Actions
+- Cleaner table layout with one less column
+
+### 7. Admin - Subject Management Table & Form
+
+**Changes:**
+- ✅ Removed "Exam Type" column from subjects table
+- ✅ Removed static "JAMB" display from subject form
+- ✅ All subjects automatically set to JAMB exam type in backend
+- Table now shows: Name, Slug, Category, Status, Actions
+
+### 8. Example Files & Documentation
+
+**Changes:**
+- ✅ Updated `FeatureCard.example.tsx` - Changed "JAMB/WAEC" to "JAMB"
+- ✅ Updated `QuizModeCard.example.tsx` - Changed all 3 instances of "JAMB/WAEC" to "JAMB"
+- ✅ Updated `QuizModeCard.README.md` - Changed "JAMB/WAEC" to "JAMB"
 
 ---
 
 ## Build Status
 
+### Phase 1 Build
 ✅ **Build Successful** (completed in 44.06s)
+
+### Phase 2 Build
+✅ **Build Successful** (completed in 43.46s)
 
 - No errors
 - No warnings
 - All optimizations applied successfully
+- Bundle size reduced: AdminPage (99.79 kB → 98.20 kB)
 
 ---
 

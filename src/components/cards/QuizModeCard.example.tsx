@@ -61,7 +61,7 @@ export function QuizModeCardExamples() {
             mode="cbt"
             icon={<ClipboardCheckIcon />}
             title="CBT Quiz (Past Questions)"
-            description="Timed quiz simulating real JAMB/WAEC exam conditions with automatic submission after time elapses (2hr 30min for JAMB). No explanations shown until after completion."
+            description="Timed quiz simulating real JAMB exam conditions with automatic submission after time elapses (2hr 30min for JAMB). No explanations shown until after completion."
             onClick={handleCBTQuizClick}
           />
         </div>
@@ -82,7 +82,7 @@ export function QuizModeCardExamples() {
             mode="cbt"
             icon={<ClipboardCheckIcon />}
             title="CBT Quiz (Past Questions)"
-            description="Timed quiz simulating real JAMB/WAEC exam conditions. Automatic submission after time elapses."
+            description="Timed quiz simulating real JAMB exam conditions. Automatic submission after time elapses."
             onClick={handleCBTQuizClick}
           />
         </div>
@@ -103,7 +103,7 @@ export function QuizModeCardExamples() {
             mode="cbt"
             icon={<ClipboardCheckIcon />}
             title="CBT Quiz"
-            description="Timed exam simulation with JAMB/WAEC past questions."
+            description="Timed exam simulation with JAMB past questions."
             onClick={handleCBTQuizClick}
           />
         </div>

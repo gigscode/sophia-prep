@@ -45,7 +45,7 @@ function QuizModesSection() {
         mode="cbt"
         icon={<ClipboardCheck size={28} />}
         title="CBT Quiz (Past Questions)"
-        description="Timed quiz simulating real JAMB/WAEC exam conditions with automatic submission after time elapses."
+        description="Timed quiz simulating real JAMB exam conditions with automatic submission after time elapses."
         onClick={() => navigate('/cbt-quiz')}
       />
     </div>
