@@ -1,119 +1,117 @@
 #!/usr/bin/env node
+
 /**
- * Check Database Schema
+ * Database Schema Verification Script
  * 
- * Inspects the database to find the correct table names and structure
+ * This script checks if the required tables and columns exist
+ * and provides fixes for common schema issues.
  */
 
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import path from 'path';
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+// Load environment variables
+dotenv.config({ path: '.env.local' });
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
 
-console.log('🔍 Checking Database Schema\n');
-
-if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-  console.error('❌ Missing Supabase credentials');
+if (!supabaseUrl || !supabaseKey) {
+  console.error('❌ Missing Supabase credentials in .env.local');
   process.exit(1);
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-async function checkSchema() {
-  console.log('📊 Checking for tables...\n');
-  
-  // Check for questions table
+async function checkTableExists(tableName) {
   try {
-    const { data: questions, error: qError } = await supabase
-      .from('questions')
+    const { error } = await supabase
+      .from(tableName)
       .select('*')
       .limit(1);
     
-    if (qError) {
-      console.log('❌ questions table:', qError.message);
-    } else {
-      console.log('✅ questions table exists');
-      if (questions && questions.length > 0) {
-        console.log('   Columns:', Object.keys(questions[0]).join(', '));
-      }
-    }
-  } catch (err) {
-    console.log('❌ questions table error:', err.message);
-  }
-  
-  // Check for subjects table (might be named differently)
-  const possibleNames = ['subjects', 'subject', 'exam_subjects', 'quiz_subjects'];
-  
-  for (const tableName of possibleNames) {
-    try {
-      const { data, error } = await supabase
-        .from(tableName)
-        .select('*')
-        .limit(1);
-      
-      if (!error) {
-        console.log(`✅ ${tableName} table exists`);
-        if (data && data.length > 0) {
-          console.log(`   Columns:`, Object.keys(data[0]).join(', '));
-        }
-      }
-    } catch (err) {
-      // Table doesn't exist, continue
-    }
-  }
-  
-  // Check for topics table
-  try {
-    const { data: topics, error: tError } = await supabase
-      .from('topics')
-      .select('*')
-      .limit(1);
-    
-    if (tError) {
-      console.log('❌ topics table:', tError.message);
-    } else {
-      console.log('✅ topics table exists');
-      if (topics && topics.length > 0) {
-        console.log('   Columns:', Object.keys(topics[0]).join(', '));
-      }
-    }
-  } catch (err) {
-    console.log('❌ topics table error:', err.message);
-  }
-  
-  console.log('\n📊 Checking relationships...\n');
-  
-  // Check if topics has subject_id
-  try {
-    const { data: topics } = await supabase
-      .from('topics')
-      .select('id, subject_id, name')
-      .limit(1);
-    
-    if (topics && topics.length > 0) {
-      console.log('✅ topics.subject_id exists');
-      console.log('   Sample topic:', topics[0]);
-    }
-  } catch (err) {
-    console.log('⚠️  Could not check topics.subject_id');
+    return !error;
+  } catch (error) {
+    return false;
   }
 }
 
-checkSchema()
-  .then(() => {
-    console.log('\n✅ Schema check complete\n');
-    process.exit(0);
-  })
-  .catch(err => {
-    console.error('\n❌ Error:', err.message);
-    process.exit(1);
-  });
+async function checkColumnExists(tableName, columnName) {
+  try {
+    const { error } = await supabase
+      .from(tableName)
+      .select(columnName)
+      .limit(1);
+    
+    return !error;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function main() {
+  console.log('🔍 Checking database schema...\n');
+
+  // Check subscription_plans table
+  console.log('📋 Checking subscription_plans table...');
+  const subscriptionPlansExists = await checkTableExists('subscription_plans');
+  
+  if (!subscriptionPlansExists) {
+    console.log('❌ subscription_plans table does not exist');
+    console.log('💡 Solution: Run the schema.sql file in Supabase SQL Editor');
+  } else {
+    console.log('✅ subscription_plans table exists');
+    
+    // Check price_ngn column
+    const priceNgnExists = await checkColumnExists('subscription_plans', 'price_ngn');
+    if (!priceNgnExists) {
+      console.log('❌ price_ngn column does not exist in subscription_plans');
+      console.log('💡 Solution: Add the column with: ALTER TABLE subscription_plans ADD COLUMN price_ngn DECIMAL(10,2);');
+    } else {
+      console.log('✅ price_ngn column exists');
+    }
+  }
+
+  console.log('');
+
+  // Check questions table
+  console.log('📋 Checking questions table...');
+  const questionsExists = await checkTableExists('questions');
+  
+  if (!questionsExists) {
+    console.log('❌ questions table does not exist');
+    console.log('💡 Solution: Run the schema.sql file in Supabase SQL Editor');
+  } else {
+    console.log('✅ questions table exists');
+    
+    // Check exam_type column
+    const examTypeExists = await checkColumnExists('questions', 'exam_type');
+    if (!examTypeExists) {
+      console.log('❌ exam_type column does not exist in questions');
+      console.log('💡 Solution: Add the column with: ALTER TABLE questions ADD COLUMN exam_type TEXT CHECK (exam_type IN (\'JAMB\'));');
+    } else {
+      console.log('✅ exam_type column exists');
+    }
+  }
+
+  console.log('');
+
+  // Check user_subscriptions table
+  console.log('📋 Checking user_subscriptions table...');
+  const userSubscriptionsExists = await checkTableExists('user_subscriptions');
+  
+  if (!userSubscriptionsExists) {
+    console.log('❌ user_subscriptions table does not exist');
+    console.log('💡 Solution: Run the schema.sql file in Supabase SQL Editor');
+  } else {
+    console.log('✅ user_subscriptions table exists');
+  }
+
+  console.log('\n🏁 Schema check complete!');
+  console.log('\nIf any tables or columns are missing, please:');
+  console.log('1. Open Supabase Dashboard > SQL Editor');
+  console.log('2. Run the supabase/schema.sql file');
+  console.log('3. Or run the individual ALTER TABLE commands shown above');
+}
+
+main().catch(console.error);

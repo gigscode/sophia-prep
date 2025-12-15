@@ -75,7 +75,7 @@ export class AdminAnalyticsService {
         .select('subscription_plan');
 
       const usersBySubscription: Record<string, number> = {};
-      users?.forEach((user: any) => {
+      users?.forEach((user: { subscription_plan?: string }) => {
         const plan = user.subscription_plan || 'Free';
         usersBySubscription[plan] = (usersBySubscription[plan] || 0) + 1;
       });
@@ -117,7 +117,7 @@ export class AdminAnalyticsService {
       const attemptsBySubject: Record<string, number> = {};
       const scoresBySubject: Record<string, number[]> = {};
 
-      attempts?.forEach((attempt: any) => {
+      attempts?.forEach((attempt: { score_percentage?: number; subject_id?: string }) => {
         totalScore += attempt.score_percentage || 0;
         const subject = attempt.subject_id || 'Unknown';
         attemptsBySubject[subject] = (attemptsBySubject[subject] || 0) + 1;
@@ -172,16 +172,28 @@ export class AdminAnalyticsService {
 
 
 
-      // Get questions by exam type
-      const { data: questions } = await supabase
-        .from('questions')
-        .select('exam_type');
-
+      // Get questions by exam type (with error handling)
       const questionsByExamType: Record<string, number> = { JAMB: 0 };
+      
+      try {
+        const { data: questions, error } = await supabase
+          .from('questions')
+          .select('exam_type');
 
-      questions?.forEach((q: any) => {
-        if (q.exam_type) questionsByExamType[q.exam_type]++;
-      });
+        if (error) {
+          if (error.code === '42703' || error.message?.includes('does not exist')) {
+            console.warn('Questions table schema issue - exam_type column may not exist');
+          } else {
+            console.error('Error fetching questions for analytics:', error);
+          }
+        } else {
+          questions?.forEach((q: { exam_type?: string }) => {
+            if (q.exam_type) questionsByExamType[q.exam_type]++;
+          });
+        }
+      } catch (error) {
+        console.warn('Failed to fetch questions analytics, using defaults:', error);
+      }
 
       return {
         totalQuestions: totalQuestions || 0,
@@ -216,9 +228,9 @@ export class AdminAnalyticsService {
         .select('plan_id, status');
 
       const subscriptionsByPlan: Record<string, number> = {};
-      subscriptions?.forEach((sub: any) => {
+      subscriptions?.forEach((sub: { status?: string; plan_id?: string }) => {
         if (sub.status === 'active') {
-          subscriptionsByPlan[sub.plan_id] = (subscriptionsByPlan[sub.plan_id] || 0) + 1;
+          subscriptionsByPlan[sub.plan_id || 'unknown'] = (subscriptionsByPlan[sub.plan_id || 'unknown'] || 0) + 1;
         }
       });
 

@@ -59,6 +59,7 @@ class SubscriptionService {
 
       if (!targetUserId) return null;
 
+      // First, try the full query with subscription_plans join
       const { data, error } = await supabase
         .from('user_subscriptions')
         .select(`
@@ -82,11 +83,34 @@ class SubscriptionService {
           // No active subscription found
           return null;
         }
+        if (error.code === '42703' || error.message?.includes('does not exist')) {
+          // Column or table does not exist - try fallback query
+          console.warn('Subscription schema issue detected, using fallback query');
+
+          // Fallback: query without the problematic join
+          const fallbackResult = await supabase
+            .from('user_subscriptions')
+            .select('*')
+            .eq('user_id', targetUserId)
+            .eq('status', 'ACTIVE')
+            .gte('end_date', new Date().toISOString())
+            .order('end_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (fallbackResult.error) {
+            console.error('Fallback subscription query also failed:', fallbackResult.error);
+            return null;
+          }
+
+          // Return subscription without plan details
+          return fallbackResult.data as UserSubscription | null;
+        }
         console.error('Error fetching subscription:', error);
         return null;
       }
 
-      return data as any;
+      return data as UserSubscription | null;
     } catch (error) {
       console.error('Error in getActiveSubscription:', error);
       return null;
@@ -122,7 +146,7 @@ class SubscriptionService {
         return [];
       }
 
-      return (data || []) as any[];
+      return (data || []) as UserSubscription[];
     } catch (error) {
       console.error('Error in getUserSubscriptions:', error);
       return [];

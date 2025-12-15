@@ -1,7 +1,8 @@
--- MANUAL FIX FOR CONSOLE ERRORS
--- Copy and paste this SQL into Supabase Dashboard > SQL Editor and run it
+-- Fix missing columns that are causing console errors
+-- Date: 2025-12-15
+-- Description: Add missing price_ngn and exam_type columns
 
--- Fix 1: Add missing price_ngn column to subscription_plans table
+-- Add price_ngn column to subscription_plans table if it doesn't exist
 DO $$ 
 BEGIN
     IF NOT EXISTS (
@@ -18,7 +19,7 @@ BEGIN
     END IF;
 END $$;
 
--- Fix 2: Add missing exam_type column to questions table
+-- Add exam_type column to questions table if it doesn't exist
 DO $$ 
 BEGIN
     IF NOT EXISTS (
@@ -38,27 +39,10 @@ BEGIN
     END IF;
 END $$;
 
--- Fix 3: Create index for better performance
+-- Create index on exam_type for better performance
 CREATE INDEX IF NOT EXISTS idx_questions_exam_type ON questions(exam_type);
 
--- Fix 4: Update any existing subscription plans to have a default price
+-- Update any existing subscription plans to have a default price if needed
 UPDATE subscription_plans 
 SET price_ngn = 0 
 WHERE price_ngn IS NULL;
-
--- Verification queries (run these after the fixes to confirm)
-SELECT 'subscription_plans columns:' as info;
-
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'subscription_plans' 
-ORDER BY ordinal_position;
-
-SELECT 'questions columns (showing exam_type):' as info;
-
-SELECT column_name, data_type 
-FROM information_schema.columns 
-WHERE table_name = 'questions' 
-AND column_name = 'exam_type';
-
-SELECT 'Fix completed successfully!' as result;
