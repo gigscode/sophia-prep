@@ -122,7 +122,7 @@ export function QuestionManagement() {
   };
 
   const handleImport = () => {
-    navigate('/admin/import-questions');
+    navigate('/7351/admin/import-questions');
   };
 
   const handleCreate = () => {

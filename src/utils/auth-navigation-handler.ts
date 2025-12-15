@@ -30,8 +30,8 @@ export class AuthNavigationHandler {
     this.config = {
       loginPath: '/login',
       homePath: '/',
-      adminPath: '/admin',
-      protectedPaths: ['/admin', '/profile', '/quiz'],
+      adminPath: '/7351/admin',
+      protectedPaths: ['/7351/admin', '/profile', '/quiz'],
       publicPaths: ['/', '/login', '/signup', '/about', '/contact'],
       preserveLocationOnLogin: true,
       preserveLocationOnLogout: false,

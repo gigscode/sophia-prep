@@ -31,8 +31,8 @@ describe('AuthNavigationHandler', () => {
     handler = new AuthNavigationHandler({
       loginPath: '/login',
       homePath: '/',
-      adminPath: '/admin',
-      protectedPaths: ['/admin', '/profile'],
+      adminPath: '/7351/admin',
+      protectedPaths: ['/7351/admin', '/profile'],
       publicPaths: ['/', '/login', '/about'],
     });
     
@@ -64,7 +64,7 @@ describe('AuthNavigationHandler', () => {
     handler.setNavigator(mockNavigate, '/login');
     handler.handleAuthStateChange(loginEvent);
 
-    expect(mockNavigate).toHaveBeenCalledWith('/admin', { replace: true });
+    expect(mockNavigate).toHaveBeenCalledWith('/7351/admin', { replace: true });
   });
 
   it('should redirect to login after logout from protected path', () => {

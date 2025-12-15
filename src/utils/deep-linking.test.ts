@@ -91,8 +91,8 @@ vi.mock('../config/routes', () => ({
         title: 'Profile - Sophia Prep', 
         description: 'User profile' 
       },
-      '/admin': { 
-        path: '/admin', 
+      '/7351/admin': { 
+        path: '/7351/admin', 
         requireAuth: true, 
         requireAdmin: true, 
         title: 'Admin - Sophia Prep', 
@@ -112,7 +112,7 @@ vi.mock('../config/routes', () => ({
     { path: '/subjects/:slug', requireAuth: false, requireAdmin: false, title: 'Subject - Sophia Prep' },
     { path: '/quiz/unified', requireAuth: false, requireAdmin: false, title: 'Quiz - Sophia Prep' },
     { path: '/profile', requireAuth: true, requireAdmin: false, title: 'Profile - Sophia Prep' },
-    { path: '/admin', requireAuth: true, requireAdmin: true, title: 'Admin - Sophia Prep' }
+    { path: '/7351/admin', requireAuth: true, requireAdmin: true, title: 'Admin - Sophia Prep' }
   ]
 }));
 
@@ -163,7 +163,7 @@ describe('DeepLinkManager', () => {
       expect(profileResult.requiresAuth).toBe(true);
       expect(profileResult.requiresAdmin).toBe(false);
       
-      const adminResult = manager.validateDeepLink('/admin');
+      const adminResult = manager.validateDeepLink('/7351/admin');
       expect(adminResult.requiresAuth).toBe(true);
       expect(adminResult.requiresAdmin).toBe(true);
     });
@@ -215,7 +215,7 @@ describe('DeepLinkManager', () => {
 
     it('should deny access to admin routes for non-admin users', async () => {
       const mockUser = { isAdmin: false };
-      const result = await manager.handleDeepLink('/admin', mockNavigate, mockUser);
+      const result = await manager.handleDeepLink('/7351/admin', mockNavigate, mockUser);
       
       expect(result.success).toBe(false);
       expect(result.errors).toContain('Admin privileges required to access this page');
@@ -223,10 +223,10 @@ describe('DeepLinkManager', () => {
 
     it('should allow access to admin routes for admin users', async () => {
       const mockUser = { isAdmin: true };
-      const result = await manager.handleDeepLink('/admin', mockNavigate, mockUser);
+      const result = await manager.handleDeepLink('/7351/admin', mockNavigate, mockUser);
       
       expect(result.success).toBe(true);
-      expect(mockNavigate).toHaveBeenCalledWith('/admin', { replace: false });
+      expect(mockNavigate).toHaveBeenCalledWith('/7351/admin', { replace: false });
     });
   });
 

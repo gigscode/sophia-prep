@@ -186,7 +186,7 @@ export function DeepLinkingDemo() {
               { label: 'Valid Subject Page', url: '/subjects/mathematics?mode=practice' },
               { label: 'Valid Quiz Page', url: '/quiz/unified?subject=physics&mode=exam' },
               { label: 'Protected Profile Page', url: '/profile' },
-              { label: 'Admin Page', url: '/admin' },
+              { label: 'Admin Page', url: '/7351/admin' },
               { label: 'Invalid Route', url: '/nonexistent/page' },
               { label: 'Unsafe URL', url: 'javascript:alert("xss")' }
             ].map((sample, index) => (

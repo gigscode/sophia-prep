@@ -8,7 +8,6 @@ import { describe, it, expect } from 'vitest';
 import { 
   routeConfigs, 
   getRouteConfig, 
-  extractRouteParams, 
   routeRequiresAuth, 
   routeRequiresAdmin,
   getPublicRoutes,
@@ -45,12 +44,12 @@ describe('Route Configuration', () => {
     expect(routeRequiresAdmin('/')).toBe(false);
     expect(routeRequiresAdmin('/profile')).toBe(false);
     expect(routeRequiresAdmin('/7351/admin')).toBe(true);
-    expect(routeRequiresAdmin('/admin/import-questions')).toBe(true);
+    expect(routeRequiresAdmin('/7351/admin/import-questions')).toBe(true);
   });
 
   it('should extract route parameters correctly', () => {
     // Test with a route that has parameters (e.g., admin import questions)
-    const config = getRouteConfig('/admin/import-questions');
+    const config = getRouteConfig('/7351/admin/import-questions');
     expect(config).toBeDefined();
   });
 

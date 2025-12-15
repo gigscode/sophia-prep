@@ -244,7 +244,7 @@ export const routeConfigs: RouteConfig[] = [
     description: 'Administrative dashboard and controls'
   },
   {
-    path: '/admin/import-questions',
+    path: '/7351/admin/import-questions',
     component: ImportQuestionsPage,
     requireAuth: true,
     requireAdmin: true,

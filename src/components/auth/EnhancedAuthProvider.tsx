@@ -48,7 +48,7 @@ export function EnhancedAuthProvider({
     
     // Update navigation handler configuration
     authNavigationHandler.updateConfig({
-      protectedPaths: ['/admin', '/profile', '/quiz', '/import-questions'],
+      protectedPaths: ['/7351/admin', '/profile', '/quiz', '/7351/admin/import-questions'],
       publicPaths: ['/', '/login', '/signup', '/about', '/contact', '/help', '/privacy', '/terms'],
     });
   }, [navigate, currentPath]);
