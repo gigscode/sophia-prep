@@ -113,15 +113,21 @@ const physicsTopics = {
 async function getPhysicsSubject() {
   const { data, error } = await supabase
     .from('subjects')
-    .select('id')
+    .select('id, name')
     .eq('slug', 'physics')
     .single();
 
-  if (error || !data) {
+  if (error) {
+    console.error('❌ Error fetching Physics subject:', error);
+    return null;
+  }
+
+  if (!data) {
     console.error('❌ Physics subject not found. Please ensure Physics subject exists first.');
     return null;
   }
 
+  console.log(`✅ Found Physics subject: ${data.name}`);
   return data.id;
 }
 

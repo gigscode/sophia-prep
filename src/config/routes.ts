@@ -50,6 +50,7 @@ const ResetPasswordPage = lazy(() => import('../pages/ResetPasswordPage').then(m
 const AdminPage = lazy(() => import('../pages/AdminPage').then(module => ({ default: module.AdminPage })));
 const ImportQuestionsPage = lazy(() => import('../pages/ImportQuestionsPage').then(module => ({ default: module.ImportQuestionsPage })));
 const MorePage = lazy(() => import('../pages/MorePage').then(module => ({ default: module.MorePage })));
+const TopicsPage = lazy(() => import('../pages/TopicsPage').then(module => ({ default: module.TopicsPage })));
 
 
 /**
@@ -189,6 +190,16 @@ export const routeConfigs: RouteConfig[] = [
     showFooter: true,
     title: 'More - Sophia Prep',
     description: 'Additional features and options'
+  },
+
+  // Topics Page
+  {
+    path: '/topics/:subjectSlug',
+    component: TopicsPage,
+    requireAuth: false,
+    showFooter: false,
+    title: 'Topics - Sophia Prep',
+    description: 'Browse topics by subject'
   },
 
   // Profile / Auth (some require authentication)
