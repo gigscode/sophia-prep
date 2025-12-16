@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, CheckCircle, AlertCircle, Play } from 'lucide-react';
 
 import { supabase } from '../integrations/supabase/client';
 import type { Subject } from '../integrations/supabase/types';
+import { Select } from '../components/ui/Select';
 
 interface QuizQuestion {
   id: string;
@@ -29,6 +30,8 @@ export function JAMBExamPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [englishSubject, setEnglishSubject] = useState<Subject | null>(null);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
   
   // Exam state
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -56,9 +59,10 @@ export function JAMBExamPage() {
     }
   }, [currentView, timeRemaining]);
 
-  // Load subjects on mount
+  // Load subjects and years on mount
   useEffect(() => {
     loadSubjects();
+    loadAvailableYears();
   }, []);
 
   const loadSubjects = async () => {
@@ -89,6 +93,28 @@ export function JAMBExamPage() {
       setError('Failed to load subjects');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAvailableYears = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('questions')
+        .select('exam_year')
+        .eq('exam_type', 'JAMB')
+        .not('exam_year', 'is', null)
+        .order('exam_year', { ascending: false });
+
+      if (error) throw error;
+
+      // Get unique years and sort them
+      const years = [...new Set((data || []).map((item: { exam_year: number | null }) => item.exam_year))]
+        .filter((year): year is number => year !== null)
+        .sort((a, b) => b - a); // Most recent first
+
+      setAvailableYears(years);
+    } catch (err) {
+      console.error('Error loading available years:', err);
     }
   };
 
@@ -126,22 +152,28 @@ export function JAMBExamPage() {
       const allQuestions: QuizQuestion[] = [];
 
       for (const subjectId of selectedSubjects) {
-        const { data, error } = await supabase
+        let query = supabase
           .from('questions')
           .select(`
             *,
             subjects!inner(name)
           `)
           .eq('subject_id', subjectId)
-          .eq('is_active', true)
-          .limit(questionsPerSubject);
+          .eq('is_active', true);
+
+        // Add year filter if specific year is selected
+        if (selectedYear !== 'all') {
+          query = query.eq('exam_year', selectedYear);
+        }
+
+        const { data, error } = await query.limit(questionsPerSubject);
 
         if (error) throw error;
 
-        const subjectQuestions = (data || []).map((q: any) => ({
+        const subjectQuestions = (data || []).map((q: Record<string, unknown>) => ({
           ...q,
-          subject_name: q.subjects?.name || 'Unknown Subject'
-        }));
+          subject_name: (q.subjects as { name?: string })?.name || 'Unknown Subject'
+        })) as QuizQuestion[];
 
         // Shuffle questions for this subject
         const shuffled = subjectQuestions.sort(() => Math.random() - 0.5);
@@ -149,7 +181,8 @@ export function JAMBExamPage() {
       }
 
       if (allQuestions.length === 0) {
-        setError('No questions found for selected subjects');
+        const yearText = selectedYear === 'all' ? 'any year' : `year ${selectedYear}`;
+        setError(`No questions found for selected subjects from ${yearText}. Try selecting a different year or different subjects.`);
         return;
       }
 
@@ -274,6 +307,32 @@ export function JAMBExamPage() {
               <p className="text-red-800">{error}</p>
             </div>
           )}
+
+          {/* Year Selection */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-green-900">Select JAMB Year</h2>
+              <div className="w-48">
+                <Select
+                  value={selectedYear.toString()}
+                  onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  options={[
+                    { value: 'all', label: 'All Years' },
+                    ...availableYears.map(year => ({ 
+                      value: year.toString(), 
+                      label: year.toString() 
+                    }))
+                  ]}
+                />
+              </div>
+            </div>
+            <p className="text-sm text-green-700">
+              {selectedYear === 'all' 
+                ? 'Questions from all available years will be included in your exam'
+                : `Only questions from ${selectedYear} will be included in your exam`
+              }
+            </p>
+          </div>
 
           {/* Instructions */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -612,6 +671,11 @@ export function JAMBExamPage() {
                 <div className="text-sm text-gray-600">
                   Answered: {answeredCount}/{questions.length}
                 </div>
+                {selectedYear !== 'all' && (
+                  <div className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
+                    {selectedYear}
+                  </div>
+                )}
               </div>
               
               <div className="flex items-center gap-4">
@@ -798,6 +862,7 @@ export function JAMBExamPage() {
                 onClick={() => {
                   setCurrentView('subject-selection');
                   setSelectedSubjects(englishSubject ? [englishSubject.id] : []);
+                  setSelectedYear('all');
                   setQuestions([]);
                   setAnswers({});
                   setCurrentQuestionIndex(0);
