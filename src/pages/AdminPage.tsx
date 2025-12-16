@@ -8,6 +8,7 @@ import { SubjectManagement } from '../components/admin/SubjectManagement';
 import { QuestionManagement } from '../components/admin/QuestionManagement';
 import { TopicManagement } from '../components/admin/TopicManagement';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
+import { SubjectConsistencyTest } from '../components/SubjectConsistencyTest';
 
 type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions' | 'topics';
 
@@ -209,7 +210,12 @@ export function AdminPage() {
           >
             {tab === 'analytics' && <AnalyticsDashboard />}
             {tab === 'users' && <UserManagement />}
-            {tab === 'subjects' && <SubjectManagement />}
+            {tab === 'subjects' && (
+              <>
+                <SubjectConsistencyTest />
+                <SubjectManagement />
+              </>
+            )}
             {tab === 'topics' && <TopicManagement />}
             {tab === 'questions' && <QuestionManagement />}
           </motion.div>

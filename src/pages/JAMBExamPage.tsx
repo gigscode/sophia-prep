@@ -75,10 +75,9 @@ export function JAMBExamPage() {
       const subjectsData = data || [];
       setSubjects(subjectsData);
       
-      // Find English Language subject and auto-select it (only English is mandatory for all JAMB students)
+      // Find English Language subject and auto-select it (only English Language is mandatory for all JAMB students)
       const english = subjectsData.find((s: Subject) => 
-        s.slug === 'english' || 
-        s.name.toLowerCase().includes('english')
+        s.slug === 'english'
       ) as Subject | undefined;
       
       if (english) {

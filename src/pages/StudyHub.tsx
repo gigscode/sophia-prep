@@ -28,7 +28,7 @@ export function StudyHub() {
               { name: 'Mathematics', slug: 'mathematics', color: 'bg-blue-500' },
               { name: 'Chemistry', slug: 'chemistry', color: 'bg-green-500' },
               { name: 'Biology', slug: 'biology', color: 'bg-purple-500' },
-              { name: 'English', slug: 'english', color: 'bg-yellow-500' },
+              { name: 'English Language', slug: 'english', color: 'bg-yellow-500' },
               { name: 'Economics', slug: 'economics', color: 'bg-indigo-500' },
               { name: 'Government', slug: 'government', color: 'bg-pink-500' },
               { name: 'Geography', slug: 'geography', color: 'bg-teal-500' }

@@ -15,22 +15,22 @@ export class SubjectCombinationService {
     switch (combinationType) {
       case 'SCIENCE':
         return {
-          mandatory: ['english-language', 'mathematics', 'physics', 'chemistry', 'biology'],
+          mandatory: ['english', 'mathematics', 'physics', 'chemistry', 'biology'],
           optional: ['further-mathematics', 'geography', 'food-nutrition']
         };
       case 'COMMERCIAL':
         return {
-          mandatory: ['english-language', 'mathematics', 'commerce', 'accounting', 'economics'],
+          mandatory: ['english', 'mathematics', 'commerce', 'accounting', 'economics'],
           optional: ['marketing', 'civic-education', 'geography']
         };
       case 'ARTS':
         return {
-          mandatory: ['english-language', 'literature-in-english', 'government', 'crs-irs'],
+          mandatory: ['english', 'literature', 'government', 'crs-irs'],
           optional: ['music', 'geography', 'history', 'civic-education']
         };
       case 'CUSTOM':
         return {
-          mandatory: ['english-language'],
+          mandatory: ['english'],
           optional: []
         };
     }

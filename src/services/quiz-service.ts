@@ -14,7 +14,7 @@ export interface QuizQuestion {
 export const quizService = {
   /**
    * Get questions for a specific subject from Supabase
-   * @param subjectSlug - Subject slug (e.g., 'mathematics', 'english-language')
+   * @param subjectSlug - Subject slug (e.g., 'mathematics', 'english')
    * @param limit - Maximum number of questions to return (default: 200)
    */
   async getQuestionsForSubject(subjectSlug: string, limit = 200): Promise<QuizQuestion[]> {

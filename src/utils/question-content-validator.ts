@@ -53,7 +53,7 @@ export const SUBJECT_VALIDATION_RULES: SubjectKeywords[] = [
   },
   {
     subject: 'English Language',
-    slug: 'english-language',
+    slug: 'english',
     keywords: [
       'grammar', 'sentence', 'verb', 'noun', 'adjective', 'adverb', 'pronoun',
       'preposition', 'conjunction', 'article', 'subject', 'predicate', 'object',
@@ -79,7 +79,7 @@ export const SUBJECT_VALIDATION_RULES: SubjectKeywords[] = [
   },
   {
     subject: 'Literature in English',
-    slug: 'literature-in-english',
+    slug: 'literature',
     keywords: [
       'novel', 'character', 'narrator', 'protagonist', 'antagonist', 'plot', 'theme',
       'author', 'writer', 'story', 'setting', 'conflict', 'climax', 'resolution',

@@ -295,3 +295,30 @@ Mathematics       | mathematics | GENERAL          | false
 ```
 
 **When to run:** After the main setup, if Mathematics is incorrectly set as mandatory.
+
+---
+
+## 🧹 Subject Cleanup: Remove Duplicate Subjects
+
+**File:** `cleanup-duplicate-subjects.sql`
+
+**Description:** Remove duplicate "English" and "Literature" subjects, keeping only "English Language" and "Literature in English"
+
+**Issue:** You may have duplicate subjects like:
+- "English" AND "English Language" 
+- "Literature" AND "Literature in English"
+
+This script:
+1. Moves questions from duplicates to correct subjects
+2. Removes duplicate subjects
+3. Updates subscription plans
+4. Ensures consistent slug usage
+
+```sql
+-- Run the cleanup-duplicate-subjects.sql file
+-- This will remove duplicates and ensure consistency
+```
+
+**When to run:** If you notice duplicate subjects in your subject selection or admin panel.
+
+**Expected Result:** Only one "English Language" and one "Literature in English" subject remain.
