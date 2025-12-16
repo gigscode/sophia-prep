@@ -8,6 +8,7 @@ export interface QuizModeCardProps {
   description: string;
   onClick: () => void;
   className?: string;
+  layout?: 'vertical' | 'horizontal';
 }
 
 /**
@@ -32,6 +33,7 @@ export function QuizModeCard({
   description,
   onClick,
   className = '',
+  layout = 'vertical',
 }: QuizModeCardProps) {
   const cardId = React.useId();
   const titleId = `${cardId}-title`;
@@ -84,48 +86,100 @@ export function QuizModeCard({
       aria-describedby={descriptionId}
       aria-label={generateAriaLabel(title, description, 'Quiz mode')}
     >
-      {/* Icon Container - Circular with mode-specific background color */}
-      <div
-        className="
-          w-14
-          h-14
-          rounded-full
-          flex
-          items-center
-          justify-center
-          mb-4
-        "
-        style={{
-          backgroundColor: colors.iconBackgroundColor,
-          color: colors.iconColor,
-        }}
-        aria-hidden="true"
-      >
-        {icon}
-      </div>
+      {layout === 'horizontal' ? (
+        /* Horizontal Layout - Icon and Title on same row */
+        <>
+          <div className="flex items-center gap-4 mb-4">
+            {/* Icon Container */}
+            <div
+              className="
+                w-14
+                h-14
+                rounded-full
+                flex
+                items-center
+                justify-center
+                flex-shrink-0
+              "
+              style={{
+                backgroundColor: colors.iconBackgroundColor,
+                color: colors.iconColor,
+              }}
+              aria-hidden="true"
+            >
+              {icon}
+            </div>
 
-      {/* Content */}
-      <div className="space-y-2">
-        <h3
-          id={titleId}
-          className="text-2xl font-semibold"
-          style={{
-            color: 'hsl(var(--color-text-primary))',
-          }}
-        >
-          {title}
-        </h3>
+            {/* Title */}
+            <h3
+              id={titleId}
+              className="text-2xl font-semibold"
+              style={{
+                color: 'hsl(var(--color-text-primary))',
+              }}
+            >
+              {title}
+            </h3>
+          </div>
 
-        <p
-          id={descriptionId}
-          className="text-lg leading-relaxed"
-          style={{
-            color: 'hsl(var(--color-text-secondary))',
-          }}
-        >
-          {description}
-        </p>
-      </div>
+          {/* Description */}
+          <p
+            id={descriptionId}
+            className="text-lg leading-relaxed"
+            style={{
+              color: 'hsl(var(--color-text-secondary))',
+            }}
+          >
+            {description}
+          </p>
+        </>
+      ) : (
+        /* Vertical Layout - Icon above title */
+        <>
+          {/* Icon Container - Circular with mode-specific background color */}
+          <div
+            className="
+              w-14
+              h-14
+              rounded-full
+              flex
+              items-center
+              justify-center
+              mb-4
+            "
+            style={{
+              backgroundColor: colors.iconBackgroundColor,
+              color: colors.iconColor,
+            }}
+            aria-hidden="true"
+          >
+            {icon}
+          </div>
+
+          {/* Content */}
+          <div className="space-y-2">
+            <h3
+              id={titleId}
+              className="text-2xl font-semibold"
+              style={{
+                color: 'hsl(var(--color-text-primary))',
+              }}
+            >
+              {title}
+            </h3>
+
+            <p
+              id={descriptionId}
+              className="text-lg leading-relaxed"
+              style={{
+                color: 'hsl(var(--color-text-secondary))',
+              }}
+            >
+              {description}
+            </p>
+          </div>
+        </>
+      )}
 
       {/* Screen reader helper text */}
       <span className="sr-only">

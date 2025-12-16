@@ -1,5 +1,5 @@
 
-import { BookOpen, Clock, ChevronRight } from 'lucide-react';
+import { BookOpen, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { QuizModeCard } from '../cards/QuizModeCard';
@@ -83,7 +83,14 @@ export function QuizModesSection({
             {/* CBT Quiz Card */}
             <QuizModeCard
               mode="cbt"
-              icon={<Clock size={28} />}
+              layout="horizontal"
+              icon={
+                <img 
+                  src="/jamblogo.jpeg" 
+                  alt="JAMB Logo" 
+                  className="w-7 h-7 object-contain"
+                />
+              }
               title="CBT Quiz"
               description="Timed past questions quiz. 2hr 30min for JAMB. Auto-submits when time expires. No explanations until completion."
               onClick={handleCBTQuizClick}
