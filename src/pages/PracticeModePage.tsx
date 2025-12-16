@@ -71,34 +71,38 @@ export function PracticeModePage() {
   const loadTopics = useCallback(async (subjectId: string) => {
     setLoading(true);
     try {
-      // Find subject slug from subjects array
-      const subject = subjects.find(s => s.id === subjectId);
-      if (!subject) {
-        throw new Error('Subject not found');
+      // Query topics directly from database
+      const { data, error } = await supabase
+        .from('topics')
+        .select('*')
+        .eq('subject_id', subjectId)
+        .eq('is_active', true)
+        .order('order_index');
+
+      if (error) {
+        console.error('Error loading topics:', error);
+        throw error;
       }
 
-      // Use the new topics service
-      const { topicsService } = await import('../services/topics-service');
-      const topicsData = await topicsService.getTopics(subject.slug);
-      
       // Convert to the expected format
-      const formattedTopics: Topic[] = topicsData.map(topic => ({
+      const formattedTopics: Topic[] = (data || []).map(topic => ({
         id: topic.id,
         name: topic.name,
-        slug: topic.slug,
+        slug: topic.slug || '',
         subject_id: topic.subject_id,
         is_active: topic.is_active,
-        order_index: topic.sort_order
+        order_index: topic.order_index || 0
       }));
 
       setTopics(formattedTopics);
+      console.log(`Loaded ${formattedTopics.length} topics for subject ${subjectId}`);
     } catch (err) {
       console.error('Error loading topics:', err);
       setTopics([]);
     } finally {
       setLoading(false);
     }
-  }, [subjects]);
+  }, []);
 
   // Load subjects on mount and handle URL parameters
   useEffect(() => {
@@ -198,7 +202,8 @@ export function PracticeModePage() {
       ...prev,
       [questionId]: answer
     }));
-    // Don't show explanation immediately - wait for submit button
+    // Immediately show explanation when answer is selected
+    setShowExplanation(true);
   };
 
   const handleSubmitQuiz = () => {

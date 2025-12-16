@@ -145,12 +145,12 @@ export function TopicsPage() {
               <div key={categorySlug}>
                 {/* Category Header */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div 
+                  <div
                     className="w-4 h-4 rounded-full"
                     style={{ backgroundColor: category?.color_theme || '#3B82F6' }}
                   />
                   <h2 className="text-2xl font-bold text-gray-900">
-                    {category?.name || 'Uncategorized'}
+                    {category?.name || (categorySlug === 'all' ? 'All Topics' : 'Topics')}
                   </h2>
                   <span className="text-sm text-gray-500">
                     {topics.length} topic{topics.length !== 1 ? 's' : ''}

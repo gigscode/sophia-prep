@@ -80,7 +80,7 @@ class TopicsService {
    * Get topics for a subject, optionally filtered by category
    */
   async getTopics(
-    subjectSlug: string, 
+    subjectSlug: string,
     categorySlug?: string,
     includeStats = false
   ): Promise<Topic[]> {
@@ -91,7 +91,6 @@ class TopicsService {
           *,
           topic_categories(id, name, slug, color_theme),
           subjects!inner(slug)
-          ${includeStats ? ',questions(count)' : ''}
         `)
         .eq('subjects.slug', subjectSlug)
         .eq('is_active', true);
@@ -122,8 +121,13 @@ class TopicsService {
       const topics = await this.getTopics(subjectSlug);
       const topicsByCategory: Record<string, Topic[]> = {};
 
+      // If no topics, return empty object
+      if (!topics || topics.length === 0) {
+        return {};
+      }
+
       topics.forEach(topic => {
-        const categorySlug = topic.category?.slug || 'uncategorized';
+        const categorySlug = topic.category?.slug || 'all';
         if (!topicsByCategory[categorySlug]) {
           topicsByCategory[categorySlug] = [];
         }
