@@ -6,9 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { UserManagement } from '../components/admin/UserManagement';
 import { SubjectManagement } from '../components/admin/SubjectManagement';
 import { QuestionManagement } from '../components/admin/QuestionManagement';
+import { TopicManagement } from '../components/admin/TopicManagement';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
 
-type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions';
+type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions' | 'topics';
 
 export function AdminPage() {
   const { user, loading } = useAuth();
@@ -75,6 +76,7 @@ export function AdminPage() {
     { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3, color: 'text-blue-600', bgColor: 'bg-blue-50' },
     { id: 'users' as AdminTab, label: 'Users', icon: Users, color: 'text-green-600', bgColor: 'bg-green-50' },
     { id: 'subjects' as AdminTab, label: 'Subjects', icon: BookOpen, color: 'text-purple-600', bgColor: 'bg-purple-50' },
+    { id: 'topics' as AdminTab, label: 'Topics', icon: BookOpen, color: 'text-orange-600', bgColor: 'bg-orange-50' },
     { id: 'questions' as AdminTab, label: 'Questions', icon: FileQuestion, color: 'text-red-600', bgColor: 'bg-red-50' },
   ];
 
@@ -208,6 +210,7 @@ export function AdminPage() {
             {tab === 'analytics' && <AnalyticsDashboard />}
             {tab === 'users' && <UserManagement />}
             {tab === 'subjects' && <SubjectManagement />}
+            {tab === 'topics' && <TopicManagement />}
             {tab === 'questions' && <QuestionManagement />}
           </motion.div>
         </div>

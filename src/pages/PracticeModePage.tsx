@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, BookOpen, CheckCircle, XCircle, ChevronDown } from 'lucide-react';
 import { PageHeader } from '../components/layout';
 import { supabase } from '../integrations/supabase/client';
@@ -30,6 +30,7 @@ type ViewState = 'selection' | 'quiz' | 'results';
 
 export function PracticeModePage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [currentView, setCurrentView] = useState<ViewState>('selection');
   
   // Selection state
@@ -47,11 +48,7 @@ export function PracticeModePage() {
   const [error, setError] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
 
-  // Load subjects on mount
-  useEffect(() => {
-    loadSubjects();
-  }, []);
-
+  // Define functions first
   const loadSubjects = async () => {
     setLoading(true);
     try {
@@ -71,25 +68,68 @@ export function PracticeModePage() {
     }
   };
 
-  const loadTopics = async (subjectId: string) => {
+  const loadTopics = useCallback(async (subjectId: string) => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('topics')
-        .select('*')
-        .eq('subject_id', subjectId)
-        .eq('is_active', true)
-        .order('order_index');
+      // Find subject slug from subjects array
+      const subject = subjects.find(s => s.id === subjectId);
+      if (!subject) {
+        throw new Error('Subject not found');
+      }
 
-      if (error) throw error;
-      setTopics(data || []);
+      // Use the new topics service
+      const { topicsService } = await import('../services/topics-service');
+      const topicsData = await topicsService.getTopics(subject.slug);
+      
+      // Convert to the expected format
+      const formattedTopics: Topic[] = topicsData.map(topic => ({
+        id: topic.id,
+        name: topic.name,
+        slug: topic.slug,
+        subject_id: topic.subject_id,
+        is_active: topic.is_active,
+        order_index: topic.sort_order
+      }));
+
+      setTopics(formattedTopics);
     } catch (err) {
       console.error('Error loading topics:', err);
       setTopics([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, [subjects]);
+
+  // Load subjects on mount and handle URL parameters
+  useEffect(() => {
+    loadSubjects();
+  }, []);
+
+  // Handle URL parameters for direct topic access
+  useEffect(() => {
+    const subjectSlug = searchParams.get('subject');
+    
+    if (subjectSlug && subjects.length > 0) {
+      const subject = subjects.find(s => s.slug === subjectSlug);
+      if (subject) {
+        setSelectedSubject(subject);
+        loadTopics(subject.id);
+      }
+    }
+  }, [searchParams, subjects, loadTopics]);
+
+  // Handle topic selection from URL
+  useEffect(() => {
+    const topicSlug = searchParams.get('topic');
+    if (topicSlug && topics.length > 0) {
+      const topic = topics.find(t => t.slug === topicSlug);
+      if (topic) {
+        setSelectedTopic(topic);
+        // Note: Auto-start removed to avoid dependency issues
+        // Users can click "Start Quiz" button instead
+      }
+    }
+  }, [topics, searchParams]);
 
   const handleSubjectSelect = async (subjectId: string) => {
     const subject = subjects.find(s => s.id === subjectId);
