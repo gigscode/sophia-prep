@@ -1,6 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
 import type { Question } from '../integrations/supabase/types';
-import { questionContentValidator } from '../utils/question-content-validator';
+
 
 export type QuestionFilters = {
   search?: string;
@@ -75,24 +75,8 @@ export class AdminQuestionService {
       errors.push(`correct_answer must be A, B, C, or D (got "${question.correct_answer}"). Question: "${questionPreview}..."`);
     }
 
-    // Content validation - check if question content matches assigned subject
-    if (subjectSlug && question.question_text && question.option_a && question.option_b && question.option_c && question.option_d) {
-      const contentValidation = questionContentValidator.validateQuestionSubjectMatch(
-        question.question_text,
-        [question.option_a, question.option_b, question.option_c, question.option_d],
-        subjectSlug,
-        0.3 // Minimum confidence threshold
-      );
-
-      if (!contentValidation.isValid) {
-        if (contentValidation.suggestedSubject) {
-          // This is a warning, not an error - allow import but warn user
-          warnings.push(`⚠️ CONTENT MISMATCH: "${questionPreview}..." appears to be ${contentValidation.suggestedSubject} content but is assigned to ${subjectSlug}. Confidence: ${(contentValidation.confidence * 100).toFixed(1)}%`);
-        } else {
-          warnings.push(`⚠️ LOW CONFIDENCE: "${questionPreview}..." may not match ${subjectSlug} subject content. Confidence: ${(contentValidation.confidence * 100).toFixed(1)}%`);
-        }
-      }
-    }
+    // Content validation disabled - when user selects a subject, accept it as is
+    // The user has manually chosen the subject, so we trust their decision
 
     return {
       isValid: errors.length === 0,

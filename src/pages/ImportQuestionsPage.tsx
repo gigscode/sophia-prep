@@ -5,7 +5,7 @@ import { Select } from '../components/ui/Select';
 import { showToast } from '../components/ui/Toast';
 import { adminQuestionService, type QuestionInput } from '../services/admin-question-service';
 import { adminSubjectService } from '../services/admin-subject-service';
-import { questionContentValidator } from '../utils/question-content-validator';
+
 import { Upload, FileText, Download, AlertCircle, CheckCircle, ArrowLeft } from 'lucide-react';
 import type { Subject } from '../integrations/supabase/types';
 import { Card } from '../components/ui/Card';
@@ -28,7 +28,7 @@ interface ParsedQuestion {
 }
 
 // Validation helper
-const validateQuestion = (q: any, index: number): { valid: boolean; errors: string[] } => {
+const validateQuestion = (q: Record<string, unknown>, index: number): { valid: boolean; errors: string[] } => {
     const errors: string[] = [];
     const prefix = `Question ${index + 1}`;
 
@@ -47,7 +47,7 @@ const validateQuestion = (q: any, index: number): { valid: boolean; errors: stri
     if (!q.option_d || typeof q.option_d !== 'string' || !q.option_d.trim()) {
         errors.push(`${prefix}: Missing or invalid option_d`);
     }
-    if (!q.correct_answer || !['A', 'B', 'C', 'D'].includes(q.correct_answer.toUpperCase())) {
+    if (!q.correct_answer || typeof q.correct_answer !== 'string' || !['A', 'B', 'C', 'D'].includes(q.correct_answer.toUpperCase())) {
         errors.push(`${prefix}: Missing or invalid correct_answer (must be A, B, C, or D)`);
     }
 
@@ -95,7 +95,7 @@ export function ImportQuestionsPage() {
             if (savedState.format) setFormat(savedState.format as ImportFormat);
             if (savedState.importMode) setImportMode(savedState.importMode as 'file' | 'text');
         }
-    }, []);
+    }, [formPersistence]);
 
     const loadSubjects = async () => {
         try {
@@ -157,33 +157,18 @@ export function ImportQuestionsPage() {
                 return;
             }
 
-            // Validate content
-            const questionsForValidation = parsedQuestions.map(pq => ({
-                questionText: pq.question_text,
-                options: [pq.option_a, pq.option_b, pq.option_c, pq.option_d],
-                assignedSubjectSlug: selectedSubjectObj.slug
-            }));
-
-            const validation = questionContentValidator.validateQuestionBatch(
-                questionsForValidation,
-                0.3 // Minimum confidence threshold
-            );
-
+            // Content validation disabled - trust user's subject selection
             setPreviewValidation({
                 totalQuestions: parsedQuestions.length,
-                validQuestions: validation.validQuestions,
-                warnings: validation.warnings,
-                suggestions: validation.suggestions
+                validQuestions: parsedQuestions.length, // All questions are considered valid
+                warnings: [],
+                suggestions: []
             });
 
-            if (validation.invalidQuestions > 0) {
-                showToast(`Found ${validation.invalidQuestions} questions with content mismatches`, 'warning');
-            } else {
-                showToast('All questions appear to match the selected subject', 'success');
-            }
+            showToast(`Ready to import ${parsedQuestions.length} questions to ${selectedSubjectObj.name}`, 'success');
 
-        } catch (error: any) {
-            showToast(`Validation failed: ${error.message}`, 'error');
+        } catch (error: unknown) {
+            showToast(`Validation failed: ${error instanceof Error ? error.message : String(error)}`, 'error');
         }
     };
 
@@ -206,7 +191,7 @@ export function ImportQuestionsPage() {
             const values = lines[i].split(',').map(v => v.trim());
             if (values.length < headers.length) continue;
 
-            const question: any = {};
+            const question: Record<string, string> = {};
             headers.forEach((header, index) => {
                 question[header] = values[index];
             });
@@ -237,21 +222,21 @@ export function ImportQuestionsPage() {
 
             // Handle different JSON formats
             if (Array.isArray(data)) {
-                data.forEach((q, index) => {
+                data.forEach((q: Record<string, unknown>, index) => {
                     const validation = validateQuestion(q, index);
                     if (validation.valid) {
                         questions.push({
-                            question_text: q.question_text.trim(),
-                            option_a: q.option_a.trim(),
-                            option_b: q.option_b.trim(),
-                            option_c: q.option_c.trim(),
-                            option_d: q.option_d.trim(),
-                            correct_answer: q.correct_answer.toUpperCase() as 'A' | 'B' | 'C' | 'D',
-                            explanation: q.explanation?.trim(),
+                            question_text: String(q.question_text).trim(),
+                            option_a: String(q.option_a).trim(),
+                            option_b: String(q.option_b).trim(),
+                            option_c: String(q.option_c).trim(),
+                            option_d: String(q.option_d).trim(),
+                            correct_answer: String(q.correct_answer).toUpperCase() as 'A' | 'B' | 'C' | 'D',
+                            explanation: q.explanation ? String(q.explanation).trim() : undefined,
                             exam_year: q.exam_year ? parseInt(String(q.exam_year)) : undefined,
                             exam_type: 'JAMB',
-                            topic: q.topic?.trim(),
-                            subject: q.subject?.trim(),
+                            topic: q.topic ? String(q.topic).trim() : undefined,
+                            subject: q.subject ? String(q.subject).trim() : undefined,
                         });
                     } else {
                         validationErrors.push(...validation.errors);
@@ -262,21 +247,21 @@ export function ImportQuestionsPage() {
                 let questionIndex = 0;
                 Object.keys(data).forEach(key => {
                     if (Array.isArray(data[key])) {
-                        data[key].forEach((q: any) => {
+                        data[key].forEach((q: Record<string, unknown>) => {
                             const validation = validateQuestion(q, questionIndex++);
                             if (validation.valid) {
                                 questions.push({
-                                    question_text: q.question_text.trim(),
-                                    option_a: q.option_a.trim(),
-                                    option_b: q.option_b.trim(),
-                                    option_c: q.option_c.trim(),
-                                    option_d: q.option_d.trim(),
-                                    correct_answer: q.correct_answer.toUpperCase() as 'A' | 'B' | 'C' | 'D',
-                                    explanation: q.explanation?.trim(),
+                                    question_text: String(q.question_text).trim(),
+                                    option_a: String(q.option_a).trim(),
+                                    option_b: String(q.option_b).trim(),
+                                    option_c: String(q.option_c).trim(),
+                                    option_d: String(q.option_d).trim(),
+                                    correct_answer: String(q.correct_answer).toUpperCase() as 'A' | 'B' | 'C' | 'D',
+                                    explanation: q.explanation ? String(q.explanation).trim() : undefined,
                                     exam_year: q.exam_year ? parseInt(String(q.exam_year)) : undefined,
                                     exam_type: 'JAMB',
-                                    topic: q.topic?.trim(),
-                                    subject: q.subject?.trim() || key.trim(),
+                                    topic: q.topic ? String(q.topic).trim() : undefined,
+                                    subject: q.subject ? String(q.subject).trim() : key.trim(),
                                 });
                             } else {
                                 validationErrors.push(...validation.errors);
@@ -297,7 +282,7 @@ export function ImportQuestionsPage() {
             }
 
             return questions;
-        } catch (error: any) {
+        } catch (error: unknown) {
             if (error instanceof SyntaxError) {
                 throw new Error(`Invalid JSON syntax: ${error.message}`);
             }
@@ -312,7 +297,7 @@ export function ImportQuestionsPage() {
         blocks.forEach((block, blockIndex) => {
             try {
                 const lines = block.split('\n').map(l => l.trim()).filter(l => l);
-                const question: any = {};
+                const question: Record<string, string> = {};
 
                 lines.forEach(line => {
                     const colonIndex = line.indexOf(':');
@@ -365,8 +350,8 @@ export function ImportQuestionsPage() {
                 } else {
                     throw new Error(`Block ${blockIndex + 1} validation failed:\n${validation.errors.join('\n')}`);
                 }
-            } catch (error: any) {
-                throw new Error(`Error parsing block ${blockIndex + 1}: ${error.message}`);
+            } catch (error: unknown) {
+                throw new Error(`Error parsing block ${blockIndex + 1}: ${error instanceof Error ? error.message : String(error)}`);
             }
         });
 
@@ -853,46 +838,16 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                         {previewValidation && (
                             <div className="p-6 bg-blue-50 border border-blue-200 rounded-xl">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-2 bg-blue-100 rounded-lg">
-                                        <AlertCircle className="w-6 h-6 text-blue-600" />
+                                    <div className="p-2 bg-green-100 rounded-lg">
+                                        <CheckCircle className="w-6 h-6 text-green-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-blue-900 mb-2">Content Validation Results</h3>
+                                        <h3 className="font-semibold text-green-900 mb-2">Ready to Import</h3>
                                         <div className="flex gap-4 mb-3">
                                             <span className="px-3 py-1 bg-white rounded-full text-sm font-medium text-green-700 border border-green-200">
-                                                Valid: {previewValidation.validQuestions}/{previewValidation.totalQuestions}
+                                                {previewValidation.totalQuestions} questions ready for import
                                             </span>
-                                            {previewValidation.suggestions.length > 0 && (
-                                                <span className="px-3 py-1 bg-white rounded-full text-sm font-medium text-orange-700 border border-orange-200">
-                                                    Mismatches: {previewValidation.suggestions.length}
-                                                </span>
-                                            )}
                                         </div>
-                                        
-                                        {previewValidation.suggestions.length > 0 && (
-                                            <div className="mt-4 bg-white p-4 rounded-lg border border-orange-100">
-                                                <p className="text-sm font-semibold text-orange-800 mb-2">⚠️ Content Mismatches Detected:</p>
-                                                <ul className="text-sm space-y-2 max-h-40 overflow-y-auto pr-2">
-                                                    {previewValidation.suggestions.slice(0, 5).map((suggestion, index) => (
-                                                        <li key={index} className="text-orange-600 p-2 bg-orange-50 rounded border border-orange-200">
-                                                            <div className="font-medium">"{suggestion.questionPreview}..."</div>
-                                                            <div className="text-xs mt-1">
-                                                                Assigned to: <span className="font-medium">{suggestion.currentSubject}</span> | 
-                                                                Appears to be: <span className="font-medium">{suggestion.suggestedSubject}</span> | 
-                                                                Confidence: {(suggestion.confidence * 100).toFixed(1)}%
-                                                            </div>
-                                                        </li>
-                                                    ))}
-                                                    {previewValidation.suggestions.length > 5 && (
-                                                        <li className="text-orange-500 italic">... and {previewValidation.suggestions.length - 5} more mismatches</li>
-                                                    )}
-                                                </ul>
-                                                <p className="text-xs text-orange-700 mt-2 font-medium">
-                                                    💡 Tip: These questions will still be imported but may be assigned to the wrong subject. 
-                                                    Consider reviewing the subject assignment or the question content.
-                                                </p>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </div>
