@@ -132,13 +132,9 @@ async function importQuestions() {
           continue;
         }
 
-        const bloomLevel = (question.difficulty_level || '').toUpperCase() === 'EASY'
-          ? 'Remember'
-          : (question.difficulty_level || '').toUpperCase() === 'HARD'
-          ? 'Analyze'
-          : 'Apply';
-        const timeMinutes = (question.difficulty_level || '').toUpperCase() === 'EASY' ? 1 : (question.difficulty_level || '').toUpperCase() === 'HARD' ? 3 : 2;
-        const markWeighting = (question.difficulty_level || '').toUpperCase() === 'HARD' ? 3 : 2;
+        const bloomLevel = 'Apply'; // Default bloom level
+        const timeMinutes = 2; // Default time in minutes
+        const markWeighting = 2; // Default mark weighting
         const relatedPast = (question.exam_year && question.exam_type)
           ? [{ year: question.exam_year, exam_type: question.exam_type, topic: question.topic }]
           : [];
@@ -171,7 +167,7 @@ async function importQuestions() {
             option_d: question.option_d,
             correct_answer: question.correct_answer,
             explanation: question.explanation,
-            difficulty_level: question.difficulty_level,
+
             exam_year: question.exam_year,
             exam_type: question.exam_type,
             metadata,

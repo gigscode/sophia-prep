@@ -68,7 +68,6 @@ function normalizeJambEntry(e) {
     option_d: opts[3] || '',
     correct_answer: correctKey,
     explanation: e.explanation || '',
-    difficulty_level: e.difficulty_level || null,
     exam_year: e.exam_year || null,
     exam_type: e.exam_type || null,
   };
@@ -117,7 +116,6 @@ function normalizeExtraEntry(e) {
     option_d: filled[3] || '',
     correct_answer: correctKey,
     explanation: e.explanation || '',
-    difficulty_level: e.difficulty_level || null,
     exam_year: e.exam_year || null,
     exam_type: e.exam_type || null,
   };

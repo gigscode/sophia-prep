@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Seed Physics Topics
+ * Seed Physics Topics (No Difficulty)
  * 
  * This script seeds the Physics subject with organized topics and categories.
+ * Difficulty feature has been removed.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -61,52 +62,52 @@ const physicsCategories = [
   }
 ];
 
-// Physics topics organized by category
+// Physics topics organized by category (difficulty removed)
 const physicsTopics = {
   'mechanics': [
     { name: 'Measurements and Units', slug: 'measurements-units', estimatedTime: 45 },
-    { name: 'Scalars and Vectors', slug: 'scalars-vectors', difficulty: 'INTERMEDIATE', estimatedTime: 60 },
-    { name: 'Motion', slug: 'motion', difficulty: 'INTERMEDIATE', estimatedTime: 90 },
-    { name: 'Gravitational Field', slug: 'gravitational-field', difficulty: 'ADVANCED', estimatedTime: 75 },
-    { name: 'Equilibrium of Forces', slug: 'equilibrium-forces', difficulty: 'INTERMEDIATE', estimatedTime: 60 },
-    { name: 'Work, Energy and Power', slug: 'work-energy-power', difficulty: 'INTERMEDIATE', estimatedTime: 80 },
-    { name: 'Friction', slug: 'friction', difficulty: 'BASIC', estimatedTime: 50 },
-    { name: 'Simple Machines', slug: 'simple-machines', difficulty: 'BASIC', estimatedTime: 55 },
-    { name: 'Elasticity (Hooke\'s Law and Young\'s Modulus)', slug: 'elasticity', difficulty: 'ADVANCED', estimatedTime: 70 },
-    { name: 'Pressure', slug: 'pressure', difficulty: 'INTERMEDIATE', estimatedTime: 60 },
-    { name: 'Liquids at Rest', slug: 'liquids-rest', difficulty: 'INTERMEDIATE', estimatedTime: 50 }
+    { name: 'Scalars and Vectors', slug: 'scalars-vectors', estimatedTime: 60 },
+    { name: 'Motion', slug: 'motion', estimatedTime: 90 },
+    { name: 'Gravitational Field', slug: 'gravitational-field', estimatedTime: 75 },
+    { name: 'Equilibrium of Forces', slug: 'equilibrium-forces', estimatedTime: 60 },
+    { name: 'Work, Energy and Power', slug: 'work-energy-power', estimatedTime: 80 },
+    { name: 'Friction', slug: 'friction', estimatedTime: 50 },
+    { name: 'Simple Machines', slug: 'simple-machines', estimatedTime: 55 },
+    { name: 'Elasticity (Hooke\'s Law and Young\'s Modulus)', slug: 'elasticity', estimatedTime: 70 },
+    { name: 'Pressure', slug: 'pressure', estimatedTime: 60 },
+    { name: 'Liquids at Rest', slug: 'liquids-rest', estimatedTime: 50 }
   ],
   'thermal-physics': [
-    { name: 'Temperature and Its Measurement', slug: 'temperature-measurement', difficulty: 'BASIC', estimatedTime: 40 },
-    { name: 'Thermal Expansion', slug: 'thermal-expansion', difficulty: 'INTERMEDIATE', estimatedTime: 55 },
-    { name: 'Gas Laws', slug: 'gas-laws', difficulty: 'INTERMEDIATE', estimatedTime: 70 },
-    { name: 'Quantity of Heat', slug: 'quantity-heat', difficulty: 'INTERMEDIATE', estimatedTime: 60 },
-    { name: 'Change of State', slug: 'change-state', difficulty: 'INTERMEDIATE', estimatedTime: 65 },
-    { name: 'Vapours', slug: 'vapours', difficulty: 'ADVANCED', estimatedTime: 50 },
-    { name: 'Structure of Matter and Kinetic Theory', slug: 'kinetic-theory', difficulty: 'ADVANCED', estimatedTime: 80 },
-    { name: 'Heat Transfer', slug: 'heat-transfer', difficulty: 'INTERMEDIATE', estimatedTime: 70 }
+    { name: 'Temperature and Its Measurement', slug: 'temperature-measurement', estimatedTime: 40 },
+    { name: 'Thermal Expansion', slug: 'thermal-expansion', estimatedTime: 55 },
+    { name: 'Gas Laws', slug: 'gas-laws', estimatedTime: 70 },
+    { name: 'Quantity of Heat', slug: 'quantity-heat', estimatedTime: 60 },
+    { name: 'Change of State', slug: 'change-state', estimatedTime: 65 },
+    { name: 'Vapours', slug: 'vapours', estimatedTime: 50 },
+    { name: 'Structure of Matter and Kinetic Theory', slug: 'kinetic-theory', estimatedTime: 80 },
+    { name: 'Heat Transfer', slug: 'heat-transfer', estimatedTime: 70 }
   ],
   'waves-optics': [
-    { name: 'Waves', slug: 'waves', difficulty: 'INTERMEDIATE', estimatedTime: 75 },
-    { name: 'Propagation of Sound Waves', slug: 'sound-propagation', difficulty: 'INTERMEDIATE', estimatedTime: 60 },
-    { name: 'Characteristics of Sound Waves', slug: 'sound-characteristics', difficulty: 'INTERMEDIATE', estimatedTime: 55 },
-    { name: 'Light Energy', slug: 'light-energy', difficulty: 'BASIC', estimatedTime: 45 },
-    { name: 'Reflection of Light at Plane and Curved Surfaces', slug: 'light-reflection', difficulty: 'INTERMEDIATE', estimatedTime: 70 },
-    { name: 'Refraction of Light through Plane and Curved Surfaces', slug: 'light-refraction', difficulty: 'INTERMEDIATE', estimatedTime: 75 },
-    { name: 'Optical Instruments', slug: 'optical-instruments', difficulty: 'ADVANCED', estimatedTime: 85 },
-    { name: 'Dispersion of Light and Colours / Electromagnetic Spectrum', slug: 'light-dispersion', difficulty: 'ADVANCED', estimatedTime: 80 }
+    { name: 'Waves', slug: 'waves', estimatedTime: 75 },
+    { name: 'Propagation of Sound Waves', slug: 'sound-propagation', estimatedTime: 60 },
+    { name: 'Characteristics of Sound Waves', slug: 'sound-characteristics', estimatedTime: 55 },
+    { name: 'Light Energy', slug: 'light-energy', estimatedTime: 45 },
+    { name: 'Reflection of Light at Plane and Curved Surfaces', slug: 'light-reflection', estimatedTime: 70 },
+    { name: 'Refraction of Light through Plane and Curved Surfaces', slug: 'light-refraction', estimatedTime: 75 },
+    { name: 'Optical Instruments', slug: 'optical-instruments', estimatedTime: 85 },
+    { name: 'Dispersion of Light and Colours / Electromagnetic Spectrum', slug: 'light-dispersion', estimatedTime: 80 }
   ],
   'electricity-magnetism': [
-    { name: 'Electrostatics', slug: 'electrostatics', difficulty: 'INTERMEDIATE', estimatedTime: 70 },
-    { name: 'Capacitors', slug: 'capacitors', difficulty: 'ADVANCED', estimatedTime: 75 },
-    { name: 'Electric Cells', slug: 'electric-cells', difficulty: 'BASIC', estimatedTime: 50 },
-    { name: 'Current Electricity', slug: 'current-electricity', difficulty: 'INTERMEDIATE', estimatedTime: 80 },
-    { name: 'Electrical Energy and Power', slug: 'electrical-energy-power', difficulty: 'INTERMEDIATE', estimatedTime: 65 },
-    { name: 'Magnets and Magnetic Fields', slug: 'magnetic-fields', difficulty: 'INTERMEDIATE', estimatedTime: 70 },
-    { name: 'Force on a Current-Carrying Conductor in a Magnetic Field', slug: 'magnetic-force', difficulty: 'ADVANCED', estimatedTime: 75 },
-    { name: 'Electromagnetic Induction (including Inductance and Eddy Currents)', slug: 'electromagnetic-induction', difficulty: 'ADVANCED', estimatedTime: 90 },
-    { name: 'Simple A.C. Circuits', slug: 'ac-circuits', difficulty: 'ADVANCED', estimatedTime: 85 },
-    { name: 'Conduction of Electricity through Liquids and Gases', slug: 'electrical-conduction', difficulty: 'ADVANCED', estimatedTime: 70 }
+    { name: 'Electrostatics', slug: 'electrostatics', estimatedTime: 70 },
+    { name: 'Capacitors', slug: 'capacitors', estimatedTime: 75 },
+    { name: 'Electric Cells', slug: 'electric-cells', estimatedTime: 50 },
+    { name: 'Current Electricity', slug: 'current-electricity', estimatedTime: 80 },
+    { name: 'Electrical Energy and Power', slug: 'electrical-energy-power', estimatedTime: 65 },
+    { name: 'Magnets and Magnetic Fields', slug: 'magnetic-fields', estimatedTime: 70 },
+    { name: 'Force on a Current-Carrying Conductor in a Magnetic Field', slug: 'magnetic-force', estimatedTime: 75 },
+    { name: 'Electromagnetic Induction (including Inductance and Eddy Currents)', slug: 'electromagnetic-induction', estimatedTime: 90 },
+    { name: 'Simple A.C. Circuits', slug: 'ac-circuits', estimatedTime: 85 },
+    { name: 'Conduction of Electricity through Liquids and Gases', slug: 'electrical-conduction', estimatedTime: 70 }
   ]
 };
 
@@ -178,14 +179,13 @@ async function seedTopics(subjectId, categoryMap) {
       category_id: categoryId,
       name: topic.name,
       slug: topic.slug,
-      difficulty_level: topic.difficulty,
       estimated_study_time_minutes: topic.estimatedTime,
       sort_order: index + 1,
       topic_level: 1,
       is_active: true
     }));
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('topics')
       .insert(topicsToInsert);
 
@@ -202,7 +202,7 @@ async function seedTopics(subjectId, categoryMap) {
 }
 
 async function main() {
-  console.log('🚀 Starting Physics topics seeding...\n');
+  console.log('🚀 Starting Physics topics seeding (no difficulty)...\n');
 
   // Get Physics subject
   const subjectId = await getPhysicsSubject();

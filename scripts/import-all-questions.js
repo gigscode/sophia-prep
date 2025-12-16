@@ -150,7 +150,7 @@ async function importJambWaecQuestions() {
             option_d: q.option_d,
             correct_answer: q.correct_answer,
             explanation: q.explanation,
-            difficulty_level: q.difficulty_level || 'MEDIUM',
+
             exam_year: q.exam_year || null,
             exam_type: q.exam_type || null,
             is_active: true
@@ -231,7 +231,7 @@ async function importExtraQuizzes() {
           option_d: options[3],
           correct_answer: correctAnswer,
           explanation: q.explanation,
-          difficulty_level: 'MEDIUM',
+
           is_active: true
         });
 
