@@ -7,6 +7,7 @@ import { useLazyLoad } from '../hooks/useLazyLoad';
 import { Header } from '../components/home/Header';
 import { HeroBanner } from '../components/home/HeroBanner';
 import { QuizModesSection } from '../components/home/QuizModesSection';
+import { PricingSection } from '../components/home/PricingSection';
 import { QuickLinksSection } from '../components/home/QuickLinksSection';
 import { UpcomingEventsSection, EventData } from '../components/home/UpcomingEventsSection';
 import { logPerformanceMetrics, markInteractive } from '../utils/performance';
@@ -29,6 +30,10 @@ export function HomePage() {
   const { navigate } = useNavigation();
 
   // Lazy load refs for below-the-fold sections
+  const [pricingRef, pricingVisible] = useLazyLoad<HTMLDivElement>({
+    threshold: 0.01,
+    rootMargin: '100px',
+  });
   const [quickLinksRef, quickLinksVisible] = useLazyLoad<HTMLDivElement>({
     threshold: 0.01,
     rootMargin: '100px',
@@ -39,6 +44,7 @@ export function HomePage() {
   });
 
   // Loading states for sections
+  const [isPricingLoading, setIsPricingLoading] = useState(true);
   const [isQuickLinksLoading, setIsQuickLinksLoading] = useState(true);
   const [isEventsLoading, setIsEventsLoading] = useState(true);
 
@@ -55,6 +61,17 @@ export function HomePage() {
       logPerformanceMetrics();
     }
   }, []);
+
+  // Simulate loading for Pricing when visible
+  useEffect(() => {
+    if (pricingVisible) {
+      // Simulate brief loading state
+      const timer = setTimeout(() => {
+        setIsPricingLoading(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [pricingVisible]);
 
   // Simulate loading for Quick Links when visible
   useEffect(() => {
@@ -143,15 +160,22 @@ export function HomePage() {
             <QuizModesSection />
           </div>
 
+          {/* Pricing Section with lazy loading */}
+          <div ref={pricingRef} className="section-reveal animate-delay-200">
+            {pricingVisible && (
+              <PricingSection isLoading={isPricingLoading} />
+            )}
+          </div>
+
           {/* Quick Links Section with lazy loading */}
-          <div ref={quickLinksRef} className="section-reveal animate-delay-200">
+          <div ref={quickLinksRef} className="section-reveal animate-delay-300">
             {quickLinksVisible && (
               <QuickLinksSection isLoading={isQuickLinksLoading} />
             )}
           </div>
 
           {/* Upcoming Events Section with lazy loading */}
-          <div ref={eventsRef} className="section-reveal animate-delay-300">
+          <div ref={eventsRef} className="section-reveal animate-delay-400">
             {eventsVisible && (
               <UpcomingEventsSection 
                 events={upcomingEvents} 

@@ -299,42 +299,69 @@ export function ImportQuestionsPage() {
                 const lines = block.split('\n').map(l => l.trim()).filter(l => l);
                 const question: Record<string, string> = {};
 
+                // Debug info for the current block
+                console.log(`Parsing block ${blockIndex + 1}:`, lines);
+
                 lines.forEach(line => {
-                    const colonIndex = line.indexOf(':');
-                    if (colonIndex === -1) return;
+                    // Handle different formats: "Key: Value", "Key) Value", "Key. Value", etc.
+                    let colonIndex = line.indexOf(':');
+                    
+                    if (colonIndex === -1) {
+                        colonIndex = line.indexOf(')');
+                    }
+                    if (colonIndex === -1) {
+                        colonIndex = line.indexOf('.');
+                    }
+                    if (colonIndex === -1) {
+                        // Try to match patterns like "A) option" or "A. option" or "A option"
+                        const optionMatch = line.match(/^([ABCD])\s*[).\\-\s]\s*(.+)$/i);
+                        if (optionMatch) {
+                            const optionLetter = optionMatch[1].toUpperCase();
+                            const optionText = optionMatch[2].trim();
+                            question[`option_${optionLetter.toLowerCase()}`] = optionText;
+                            return;
+                        }
+                        
+                        // Try to match question patterns
+                        const questionMatch = line.match(/^(?:Q|Question)\s*[).\\-\s]\s*(.+)$/i);
+                        if (questionMatch) {
+                            question.question_text = questionMatch[1].trim();
+                            return;
+                        }
+                        
+                        // Try to match answer patterns
+                        const answerMatch = line.match(/^(?:Answer|Correct|Correct Answer)\s*[).\\-\s]\s*([ABCD])$/i);
+                        if (answerMatch) {
+                            question.correct_answer = answerMatch[1].toUpperCase();
+                            return;
+                        }
+                        
+                        return; // Skip lines that don't match any pattern
+                    }
 
                     const key = line.substring(0, colonIndex).trim().toUpperCase();
                     const value = line.substring(colonIndex + 1).trim();
 
-                    switch (key) {
-                        case 'Q':
-                        case 'QUESTION':
-                            question.question_text = value;
-                            break;
-                        case 'A':
-                            question.option_a = value;
-                            break;
-                        case 'B':
-                            question.option_b = value;
-                            break;
-                        case 'C':
-                            question.option_c = value;
-                            break;
-                        case 'D':
-                            question.option_d = value;
-                            break;
-                        case 'ANSWER':
-                        case 'CORRECT':
-                        case 'CORRECT ANSWER':
-                        case 'CORRECT_ANSWER':
-                            question.correct_answer = value.toUpperCase();
-                            break;
-                        case 'EXPLANATION':
-                        case 'EXPLAIN':
-                            question.explanation = value;
-                            break;
+                    // More flexible key matching
+                    if (key.match(/^Q(UESTION)?$/)) {
+                        question.question_text = value;
+                    } else if (key === 'A' || key.startsWith('OPTION A')) {
+                        question.option_a = value;
+                    } else if (key === 'B' || key.startsWith('OPTION B')) {
+                        question.option_b = value;
+                    } else if (key === 'C' || key.startsWith('OPTION C')) {
+                        question.option_c = value;
+                    } else if (key === 'D' || key.startsWith('OPTION D')) {
+                        question.option_d = value;
+                    } else if (key.match(/^(ANSWER|CORRECT|CORRECT ANSWER|CORRECT_ANSWER)$/)) {
+                        question.correct_answer = value.toUpperCase();
+                    } else if (key.match(/^(EXPLANATION|EXPLAIN)$/)) {
+                        question.explanation = value;
                     }
                 });
+
+                // Provide detailed debugging info
+                console.log(`Block ${blockIndex + 1} parsed:`, question);
 
                 const validation = validateQuestion(question, blockIndex);
                 if (validation.valid) {
@@ -348,7 +375,29 @@ export function ImportQuestionsPage() {
                         explanation: question.explanation,
                     });
                 } else {
-                    throw new Error(`Block ${blockIndex + 1} validation failed:\n${validation.errors.join('\n')}`);
+                    // Provide more helpful error message
+                    const missingFields = [];
+                    if (!question.question_text) missingFields.push('Question text');
+                    if (!question.option_a) missingFields.push('Option A');
+                    if (!question.option_b) missingFields.push('Option B');
+                    if (!question.option_c) missingFields.push('Option C');
+                    if (!question.option_d) missingFields.push('Option D');
+                    if (!question.correct_answer) missingFields.push('Correct answer');
+                    
+                    throw new Error(`Block ${blockIndex + 1} is missing: ${missingFields.join(', ')}. 
+
+Expected format:
+Q: Your question here?
+A: First option
+B: Second option  
+C: Third option
+D: Fourth option
+Answer: C
+
+Current block content:
+${lines.join('\n')}
+
+Parsed fields: ${JSON.stringify(question, null, 2)}`);
                 }
             } catch (error: unknown) {
                 throw new Error(`Error parsing block ${blockIndex + 1}: ${error instanceof Error ? error.message : String(error)}`);
@@ -356,7 +405,7 @@ export function ImportQuestionsPage() {
         });
 
         if (questions.length === 0) {
-            throw new Error('No valid questions found in text. Make sure to separate questions with "---"');
+            throw new Error('No valid questions found in text. Make sure to separate questions with "---" and use the correct format.');
         }
 
         return questions;
@@ -491,16 +540,23 @@ A: 2
 B: 3
 C: 4
 D: 5
-Correct Answer: C
+Answer: C
 Explanation: Addition of two numbers
 ---
-Q: Solve: x + 5 = 10
-A: 3
-B: 4
-C: 5
-D: 6
-Answer: C
+Question: Solve: x + 5 = 10
+A) 3
+B) 4
+C) 5
+D) 6
+Correct: C
 Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
+---
+Q) What is the capital of Nigeria?
+A. Lagos
+B. Abuja
+C. Kano
+D. Port Harcourt
+Correct Answer: B
 ---`;
             filename = 'questions_template.txt';
         } else {
@@ -686,9 +742,13 @@ Explanation: Subtract 5 from both sides: x = 10 - 5 = 5
                                                 <div>B: Second option</div>
                                                 <div>C: Third option</div>
                                                 <div>D: Fourth option</div>
-                                                <div>Correct Answer: C</div>
+                                                <div>Answer: C</div>
                                                 <div>Explanation: Why C is correct</div>
                                                 <div className="mt-2">---</div>
+                                                <div className="mt-2 text-gray-500">Alternative formats also work:</div>
+                                                <div className="text-gray-500">Q) Question text</div>
+                                                <div className="text-gray-500">A) Option text</div>
+                                                <div className="text-gray-500">Correct: C</div>
                                             </div>
                                             <p className="mt-2 text-xs font-semibold">Note: Select Subject (required) from the dropdown below. Topic is optional.</p>
                                         </div>
