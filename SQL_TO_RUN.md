@@ -262,3 +262,36 @@ After running all 4 steps, you will have:
 - See `data/README.md` for information about JSON data files
 - Check Supabase logs for detailed error messages
 
+
+---
+
+## 🔧 Additional Fix: Mathematics Mandatory Status
+
+**File:** `fix-mathematics-mandatory.sql`
+
+**Description:** Fix Mathematics to be non-mandatory (only English is mandatory for all JAMB students)
+
+```sql
+-- Fix Mathematics to be non-mandatory
+-- Only English Language should be mandatory for all JAMB students
+
+UPDATE subjects 
+SET is_mandatory = false 
+WHERE slug = 'mathematics';
+
+-- Verify the change
+SELECT name, slug, subject_category, is_mandatory 
+FROM subjects 
+WHERE slug IN ('english', 'mathematics')
+ORDER BY sort_order;
+```
+
+**Expected Output:**
+```
+name              | slug        | subject_category | is_mandatory
+------------------+-------------+------------------+-------------
+English Language  | english     | LANGUAGE         | true
+Mathematics       | mathematics | GENERAL          | false
+```
+
+**When to run:** After the main setup, if Mathematics is incorrectly set as mandatory.

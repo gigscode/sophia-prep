@@ -75,15 +75,15 @@ export function JAMBExamPage() {
       const subjectsData = data || [];
       setSubjects(subjectsData);
       
-      // Find English Language subject and auto-select it
+      // Find English Language subject and auto-select it (only English is mandatory for all JAMB students)
       const english = subjectsData.find((s: Subject) => 
         s.slug === 'english' || 
         s.name.toLowerCase().includes('english')
-      );
+      ) as Subject | undefined;
       
       if (english) {
         setEnglishSubject(english);
-        setSelectedSubjects([(english as Subject).id]);
+        setSelectedSubjects([english.id]);
       }
     } catch (err) {
       console.error('Error loading subjects:', err);
@@ -94,7 +94,7 @@ export function JAMBExamPage() {
   };
 
   const handleSubjectToggle = (subjectId: string) => {
-    // Don't allow deselecting English
+    // Don't allow deselecting English Language
     if (englishSubject && subjectId === englishSubject.id) return;
     
     setSelectedSubjects(prev => {
@@ -472,10 +472,58 @@ export function JAMBExamPage() {
                   );
                 })()}
 
+                {/* Language Subjects */}
+                {(() => {
+                  const languageSubjects = otherSubjects.filter(s => s.subject_category === 'LANGUAGE');
+                  if (languageSubjects.length === 0) return null;
+                  
+                  return (
+                    <div>
+                      <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                        <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                        Language Subjects
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                        {languageSubjects.map((subject) => {
+                          const isSelected = selectedSubjects.includes(subject.id);
+                          const canSelect = selectedOthers.length < 3 || isSelected;
+                          
+                          return (
+                            <button
+                              key={subject.id}
+                              onClick={() => handleSubjectToggle(subject.id)}
+                              disabled={!canSelect}
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${
+                                isSelected
+                                  ? 'border-orange-500 bg-orange-50'
+                                  : canSelect
+                                  ? 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                {isSelected && <CheckCircle className="w-5 h-5 text-orange-600" />}
+                                <h5 className={`font-medium ${isSelected ? 'text-orange-900' : 'text-gray-900'}`}>
+                                  {subject.name}
+                                </h5>
+                              </div>
+                              {subject.description && (
+                                <p className={`text-sm ${isSelected ? 'text-orange-700' : 'text-gray-600'}`}>
+                                  {subject.description}
+                                </p>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* General/Other Subjects */}
                 {(() => {
                   const generalSubjects = otherSubjects.filter(s => 
-                    !['SCIENCE', 'COMMERCIAL', 'ARTS'].includes(s.subject_category || '')
+                    s.subject_category === 'GENERAL'
                   );
                   if (generalSubjects.length === 0) return null;
                   
