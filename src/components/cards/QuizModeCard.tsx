@@ -89,7 +89,7 @@ export function QuizModeCard({
       {layout === 'horizontal' ? (
         /* Horizontal Layout - Icon and Title on same row */
         <>
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center justify-between mb-4">
             {/* Icon Container */}
             <div
               className="

@@ -86,9 +86,9 @@ export function QuizModesSection({
               layout="horizontal"
               icon={
                 <img 
-                  src="/jamblogo.jpeg" 
+                  src="/jamb_logo.png" 
                   alt="JAMB Logo" 
-                  className="w-7 h-7 object-contain"
+                  className="w-9 h-9 object-contain"
                 />
               }
               title="CBT Quiz"
