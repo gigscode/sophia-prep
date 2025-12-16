@@ -22,12 +22,6 @@ export function TopicManagement() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    if (selectedSubject) {
-      loadTopicsData();
-    }
-  }, [selectedSubject, loadTopicsData]);
-
   const loadTopicsData = useCallback(async () => {
     setLoading(true);
     try {
@@ -45,6 +39,12 @@ export function TopicManagement() {
       setLoading(false);
     }
   }, [selectedSubject]);
+
+  useEffect(() => {
+    if (selectedSubject) {
+      loadTopicsData();
+    }
+  }, [selectedSubject, loadTopicsData]);
 
   const filteredTopics = topics.filter(topic =>
     topic.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -64,14 +64,7 @@ export function TopicManagement() {
     return grouped;
   };
 
-  const getDifficultyColor = (difficulty?: string) => {
-    switch (difficulty) {
-      case 'BASIC': return 'text-green-600 bg-green-50';
-      case 'INTERMEDIATE': return 'text-yellow-600 bg-yellow-50';
-      case 'ADVANCED': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
+
 
   if (loading) {
     return (
@@ -186,11 +179,6 @@ export function TopicManagement() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="font-medium text-gray-900">{topic.name}</h4>
-                        {topic.difficulty_level && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(topic.difficulty_level)}`}>
-                            {topic.difficulty_level.toLowerCase()}
-                          </span>
-                        )}
                       </div>
                       
                       <div className="flex items-center gap-4 text-sm text-gray-500">

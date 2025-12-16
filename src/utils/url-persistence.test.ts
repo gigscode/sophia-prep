@@ -67,7 +67,7 @@ describe('URL Parameter Persistence', () => {
     });
 
     it('should merge preserved parameters with new ones', () => {
-      const newParams = { category: 'secondary', difficulty: 'hard' };
+      const newParams = { category: 'secondary' };
       const preservedParams = { subject: 'math', mode: 'practice' };
       
       // Mock preserved state
@@ -78,8 +78,7 @@ describe('URL Parameter Persistence', () => {
       expect(merged).toEqual({
         subject: 'math',
         mode: 'practice',
-        category: 'secondary',
-        difficulty: 'hard'
+        category: 'secondary'
       });
     });
 

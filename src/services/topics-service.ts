@@ -25,7 +25,7 @@ export interface Topic {
   sort_order: number;
   is_active: boolean;
   estimated_questions_count: number;
-  difficulty_level?: 'BASIC' | 'INTERMEDIATE' | 'ADVANCED';
+
   estimated_study_time_minutes: number;
   prerequisites?: string[];
   created_at: string;
@@ -285,7 +285,6 @@ class TopicsService {
         `)
         .eq('subjects.slug', subjectSlug)
         .eq('is_active', true)
-        .eq('difficulty_level', 'BASIC') // Start with basic topics
         .limit(limit);
 
       if (error) {

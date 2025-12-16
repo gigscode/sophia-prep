@@ -26,7 +26,7 @@ export class UpdatedQuestionService {
         .rpc('get_practice_questions', {
           p_subject_ids: subjectIds,
           p_limit: options?.limit || 20,
-          p_difficulty: null
+
         });
 
       if (error) {

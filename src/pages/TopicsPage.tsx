@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BookOpen, Clock, BarChart3, Play, Search, Filter } from 'lucide-react';
+import { BookOpen, Clock, BarChart3, Play, Search } from 'lucide-react';
 import { topicsService, Topic, TopicCategory } from '../services/topics-service';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -17,15 +17,9 @@ export function TopicsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
 
-  useEffect(() => {
-    if (subjectSlug) {
-      loadTopics();
-    }
-  }, [subjectSlug]);
 
-  const loadTopics = async () => {
+  const loadTopics = useCallback(async () => {
     if (!subjectSlug) return;
     
     setLoading(true);
@@ -42,7 +36,11 @@ export function TopicsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [subjectSlug]);
+
+  useEffect(() => {
+    loadTopics();
+  }, [loadTopics]);
 
   const filteredTopicsByCategory = () => {
     const filtered: Record<string, Topic[]> = {};
@@ -53,14 +51,12 @@ export function TopicsPage() {
         return;
       }
       
-      // Filter by search term and difficulty
+      // Filter by search term
       const filteredTopics = topics.filter(topic => {
         const matchesSearch = topic.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             topic.description?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesDifficulty = selectedDifficulty === 'all' || 
-                                topic.difficulty_level === selectedDifficulty;
         
-        return matchesSearch && matchesDifficulty;
+        return matchesSearch;
       });
       
       if (filteredTopics.length > 0) {
@@ -71,14 +67,7 @@ export function TopicsPage() {
     return filtered;
   };
 
-  const getDifficultyColor = (difficulty?: string) => {
-    switch (difficulty) {
-      case 'BASIC': return 'text-green-600 bg-green-50';
-      case 'INTERMEDIATE': return 'text-yellow-600 bg-yellow-50';
-      case 'ADVANCED': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
-    }
-  };
+
 
   const handleTopicClick = (topic: Topic) => {
     // Navigate to practice mode with this specific topic
@@ -102,7 +91,7 @@ export function TopicsPage() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          {subjectSlug?.charAt(0).toUpperCase() + subjectSlug?.slice(1)} Topics
+          {subjectSlug ? `${subjectSlug.charAt(0).toUpperCase()}${subjectSlug.slice(1)} Topics` : 'Topics'}
         </h1>
         <p className="text-gray-600">
           Choose a topic to start practicing questions
@@ -111,7 +100,7 @@ export function TopicsPage() {
 
       {/* Filters */}
       <Card className="p-6 mb-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -127,25 +116,14 @@ export function TopicsPage() {
           <Select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="all">All Categories</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.slug}>
-                {category.name}
-              </option>
-            ))}
-          </Select>
-
-          {/* Difficulty Filter */}
-          <Select
-            value={selectedDifficulty}
-            onChange={(e) => setSelectedDifficulty(e.target.value)}
-          >
-            <option value="all">All Difficulties</option>
-            <option value="BASIC">Basic</option>
-            <option value="INTERMEDIATE">Intermediate</option>
-            <option value="ADVANCED">Advanced</option>
-          </Select>
+            options={[
+              { value: 'all', label: 'All Categories' },
+              ...categories.map(category => ({
+                value: category.slug,
+                label: category.name
+              }))
+            ]}
+          />
         </div>
       </Card>
 
@@ -186,21 +164,17 @@ export function TopicsPage() {
                 {/* Topics Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                   {topics.map(topic => (
-                    <Card 
+                    <div
                       key={topic.id}
-                      className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+                      className="cursor-pointer"
                       onClick={() => handleTopicClick(topic)}
                     >
+                      <Card className="p-6 hover:shadow-lg transition-shadow">
                       {/* Topic Header */}
                       <div className="flex items-start justify-between mb-4">
                         <h3 className="font-semibold text-gray-900 leading-tight">
                           {topic.name}
                         </h3>
-                        {topic.difficulty_level && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDifficultyColor(topic.difficulty_level)}`}>
-                            {topic.difficulty_level.toLowerCase()}
-                          </span>
-                        )}
                       </div>
 
                       {/* Topic Description */}
@@ -234,7 +208,8 @@ export function TopicsPage() {
                         <Play className="w-4 h-4 mr-2" />
                         Start Practice
                       </Button>
-                    </Card>
+                      </Card>
+                    </div>
                   ))}
                 </div>
               </div>

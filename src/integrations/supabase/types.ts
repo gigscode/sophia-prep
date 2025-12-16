@@ -104,7 +104,6 @@ export interface Database {
           option_d: string;
           correct_answer: 'A' | 'B' | 'C' | 'D';
           explanation: string | null;
-          difficulty_level: 'EASY' | 'MEDIUM' | 'HARD';
           exam_year: number | null;
           question_number: number | null;
           metadata: any | null;
@@ -123,7 +122,6 @@ export interface Database {
           option_d: string;
           correct_answer: 'A' | 'B' | 'C' | 'D';
           explanation: string | null;
-          difficulty_level: 'EASY' | 'MEDIUM' | 'HARD';
           exam_year: number | null;
           question_number: number | null;
           metadata: any | null;
@@ -142,7 +140,6 @@ export interface Database {
           option_d: string;
           correct_answer: 'A' | 'B' | 'C' | 'D';
           explanation: string | null;
-          difficulty_level: 'EASY' | 'MEDIUM' | 'HARD';
           exam_year: number | null;
           question_number: number | null;
           metadata: any | null;
@@ -253,7 +250,7 @@ export interface Database {
         Args: {
           p_subject_ids: string[];
           p_limit: number;
-          p_difficulty: string | null;
+
         };
         Returns: {
           question_id: string;
@@ -264,7 +261,6 @@ export interface Database {
           option_d: string;
           correct_answer: string;
           explanation: string | null;
-          difficulty_level: string;
           subject_name: string;
         }[];
       };
@@ -284,7 +280,6 @@ export interface Database {
           option_d: string;
           correct_answer: string;
           explanation: string | null;
-          difficulty_level: string;
           subject_name: string;
           exam_type_name: string;
           questions_count: number;
@@ -308,7 +303,6 @@ export interface Database {
           option_d: string;
           correct_answer: string;
           explanation: string | null;
-          difficulty_level: string;
           subject_name: string;
           exam_type_name: string;
           questions_count: number;
@@ -343,7 +337,6 @@ export interface Database {
           option_d: string;
           correct_answer: string;
           explanation: string | null;
-          difficulty_level: string;
           subject_name: string;
           exam_type_name: string;
           questions_count: number;

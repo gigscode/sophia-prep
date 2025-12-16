@@ -15,7 +15,7 @@ export type QuizAnalytics = {
   attemptsBySubject: Record<string, number>;
   averageScoreBySubject: Record<string, number>;
   mostPopularSubjects: { subject: string; count: number }[];
-  mostDifficultTopics: { topic: string; averageScore: number }[];
+
 };
 
 export type ContentAnalytics = {
@@ -144,7 +144,7 @@ export class AdminAnalyticsService {
         attemptsBySubject,
         averageScoreBySubject,
         mostPopularSubjects,
-        mostDifficultTopics: [], // Would need more complex query
+
       };
     } catch (err) {
       console.error('Failed to get quiz analytics:', err);
@@ -154,7 +154,7 @@ export class AdminAnalyticsService {
         attemptsBySubject: {},
         averageScoreBySubject: {},
         mostPopularSubjects: [],
-        mostDifficultTopics: [],
+
       };
     }
   }

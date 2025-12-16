@@ -26,7 +26,6 @@ export const QuickQuestionUploader: React.FC = () => {
           optionD: '6',
           correctAnswer: 'B' as const,
           explanation: '2 + 2 equals 4',
-          difficultyLevel: 'EASY' as const,
           examYear: 2024
         },
         {
@@ -39,7 +38,6 @@ export const QuickQuestionUploader: React.FC = () => {
           optionD: 'Quickly',
           correctAnswer: 'C' as const,
           explanation: 'Book is a noun (a thing)',
-          difficultyLevel: 'EASY' as const,
           examYear: 2024
         },
         {
@@ -52,7 +50,6 @@ export const QuickQuestionUploader: React.FC = () => {
           optionD: 'Pascal',
           correctAnswer: 'B' as const,
           explanation: 'Newton is the SI unit of force',
-          difficultyLevel: 'MEDIUM' as const,
           examYear: 2023
         },
         {
@@ -65,7 +62,6 @@ export const QuickQuestionUploader: React.FC = () => {
           optionD: 'O2',
           correctAnswer: 'A' as const,
           explanation: 'Water is H2O (2 hydrogen atoms + 1 oxygen atom)',
-          difficultyLevel: 'EASY' as const,
           examYear: 2023
         },
         {
@@ -78,7 +74,6 @@ export const QuickQuestionUploader: React.FC = () => {
           optionD: '40',
           correctAnswer: 'B' as const,
           explanation: '5 × 6 = 30',
-          difficultyLevel: 'EASY' as const,
           examYear: 2024
         }
       ];

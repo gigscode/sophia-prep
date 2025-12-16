@@ -26,7 +26,6 @@ function normalizeExtraEntry(e) {
     option_d: d || null,
     correct_answer: (e.answer || e.correct || e.correct_answer || '').toString(),
     explanation: e.explanation || '',
-    difficulty_level: e.difficulty_level || null,
     exam_year: e.exam_year || null,
     exam_type: e.exam_type || null,
   };
@@ -44,7 +43,6 @@ function normalizeJambEntry(e) {
     option_d: e.option_d || null,
     correct_answer: (e.correct_answer || e.correct || e.answer || '').toString(),
     explanation: e.explanation || '',
-    difficulty_level: e.difficulty_level || null,
     exam_year: e.exam_year || null,
     exam_type: e.exam_type || null,
   };
