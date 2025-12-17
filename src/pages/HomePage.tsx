@@ -147,7 +147,7 @@ export function HomePage() {
           <div className="section-reveal animate-delay-0">
             <HeroBanner
               title="Sophia Prep Exam Success"
-              description="Your JAMB success starts here — lifetime access for just ₦4,999."
+              description="Your JAMB success starts here — 3 months access for just ₦3,999."
               buttonText="Get Started"
               buttonAction={handleHeroBannerAction}
               gradientColors={['hsl(var(--color-primary-purple))', 'hsl(var(--color-primary-blue))']}

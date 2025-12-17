@@ -1,5 +1,5 @@
 
-import { BookOpen, ChevronRight } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { QuizModeCard } from '../cards/QuizModeCard';
@@ -73,9 +73,16 @@ export function QuizModesSection({
             {/* Practice Mode Card */}
             <QuizModeCard
               mode="practice"
-              icon={<BookOpen size={28} />}
+              layout="horizontal"
+              icon={
+                <img 
+                  src="/jamb_logo.png" 
+                  alt="JAMB Logo" 
+                  className="w-15 h-15 object-contain"
+                />
+              }
               title="Practice Mode"
-              description="Familiarize yourself with exam questions. See explanations after each answer and time yourself manually with a submit button."
+              description="Practice and Master Jamb Past Questions"
               onClick={handlePracticeModeClick}
               className="animate-fade-in-up animate-delay-0"
             />
@@ -88,11 +95,11 @@ export function QuizModesSection({
                 <img 
                   src="/jamb_logo.png" 
                   alt="JAMB Logo" 
-                  className="w-9 h-9 object-contain"
+                  className="w-15 h-15 object-contain"
                 />
               }
               title="CBT Quiz"
-              description="Timed past questions quiz. 2hr 30min for JAMB. Auto-submits when time expires. No explanations until completion."
+              description="Try JAMB Exam Simulation."
               onClick={handleCBTQuizClick}
               className="animate-fade-in-up animate-delay-100"
             />

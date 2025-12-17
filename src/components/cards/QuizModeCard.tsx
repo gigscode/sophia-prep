@@ -39,17 +39,19 @@ export function QuizModeCard({
   const titleId = `${cardId}-title`;
   const descriptionId = `${cardId}-description`;
 
-  // Color scheme based on mode
+  // Color scheme based on mode with transparent backgrounds and faded icons
   const colorScheme = {
     practice: {
-      backgroundColor: 'hsl(var(--color-bg-card))',
-      iconBackgroundColor: 'hsl(var(--color-pastel-peach))', // Orange/peach for Practice Mode
-      iconColor: 'hsl(var(--color-primary-orange))',
+      backgroundColor: 'rgba(251, 146, 60, 0.1)', // Transparent orange background
+      iconBackgroundColor: 'rgba(251, 146, 60, 0.15)', // Slightly more opaque orange for icon container
+      iconColor: 'rgba(251, 146, 60, 0.6)', // Faded/transparent orange icon
+      iconOpacity: '0.6',
     },
     cbt: {
-      backgroundColor: 'hsl(var(--color-bg-card))',
-      iconBackgroundColor: 'hsl(var(--color-pastel-mint))', // Green/mint for CBT Quiz
-      iconColor: 'hsl(var(--color-primary-green))',
+      backgroundColor: 'rgba(34, 197, 94, 0.1)', // Transparent green background
+      iconBackgroundColor: 'rgba(34, 197, 94, 0.15)', // Slightly more opaque green for icon container
+      iconColor: 'rgba(34, 197, 94, 0.6)', // Faded/transparent green icon
+      iconOpacity: '0.6',
     },
   };
 
@@ -87,29 +89,29 @@ export function QuizModeCard({
       aria-label={generateAriaLabel(title, description, 'Quiz mode')}
     >
       {layout === 'horizontal' ? (
-        /* Horizontal Layout - Icon and Title on same row */
-        <>
-          <div className="flex items-center justify-between mb-4">
-            {/* Icon Container */}
+        /* Horizontal Layout - 30/70 split with logo on left */
+        <div className="flex items-center gap-6">
+          {/* Left side - 30% - Logo */}
+          <div className="flex-[0_0_30%] flex items-center justify-center">
             <div
               className="
-                w-14
-                h-14
-                rounded-full
+                w-20
+                h-20
                 flex
                 items-center
                 justify-center
-                flex-shrink-0
               "
               style={{
-                backgroundColor: colors.iconBackgroundColor,
-                color: colors.iconColor,
+                opacity: colors.iconOpacity,
               }}
               aria-hidden="true"
             >
               {icon}
             </div>
+          </div>
 
+          {/* Right side - 70% - Content */}
+          <div className="flex-[0_0_70%] space-y-3">
             {/* Title */}
             <h3
               id={titleId}
@@ -120,19 +122,19 @@ export function QuizModeCard({
             >
               {title}
             </h3>
-          </div>
 
-          {/* Description */}
-          <p
-            id={descriptionId}
-            className="text-lg leading-relaxed"
-            style={{
-              color: 'hsl(var(--color-text-secondary))',
-            }}
-          >
-            {description}
-          </p>
-        </>
+            {/* Description */}
+            <p
+              id={descriptionId}
+              className="text-base leading-relaxed"
+              style={{
+                color: 'hsl(var(--color-text-secondary))',
+              }}
+            >
+              {description}
+            </p>
+          </div>
+        </div>
       ) : (
         /* Vertical Layout - Icon above title */
         <>
@@ -150,6 +152,7 @@ export function QuizModeCard({
             style={{
               backgroundColor: colors.iconBackgroundColor,
               color: colors.iconColor,
+              opacity: colors.iconOpacity,
             }}
             aria-hidden="true"
           >
