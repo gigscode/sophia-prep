@@ -51,6 +51,7 @@ const AdminPage = lazy(() => import('../pages/AdminPage').then(module => ({ defa
 const ImportQuestionsPage = lazy(() => import('../pages/ImportQuestionsPage').then(module => ({ default: module.ImportQuestionsPage })));
 const MorePage = lazy(() => import('../pages/MorePage').then(module => ({ default: module.MorePage })));
 const TopicsPage = lazy(() => import('../pages/TopicsPage').then(module => ({ default: module.TopicsPage })));
+const StudyMaterialsPage = lazy(() => import('../components/pdfs/StudyMaterialsPage').then(module => ({ default: module.StudyMaterialsPage })));
 
 
 /**
@@ -108,6 +109,14 @@ export const routeConfigs: RouteConfig[] = [
     showFooter: true,
     title: 'Videos - Sophia Prep',
     description: 'Educational video content'
+  },
+  {
+    path: '/study-materials',
+    component: StudyMaterialsPage,
+    requireAuth: false,
+    showFooter: true,
+    title: 'Study Materials - Sophia Prep',
+    description: 'Access study materials and syllabus files'
   },
 
   // Practice Mode

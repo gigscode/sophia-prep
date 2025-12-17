@@ -85,15 +85,15 @@ export function StudyHub() {
           </button>
 
           <button 
-            onClick={() => navigate('/novels')}
+            onClick={() => navigate('/study-materials')}
             disabled={isNavigating}
             className="sophia-card p-6 hover:shadow-lg transition-shadow text-left w-full disabled:opacity-50"
           >
             <div className="flex items-center gap-4 mb-3">
               <Library className="w-8 h-8 text-purple-600" />
-              <h3 className="text-xl font-semibold">Novels</h3>
+              <h3 className="text-xl font-semibold">Study Materials</h3>
             </div>
-            <p className="text-gray-600">Prescribed novels, summaries, themes, and analyses</p>
+            <p className="text-gray-600">Access study materials, novels, and syllabus files</p>
           </button>
 
           <button 

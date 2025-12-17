@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigation } from '../hooks/useNavigation';
-import { BookOpen, Users, FileQuestion, BarChart3, Menu, X, Home } from 'lucide-react';
+import { BookOpen, Users, FileQuestion, BarChart3, Menu, X, Home, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserManagement } from '../components/admin/UserManagement';
 import { SubjectManagement } from '../components/admin/SubjectManagement';
 import { QuestionManagement } from '../components/admin/QuestionManagement';
 import { TopicManagement } from '../components/admin/TopicManagement';
 import { AnalyticsDashboard } from '../components/admin/AnalyticsDashboard';
+import { PDFManagement } from '../components/admin/PDFManagement';
 import { SubjectConsistencyTest } from '../components/SubjectConsistencyTest';
 
-type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions' | 'topics';
+type AdminTab = 'analytics' | 'users' | 'subjects' | 'questions' | 'topics' | 'pdfs';
 
 export function AdminPage() {
   const { user, loading } = useAuth();
@@ -79,6 +80,7 @@ export function AdminPage() {
     { id: 'subjects' as AdminTab, label: 'Subjects', icon: BookOpen, color: 'text-purple-600', bgColor: 'bg-purple-50' },
     { id: 'topics' as AdminTab, label: 'Topics', icon: BookOpen, color: 'text-orange-600', bgColor: 'bg-orange-50' },
     { id: 'questions' as AdminTab, label: 'Questions', icon: FileQuestion, color: 'text-red-600', bgColor: 'bg-red-50' },
+    { id: 'pdfs' as AdminTab, label: 'PDF Files', icon: FileText, color: 'text-indigo-600', bgColor: 'bg-indigo-50' },
   ];
 
   return (
@@ -218,6 +220,7 @@ export function AdminPage() {
             )}
             {tab === 'topics' && <TopicManagement />}
             {tab === 'questions' && <QuestionManagement />}
+            {tab === 'pdfs' && <PDFManagement />}
           </motion.div>
         </div>
       </div>
