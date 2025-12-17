@@ -111,21 +111,18 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
                 </h3>
               </div>
               
-              {/* Price and Duration on same line */}
-              <div className="flex items-baseline justify-center gap-2">
-                <span className="text-2xl font-bold text-gray-900">
+              {/* Price only */}
+              <div className="text-center">
+                <span className="text-3xl font-bold text-red-900">
                   {plan.price}
-                </span>
-                <span className="text-sm text-gray-600">
-                  {plan.duration}
                 </span>
               </div>
             </div>
 
-            {/* Features List - Compact */}
-            <div className="space-y-2 mb-4">
+            {/* Features List - Compact & Centered */}
+            <div className="space-y-2 mb-4 text-center">
               {plan.features.slice(0, 3).map((feature, index) => (
-                <div key={index} className="flex items-start gap-2">
+                <div key={index} className="flex items-start gap-2 justify-center">
                   <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
                   <span className="text-gray-700 text-xs">
                     {feature}
