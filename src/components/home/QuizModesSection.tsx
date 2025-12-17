@@ -39,7 +39,7 @@ export function QuizModesSection({
   };
 
   return (
-    <section className={`space-y-4 ${className}`.trim()}>
+    <section className={`space-y-3 ${className}`.trim()}>
       {/* Section Header */}
       <SectionHeader
         title="CBT Exam Modes"

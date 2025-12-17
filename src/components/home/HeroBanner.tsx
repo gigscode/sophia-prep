@@ -61,23 +61,26 @@ export function HeroBanner({
     >
       {/* Content Container */}
       <div className="relative z-10 flex flex-col gap-4">
-        {/* Icon (if provided) */}
-        {icon && (
-          <div 
-            className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm"
-            aria-hidden="true"
-          >
-            {icon}
-          </div>
-        )}
+        {/* Icon and Title on same line */}
+        <div className="flex items-center gap-4">
+          {/* Icon (if provided) */}
+          {icon && (
+            <div 
+              className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0"
+              aria-hidden="true"
+            >
+              {icon}
+            </div>
+          )}
 
-        {/* Title */}
-        <h2 
-          id={titleId}
-          className="text-2xl md:text-3xl font-bold text-white leading-tight"
-        >
-          {title}
-        </h2>
+          {/* Title */}
+          <h2 
+            id={titleId}
+            className="text-2xl md:text-3xl font-bold text-white leading-tight"
+          >
+            {title}
+          </h2>
+        </div>
 
         {/* Description */}
         <p 
