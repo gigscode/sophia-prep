@@ -79,6 +79,8 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
             className={`relative p-6 transition-all duration-300 hover:shadow-lg ${
               plan.isPopular
                 ? 'border-2 border-[#B78628] bg-gradient-to-br from-[#FDF6E8] to-white'
+                : plan.id === 'monthly'
+                ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 hover:border-blue-500'
                 : 'border border-gray-200 hover:border-gray-300'
             }`}
           >
@@ -94,7 +96,11 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
             {/* Plan Header */}
             <div className="text-center mb-6">
               <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 ${
-                plan.isPopular ? 'bg-[#B78628] text-white' : 'bg-gray-100 text-gray-600'
+                plan.isPopular 
+                  ? 'bg-[#B78628] text-white' 
+                  : plan.id === 'monthly'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                  : 'bg-gray-100 text-gray-600'
               }`}>
                 {plan.icon}
               </div>
@@ -128,6 +134,8 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
               className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
                 plan.isPopular
                   ? 'bg-[#B78628] text-white hover:bg-[#A67522]'
+                  : plan.id === 'monthly'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
                   : 'bg-gray-900 text-white hover:bg-gray-800'
               }`}
             >
