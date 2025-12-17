@@ -76,7 +76,7 @@ export function MorePage() {
       {/* Header Banner */}
       <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-8 rounded-b-3xl shadow-md">
         <h1 className="text-2xl font-bold text-white mb-2">Activate your device.</h1>
-        <p className="text-4xl font-bold text-gray-900">₦2,000</p>
+        <p className="text-4xl font-bold text-gray-900">₦1,500 <span className='text-lg'>Monthly</span></p>
       </div>
 
       {/* Options Grid */}
