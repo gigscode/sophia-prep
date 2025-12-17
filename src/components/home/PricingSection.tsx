@@ -76,7 +76,7 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
         {plans.map((plan) => (
           <Card
             key={plan.id}
-            className={`relative p-6 transition-all duration-300 hover:shadow-lg ${
+            className={`relative p-4 transition-all duration-300 hover:shadow-lg ${
               plan.isPopular
                 ? 'border-2 border-[#B78628] bg-gradient-to-br from-[#FDF6E8] to-white'
                 : plan.id === 'monthly'
@@ -86,52 +86,62 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
           >
             {/* Popular Badge */}
             {plan.isPopular && (
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                <span className="bg-[#B78628] text-white px-4 py-1 rounded-full text-sm font-medium">
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                <span className="bg-[#B78628] text-white px-3 py-1 rounded-full text-xs font-medium">
                   Most Popular
                 </span>
               </div>
             )}
 
-            {/* Plan Header */}
-            <div className="text-center mb-6">
-              <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full mb-4 ${
-                plan.isPopular 
-                  ? 'bg-[#B78628] text-white' 
-                  : plan.id === 'monthly'
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
-                  : 'bg-gray-100 text-gray-600'
-              }`}>
-                {plan.icon}
+            {/* Plan Header - Compact */}
+            <div className="text-center mb-4">
+              {/* Icon and Title on same line */}
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full ${
+                  plan.isPopular 
+                    ? 'bg-[#B78628] text-white' 
+                    : plan.id === 'monthly'
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
+                    : 'bg-gray-100 text-gray-600'
+                }`}>
+                  {plan.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {plan.name}
+                </h3>
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                {plan.name}
-              </h3>
-              <div className="mb-2">
-                <span className="text-3xl font-bold text-gray-900">
+              
+              {/* Price and Duration on same line */}
+              <div className="flex items-baseline justify-center gap-2">
+                <span className="text-2xl font-bold text-gray-900">
                   {plan.price}
                 </span>
-                <span className="text-gray-600 ml-2">
+                <span className="text-sm text-gray-600">
                   {plan.duration}
                 </span>
               </div>
             </div>
 
-            {/* Features List */}
-            <div className="space-y-3 mb-6">
-              {plan.features.map((feature, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700 text-sm">
+            {/* Features List - Compact */}
+            <div className="space-y-2 mb-4">
+              {plan.features.slice(0, 3).map((feature, index) => (
+                <div key={index} className="flex items-start gap-2">
+                  <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700 text-xs">
                     {feature}
                   </span>
                 </div>
               ))}
+              {plan.features.length > 3 && (
+                <div className="text-xs text-gray-500 text-center">
+                  +{plan.features.length - 3} more features
+                </div>
+              )}
             </div>
 
-            {/* CTA Button */}
+            {/* CTA Button - Compact */}
             <button
-              className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
+              className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
                 plan.isPopular
                   ? 'bg-[#B78628] text-white hover:bg-[#A67522]'
                   : plan.id === 'monthly'
@@ -139,7 +149,7 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
                   : 'bg-gray-900 text-white hover:bg-gray-800'
               }`}
             >
-              Choose {plan.name}
+              Choose Plan
             </button>
           </Card>
         ))}
