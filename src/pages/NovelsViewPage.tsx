@@ -29,7 +29,21 @@ export function NovelsViewPage() {
       ]);
 
       setNovels(novelsData);
-      setSubjects(subjectsData);
+      
+      // Filter subjects to only show those relevant for novels:
+      // English, Literature in English, and Nigerian languages (Hausa, Igbo, Yoruba)
+      const novelRelevantSubjects = subjectsData.filter(subject => {
+        const subjectName = subject.name.toLowerCase();
+        return (
+          subjectName.includes('english') ||
+          subjectName.includes('literature') ||
+          subjectName.includes('hausa') ||
+          subjectName.includes('igbo') ||
+          subjectName.includes('yoruba')
+        );
+      });
+      
+      setSubjects(novelRelevantSubjects);
     } catch (error) {
       console.error('Error loading novels:', error);
       showToast('Failed to load novels', 'error');

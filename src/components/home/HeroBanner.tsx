@@ -66,7 +66,7 @@ export function HeroBanner({
           {/* Icon (if provided) */}
           {icon && (
             <div 
-              className="flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex-shrink-0"
+              className="flex items-center justify-center w-16 h-16 rounded-full bg-white flex-shrink-0"
               aria-hidden="true"
             >
               {icon}
