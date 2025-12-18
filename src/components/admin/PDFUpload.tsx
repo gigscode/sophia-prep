@@ -265,6 +265,11 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                   ...subjects.map(s => ({ value: s.id, label: s.name }))
                 ]}
               />
+              {type === 'novels' && subjects.length > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  Only subjects relevant for novels are shown (English, Literature, and Nigerian languages)
+                </p>
+              )}
             </div>
 
             {/* Exam Year (syllabus only) */}

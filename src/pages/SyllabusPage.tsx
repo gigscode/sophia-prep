@@ -84,13 +84,26 @@ export function SyllabusPage() {
     return subject?.name || 'Unknown Subject';
   };
 
-  // Get unique years for filter
+  // Get available years for filter (starting from 2026)
   const getAvailableYears = () => {
-    const years = syllabus
+    const currentYear = new Date().getFullYear();
+    const startYear = 2026;
+    const endYear = Math.max(currentYear + 5, startYear + 10); // Show at least 10 years from 2026
+    
+    // Generate years from 2026 onwards
+    const generatedYears = [];
+    for (let year = startYear; year <= endYear; year++) {
+      generatedYears.push(year);
+    }
+    
+    // Also include any years from database that are 2026 or later
+    const dbYears = syllabus
       .map(item => item.exam_year)
-      .filter((year): year is number => year !== null && year !== undefined)
-      .sort((a, b) => b - a); // Sort descending
-    return [...new Set(years)];
+      .filter((year): year is number => year !== null && year !== undefined && year >= startYear);
+    
+    // Combine and deduplicate
+    const allYears = [...new Set([...generatedYears, ...dbYears])];
+    return allYears.sort((a, b) => b - a); // Sort descending (newest first)
   };
 
   const filteredData = getFilteredData();

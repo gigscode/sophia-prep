@@ -52,6 +52,26 @@ export function PDFManagement() {
     }
   };
 
+  // Get filtered subjects based on the active tab
+  const getFilteredSubjects = () => {
+    if (activeTab === 'novels') {
+      // Filter subjects to only show those relevant for novels:
+      // English, Literature in English, and Nigerian languages (Hausa, Igbo, Yoruba)
+      return subjects.filter(subject => {
+        const subjectName = subject.name.toLowerCase();
+        return (
+          subjectName.includes('english') ||
+          subjectName.includes('literature') ||
+          subjectName.includes('hausa') ||
+          subjectName.includes('igbo') ||
+          subjectName.includes('yoruba')
+        );
+      });
+    }
+    // For syllabus, show all subjects
+    return subjects;
+  };
+
   const handleUploadSuccess = () => {
     loadData();
     setShowUpload(false);
@@ -210,7 +230,7 @@ export function PDFManagement() {
             onChange={(e) => setSelectedSubject(e.target.value)}
             options={[
               { value: '', label: 'All Subjects' },
-              ...subjects.map(s => ({ value: s.id, label: s.name }))
+              ...getFilteredSubjects().map(s => ({ value: s.id, label: s.name }))
             ]}
           />
 
@@ -344,7 +364,7 @@ export function PDFManagement() {
       {showUpload && (
         <PDFUpload
           type={activeTab}
-          subjects={subjects}
+          subjects={getFilteredSubjects()}
           onUploadSuccess={handleUploadSuccess}
           onClose={() => setShowUpload(false)}
         />
