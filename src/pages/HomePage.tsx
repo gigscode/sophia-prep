@@ -1,4 +1,4 @@
-import { Sparkles } from 'lucide-react';
+
 import { useEffect, useState } from 'react';
 import { Layout } from '../components/layout';
 import { useAuth } from '../hooks/useAuth';
@@ -72,6 +72,8 @@ export function HomePage() {
       return () => clearTimeout(timer);
     }
   }, [pricingVisible]);
+
+
 
   // Simulate loading for Quick Links when visible
   useEffect(() => {
@@ -151,7 +153,7 @@ export function HomePage() {
               buttonText="Get Started"
               buttonAction={handleHeroBannerAction}
               gradientColors={['hsl(var(--color-primary-purple))', 'hsl(var(--color-primary-blue))']}
-              icon={<Sparkles className="w-8 h-8 text-white" />}
+              icon={<img src="/sophialogo2.png" alt="Sophia Prep Logo" className="w-12 h-12" />}
             />
           </div>
 

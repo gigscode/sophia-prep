@@ -1,5 +1,5 @@
 
-import { BookOpen, Video, BookMarked, GraduationCap, ChevronRight } from 'lucide-react';
+import { BookOpen, BookMarked, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { SectionHeader } from './SectionHeader';
 import { QuickLinkCard } from '../cards/QuickLinkCard';
@@ -14,8 +14,8 @@ export interface QuickLinksSectionProps {
  * QuickLinksSection Component
  * 
  * Displays a grid of quick access cards for frequently used features.
- * Includes Study Past Questions, Video Lessons, Novels, and Study Hub.
- * Uses responsive grid layout: 1 column on mobile, 2 columns on tablet, 2-4 columns on desktop.
+ * Includes Study Past Questions and Novels.
+ * Uses responsive grid layout: 1 column on mobile, 2 columns on tablet and desktop.
  * 
  * Requirements: 4.1, 4.2, 4.5, 5.1, 5.2, 5.3, 5.4
  * 
@@ -41,28 +41,12 @@ export function QuickLinksSection({
       route: '/practice',
     },
     {
-      id: 'video-lessons',
-      title: 'Video Lessons',
-      icon: <Video size={40} />,
-      backgroundColor: 'hsl(var(--color-lavender))', // Lavender pastel
-      iconColor: 'hsl(var(--color-primary-purple))',
-      route: '/videos',
-    },
-    {
       id: 'novels',
       title: 'Novels',
       icon: <BookMarked size={40} />,
       backgroundColor: 'hsl(var(--color-soft-yellow))', // Soft yellow pastel
       iconColor: 'hsl(var(--color-primary-orange))',
       route: '/novels',
-    },
-    {
-      id: 'study-hub',
-      title: 'Study Hub',
-      icon: <GraduationCap size={40} />,
-      backgroundColor: 'hsl(var(--color-mint-green))', // Mint green pastel
-      iconColor: 'hsl(var(--color-primary-green))',
-      route: '/study',
     },
   ];
 
@@ -79,19 +63,19 @@ export function QuickLinksSection({
         onActionClick={onExpandClick}
       />
 
-      {/* Quick Link Cards Grid - Responsive: 1 column mobile, 2 columns tablet, 4 columns desktop */}
+      {/* Quick Link Cards Grid - Responsive: 1 column mobile, 2 columns tablet, 2 columns desktop */}
       <div
         className="
           grid
           grid-cols-1
           sm:grid-cols-2
-          lg:grid-cols-4
+          lg:grid-cols-2
           gap-4
           w-full
         "
       >
         {isLoading
-          ? Array.from({ length: 4 }).map((_, index) => (
+          ? Array.from({ length: 2 }).map((_, index) => (
             <CardSkeleton
               key={index}
               variant="quick-link"

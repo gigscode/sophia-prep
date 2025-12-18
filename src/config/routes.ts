@@ -32,7 +32,7 @@ const StudyHub = lazy(() => import('../pages/StudyHub').then(module => ({ defaul
 const SyllabusPage = lazy(() => import('../pages/SyllabusPage').then(module => ({ default: module.SyllabusPage })));
 const SummariesPage = lazy(() => import('../pages/SummariesPage').then(module => ({ default: module.SummariesPage })));
 const NovelsPage = lazy(() => import('../pages/NovelsPage').then(module => ({ default: module.NovelsPage })));
-const VideosPage = lazy(() => import('../pages/VideosPage').then(module => ({ default: module.VideosPage })));
+
 
 const PracticeModePage = lazy(() => import('../pages/PracticeModePage').then(module => ({ default: module.PracticeModePage })));
 const JAMBExamPage = lazy(() => import('../pages/JAMBExamPage').then(module => ({ default: module.JAMBExamPage })));
@@ -102,14 +102,7 @@ export const routeConfigs: RouteConfig[] = [
     title: 'Novels - Sophia Prep',
     description: 'Literature and novel study guides'
   },
-  {
-    path: '/videos',
-    component: VideosPage,
-    requireAuth: false,
-    showFooter: true,
-    title: 'Videos - Sophia Prep',
-    description: 'Educational video content'
-  },
+
   {
     path: '/study-materials',
     component: StudyMaterialsPage,
