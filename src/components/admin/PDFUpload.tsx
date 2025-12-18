@@ -131,27 +131,27 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 pb-20 sm:pb-4">
+      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
+          <h2 className="text-lg sm:text-xl font-semibold">
             Upload {PDF_TYPES[type].label}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-lg transition-colors touch-target"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* File Upload Area */}
           <div>
             <label className="block text-sm font-medium mb-2">PDF File</label>
             <div
-              className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+              className={`border-2 border-dashed rounded-xl p-4 sm:p-8 text-center transition-colors ${
                 dragActive
                   ? 'border-blue-500 bg-blue-50'
                   : file
@@ -165,15 +165,15 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
             >
               {file ? (
                 <div className="space-y-3">
-                  <div className="flex items-center justify-center gap-3">
-                    <FileText className="w-8 h-8 text-green-600" />
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">{file.name}</p>
-                      <p className="text-sm text-gray-500">{formatFileSize(file.size)}</p>
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 flex-shrink-0" />
+                    <div className="text-left flex-1 min-w-0">
+                      <p className="font-medium text-gray-900 text-sm sm:text-base truncate">{file.name}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">{formatFileSize(file.size)}</p>
                     </div>
                     <button
                       onClick={removeFile}
-                      className="p-1 hover:bg-red-100 rounded-full transition-colors"
+                      className="p-2 hover:bg-red-100 rounded-full transition-colors touch-target flex-shrink-0"
                     >
                       <X className="w-4 h-4 text-red-500" />
                     </button>
@@ -181,9 +181,9 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                 </div>
               ) : (
                 <div className="space-y-3">
-                  <Upload className="w-12 h-12 text-gray-400 mx-auto" />
+                  <Upload className="w-8 h-8 sm:w-12 sm:h-12 text-gray-400 mx-auto" />
                   <div>
-                    <p className="text-lg font-medium text-gray-700">
+                    <p className="text-base sm:text-lg font-medium text-gray-700">
                       Drop your PDF file here
                     </p>
                     <p className="text-sm text-gray-500">or click to browse</p>
@@ -191,7 +191,7 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                   <Button
                     onClick={() => fileInputRef.current?.click()}
                     variant="outline"
-                    className="mt-3"
+                    className="mt-3 touch-target"
                   >
                     Choose File
                   </Button>
@@ -211,7 +211,7 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
           </div>
 
           {/* Metadata Form */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Title */}
             <div>
               <label className="block text-sm font-medium mb-2">
@@ -221,7 +221,7 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                 placeholder={`Enter ${PDF_TYPES[type].field} title`}
               />
             </div>
@@ -234,7 +234,7 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                   type="text"
                   value={author}
                   onChange={(e) => setAuthor(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                   placeholder="Enter author name"
                 />
               </div>
@@ -248,7 +248,7 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base resize-none"
                   placeholder="Enter description"
                 />
               </div>
@@ -280,21 +280,21 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
                   type="number"
                   value={examYear}
                   onChange={(e) => setExamYear(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="e.g. 2024"
-                  min="2000"
-                  max="2030"
+                  className="w-full p-2 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+                  placeholder="e.g. 2026"
+                  min="2026"
+                  max="2040"
                 />
               </div>
             )}
           </div>
 
           {/* Upload Button */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
             <Button
               onClick={onClose}
               variant="outline"
-              className="flex-1"
+              className="w-full sm:flex-1 touch-target"
               disabled={uploading}
             >
               Cancel
@@ -302,17 +302,19 @@ export function PDFUpload({ type, subjects, onUploadSuccess, onClose }: PDFUploa
             <Button
               onClick={handleUpload}
               disabled={!file || !title.trim() || uploading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="w-full sm:flex-1 bg-blue-600 hover:bg-blue-700 touch-target"
             >
               {uploading ? (
                 <>
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Uploading...
+                  <span className="hidden sm:inline">Uploading...</span>
+                  <span className="sm:hidden">Upload...</span>
                 </>
               ) : (
                 <>
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload {PDF_TYPES[type].label}
+                  <span className="hidden sm:inline">Upload {PDF_TYPES[type].label}</span>
+                  <span className="sm:hidden">Upload</span>
                 </>
               )}
             </Button>

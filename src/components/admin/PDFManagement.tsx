@@ -280,77 +280,89 @@ export function PDFManagement() {
         <div className="bg-white shadow overflow-hidden sm:rounded-md">
           <ul className="divide-y divide-gray-200">
             {filteredData.map((item) => (
-              <li key={item.id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className={`p-2 rounded-lg ${item.is_active ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                      <FileText className={`w-6 h-6 ${item.is_active ? 'text-blue-600' : 'text-gray-400'}`} />
+              <li key={item.id} className="p-4 sm:px-6 sm:py-4">
+                {/* Mobile-first layout */}
+                <div className="space-y-3">
+                  {/* Header with icon and title */}
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${item.is_active ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                      <FileText className={`w-5 h-5 sm:w-6 sm:h-6 ${item.is_active ? 'text-blue-600' : 'text-gray-400'}`} />
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-medium text-gray-900 truncate">
-                          {item.title}
-                        </h3>
-                        {!item.is_active && (
-                          <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                            Inactive
-                          </span>
-                        )}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900 line-clamp-2">
+                            {item.title}
+                          </h3>
+                          {!item.is_active && (
+                            <span className="inline-block mt-1 px-2 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
+                              Inactive
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      
-                      <div className="mt-1 flex items-center gap-4 text-sm text-gray-500">
-                        {activeTab === 'novels' && (item as Novel).author && (
-                          <span>by {(item as Novel).author}</span>
-                        )}
-                        {activeTab === 'syllabus' && (item as Syllabus).exam_year && (
-                          <span>Year: {(item as Syllabus).exam_year}</span>
-                        )}
-                        <span>{getSubjectName(item.subject_id)}</span>
-                        <span>{pdfService.formatFileSize(item.file_size || 0)}</span>
-                        <span>{item.download_count} downloads</span>
-                      </div>
-                      
-                      {activeTab === 'novels' && (item as Novel).description && (
-                        <p className="mt-1 text-sm text-gray-600 line-clamp-2">
-                          {(item as Novel).description}
-                        </p>
-                      )}
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  {/* Metadata */}
+                  <div className="ml-11 sm:ml-14 space-y-1">
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                      {activeTab === 'novels' && (item as Novel).author && (
+                        <span>by {(item as Novel).author}</span>
+                      )}
+                      {activeTab === 'syllabus' && (item as Syllabus).exam_year && (
+                        <span>Year: {(item as Syllabus).exam_year}</span>
+                      )}
+                      <span>{getSubjectName(item.subject_id)}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-500">
+                      <span>{pdfService.formatFileSize(item.file_size || 0)}</span>
+                      <span>{item.download_count} downloads</span>
+                    </div>
+                    
+                    {activeTab === 'novels' && (item as Novel).description && (
+                      <p className="text-sm text-gray-600 line-clamp-2 mt-2">
+                        {(item as Novel).description}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Action buttons - Mobile optimized */}
+                  <div className="ml-11 sm:ml-14 flex flex-wrap gap-2">
                     {/* Download */}
                     {item.pdf_url && (
                       <button
                         onClick={() => handleDownload(item.pdf_url!, item.file_name || item.title, activeTab, item.id)}
-                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Download"
+                        className="flex items-center gap-2 px-3 py-2 text-sm bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors touch-target"
                       >
                         <Download className="w-4 h-4" />
+                        <span className="hidden sm:inline">Download</span>
                       </button>
                     )}
 
                     {/* Toggle Active */}
                     <button
                       onClick={() => handleToggleActive(activeTab, item.id, item.is_active)}
-                      className={`p-2 rounded-lg transition-colors ${
+                      className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors touch-target ${
                         item.is_active
-                          ? 'text-gray-400 hover:text-red-600 hover:bg-red-50'
-                          : 'text-gray-400 hover:text-green-600 hover:bg-green-50'
+                          ? 'bg-orange-50 text-orange-700 hover:bg-orange-100'
+                          : 'bg-green-50 text-green-700 hover:bg-green-100'
                       }`}
-                      title={item.is_active ? 'Deactivate' : 'Activate'}
                     >
                       {item.is_active ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      <span className="hidden sm:inline">
+                        {item.is_active ? 'Deactivate' : 'Activate'}
+                      </span>
                     </button>
 
                     {/* Delete */}
                     <button
                       onClick={() => handleDelete(activeTab, item.id, item.title)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete"
+                      className="flex items-center gap-2 px-3 py-2 text-sm bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition-colors touch-target"
                     >
                       <Trash2 className="w-4 h-4" />
+                      <span className="hidden sm:inline">Delete</span>
                     </button>
                   </div>
                 </div>
