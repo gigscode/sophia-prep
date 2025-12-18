@@ -2,11 +2,16 @@ import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { visualizer } from "rollup-plugin-visualizer";
+import { createHash } from "crypto";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   const env = loadEnv(mode, process.cwd(), '');
+  
+  // Generate version hash for cache busting
+  const buildTime = new Date().toISOString();
+  const versionHash = createHash('md5').update(buildTime).digest('hex').substring(0, 8);
 
   return {
     define: {
@@ -124,6 +129,16 @@ export default defineConfig(({ mode }) => {
         brotliSize: true,
         template: 'treemap', // 'sunburst', 'treemap', 'network'
       }),
+      // Custom plugin to inject version info
+      {
+        name: 'inject-version',
+        transformIndexHtml(html) {
+          return html.replace(
+            '<head>',
+            `<head>\n    <meta name="app-version" content="${versionHash}" />\n    <meta name="build-time" content="${buildTime}" />`
+          );
+        }
+      }
     ],
     resolve: {
       alias: {

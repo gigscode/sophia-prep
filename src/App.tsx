@@ -9,6 +9,7 @@ import PWAInstall from './components/PWAInstall';
 import { ToastContainer } from './components/ui/Toast';
 import { LoadingSpinner } from './components/ui/LoadingSpinner';
 import { performStartupDatabaseChecks } from './utils/database-verification';
+import './services/silent-update-service'; // Initialize silent updates
 
 import { RouteErrorBoundary, ProtectedRoute, RouteParamValidator } from './components/routing';
 import { EnhancedAuthProvider } from './components/auth';
