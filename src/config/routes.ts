@@ -39,6 +39,8 @@ const JAMBExamPage = lazy(() => import('../pages/JAMBExamPage').then(module => (
 const QuizResultsPage = lazy(() => import('../pages/QuizResultsPage').then(module => ({ default: module.QuizResultsPage })));
 const HelpCenter = lazy(() => import('../pages/HelpCenter').then(module => ({ default: module.HelpCenter })));
 const AboutPage = lazy(() => import('../pages/AboutPage').then(module => ({ default: module.AboutPage })));
+const SubscriptionPage = lazy(() => import('../pages/SubscriptionPage').then(module => ({ default: module.SubscriptionPage })));
+const SubscriptionSuccessPage = lazy(() => import('../pages/SubscriptionSuccessPage').then(module => ({ default: module.SubscriptionSuccessPage })));
 const PrivacyPolicyPage = lazy(() => import('../pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })));
 const TermsOfServicePage = lazy(() => import('../pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })));
 const ContactPage = lazy(() => import('../pages/ContactPage').then(module => ({ default: module.ContactPage })));
@@ -204,6 +206,23 @@ export const routeConfigs: RouteConfig[] = [
     description: 'Browse topics by subject'
   },
 
+  {
+    path: '/subscriptions',
+    component: SubscriptionPage,
+    requireAuth: true,
+    showFooter: true,
+    title: 'Subscriptions - Sophia Prep',
+    description: 'Choose a plan to unlock full access to CBT exams'
+  },
+  {
+    path: '/subscription-success',
+    component: SubscriptionSuccessPage,
+    requireAuth: true,
+    showFooter: false,
+    title: 'Success! - Sophia Prep',
+    description: 'Subscription successfully activated'
+  },
+
   // Profile / Auth (some require authentication)
   {
     path: '/profile',
@@ -278,12 +297,12 @@ export const getRouteConfig = (path: string): RouteConfig | undefined => {
   // Then try pattern matching for dynamic routes
   return routeConfigs.find(config => {
     if (!config.path.includes(':')) return false;
-    
+
     const configParts = config.path.split('/');
     const pathParts = path.split('/');
-    
+
     if (configParts.length !== pathParts.length) return false;
-    
+
     return configParts.every((part, index) => {
       return part.startsWith(':') || part === pathParts[index];
     });
@@ -295,19 +314,19 @@ export const getRouteConfig = (path: string): RouteConfig | undefined => {
  */
 export const extractRouteParams = (path: string, routeConfig: RouteConfig): Record<string, string> => {
   const params: Record<string, string> = {};
-  
+
   if (!routeConfig.path.includes(':')) return params;
-  
+
   const configParts = routeConfig.path.split('/');
   const pathParts = path.split('/');
-  
+
   configParts.forEach((part, index) => {
     if (part.startsWith(':') && pathParts[index]) {
       const paramName = part.substring(1);
       params[paramName] = pathParts[index];
     }
   });
-  
+
   return params;
 };
 

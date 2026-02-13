@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Select } from '../components/ui/Select';
@@ -81,11 +81,11 @@ export function ImportQuestionsPage() {
     } | null>(null);
 
     // Form state persistence
-    const formPersistence = createFormPersistence('importQuestions');
+    const formPersistence = useMemo(() => createFormPersistence('importQuestions'), []);
 
     useEffect(() => {
         loadSubjects();
-        
+
         // Load saved form state
         const savedState = formPersistence.restoreFormState();
         if (savedState) {
@@ -117,7 +117,7 @@ export function ImportQuestionsPage() {
             format,
             importMode
         });
-        
+
         // Clear previous validation when subject changes
         setPreviewValidation(null);
     };
@@ -305,7 +305,7 @@ export function ImportQuestionsPage() {
                 lines.forEach(line => {
                     // Handle different formats: "Key: Value", "Key) Value", "Key. Value", etc.
                     let colonIndex = line.indexOf(':');
-                    
+
                     if (colonIndex === -1) {
                         colonIndex = line.indexOf(')');
                     }
@@ -321,21 +321,21 @@ export function ImportQuestionsPage() {
                             question[`option_${optionLetter.toLowerCase()}`] = optionText;
                             return;
                         }
-                        
+
                         // Try to match question patterns
                         const questionMatch = line.match(/^(?:Q|Question)\s*[).\\-\s]\s*(.+)$/i);
                         if (questionMatch) {
                             question.question_text = questionMatch[1].trim();
                             return;
                         }
-                        
+
                         // Try to match answer patterns
                         const answerMatch = line.match(/^(?:Answer|Correct|Correct Answer)\s*[).\\-\s]\s*([ABCD])$/i);
                         if (answerMatch) {
                             question.correct_answer = answerMatch[1].toUpperCase();
                             return;
                         }
-                        
+
                         return; // Skip lines that don't match any pattern
                     }
 
@@ -383,7 +383,7 @@ export function ImportQuestionsPage() {
                     if (!question.option_c) missingFields.push('Option C');
                     if (!question.option_d) missingFields.push('Option D');
                     if (!question.correct_answer) missingFields.push('Correct answer');
-                    
+
                     throw new Error(`Block ${blockIndex + 1} is missing: ${missingFields.join(', ')}. 
 
 Expected format:
@@ -924,7 +924,7 @@ Correct Answer: B
                                 <AlertCircle className="w-5 h-5 mr-2" />
                                 Validate Content
                             </Button>
-                            
+
                             <Button
                                 onClick={handleImport}
                                 disabled={(importMode === 'file' && !file) || (importMode === 'text' && !textInput) || importing}

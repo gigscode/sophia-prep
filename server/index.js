@@ -22,14 +22,17 @@ import fs from 'fs';
 import path from 'path';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+import crypto from 'crypto';
 
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+dotenv.config(); // Load from .env 
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') }); // Also try .env.local
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD; // used to mint admin JWT
 const ADMIN_JWT_SECRET = process.env.ADMIN_JWT_SECRET; // secret to sign admin JWTs
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || '*';
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 const USE_SUPABASE = Boolean(SUPABASE_URL && SUPABASE_KEY);
 if (!USE_SUPABASE) {
@@ -324,6 +327,126 @@ app.post('/api/import-quizzes', async (req, res) => {
     console.error(err);
     res.status(500).json({ error: 'internal error' });
   }
+});
+
+// Paystack Webhook Handler
+app.post('/api/paystack/webhook', async (req, res) => {
+  const hash = crypto.createHmac('sha512', PAYSTACK_SECRET_KEY).update(JSON.stringify(req.body)).digest('hex');
+  if (hash !== req.headers['x-paystack-signature']) {
+    return res.status(401).json({ error: 'invalid signature' });
+  }
+
+  const event = req.body;
+  console.log('Paystack Webhook Event:', event.event);
+
+  try {
+    if (event.event === 'charge.success') {
+      const { customer, metadata } = event.data;
+      const email = customer?.email;
+      const userId = metadata?.user_id;
+      const planName = metadata?.plan || 'Premium';
+      const planSlug = metadata?.plan_slug;
+
+      console.log(`Processing successful payment for user: ${userId}, email: ${email}, plan: ${planName}, slug: ${planSlug}`);
+
+      // Find the plan in subscription_plans table
+      let planId = null;
+
+      // Try matching by slug first if available
+      if (planSlug) {
+        const { data } = await supabase
+          .from('subscription_plans')
+          .select('id')
+          .eq('slug', planSlug)
+          .maybeSingle();
+        if (data) planId = data.id;
+      }
+
+      // Fallback to name match if slug didn't work or wasn't provided
+      if (!planId) {
+        const { data } = await supabase
+          .from('subscription_plans')
+          .select('id')
+          .or(`name.ilike.%${planName}%,slug.ilike.%${planName}%`)
+          .limit(1)
+          .maybeSingle();
+        if (data) planId = data.id;
+      }
+
+      console.log(`Resolved plan_id: ${planId}`);
+
+      // Update user profile
+      const { error: profileError } = await supabase
+        .from('user_profiles')
+        .update({
+          subscription_plan: planName,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      // 1. Mark existing active subscriptions as EXPIRED (to ensure only one is active)
+      await supabase
+        .from('user_subscriptions')
+        .update({ status: 'EXPIRED' })
+        .eq('user_id', userId)
+        .eq('status', 'ACTIVE');
+
+      // 2. Record new subscription
+      const durationDays = planName.toLowerCase().includes('months') ? 90 : 30; // 3 months or 1 month
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + durationDays);
+
+      const subPayload = {
+        user_id: userId,
+        plan_id: planId, // This might be null if not found, but it should ideally be found
+        status: 'ACTIVE',
+        start_date: new Date().toISOString(),
+        end_date: endDate.toISOString(),
+        amount_paid: event.data.amount / 100, // Paystack amount is in kobo
+        currency: 'NGN',
+        payment_reference: event.data.reference,
+        auto_renew: true,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data: insertedSub, error: subError } = await supabase
+        .from('user_subscriptions')
+        .insert(subPayload)
+        .select()
+        .single();
+
+      if (subError) {
+        console.error('Error recording subscription:', subError);
+      } else {
+        console.log(`Subscription recorded successfully: ${insertedSub.id}`);
+
+        // 3. Record payment record
+        await supabase
+          .from('payments')
+          .insert({
+            user_id: userId,
+            subscription_id: insertedSub.id,
+            amount: event.data.amount / 100,
+            currency: 'NGN',
+            payment_method: 'PAYSTACK',
+            payment_reference: event.data.reference,
+            payment_status: 'SUCCESS',
+            paid_at: new Date().toISOString(),
+            payment_gateway_response: event
+          });
+      }
+    }
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('Webhook error:', err);
+    res.status(500).json({ error: 'internal error' });
+  }
+});
+
+app.post('/api/paystack/initialize', async (req, res) => {
+  // Simple proxy to Paystack initialize if needed, but react-paystack handles this client-side too.
+  // This could be used for server-side initialization if preferred.
+  res.status(501).json({ error: 'use client-side initialization' });
 });
 
 // Admin login endpoint to mint short-lived JWTs using ADMIN_PASSWORD

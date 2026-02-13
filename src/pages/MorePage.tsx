@@ -74,9 +74,12 @@ export function MorePage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20 m-2">
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-8 rounded-b-3xl shadow-md">
-        <h1 className="text-2xl font-bold text-white mb-2">Activate your device.</h1>
-        <p className="text-4xl font-bold text-gray-900">₦1,500 <span className='text-lg'>Monthly</span></p>
+      <div
+        onClick={() => navigate('/subscriptions')}
+        className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-8 rounded-b-3xl shadow-md cursor-pointer hover:from-orange-500 hover:to-orange-600 transition-all"
+      >
+        <h1 className="text-2xl font-bold text-white mb-2">Activate Premium</h1>
+        <p className="text-4xl font-bold text-gray-900">₦2,000 <span className='text-lg'>Monthly</span></p>
       </div>
 
       {/* Options Grid */}

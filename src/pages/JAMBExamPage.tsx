@@ -5,6 +5,8 @@ import { ArrowLeft, Clock, CheckCircle, AlertCircle, Play } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 import type { Subject } from '../integrations/supabase/types';
 import { Select } from '../components/ui/Select';
+import { subscriptionService, SUBSCRIPTION_PLANS, FORCED_LIMITS } from '../services/subscription-service';
+import { useAuth } from '../hooks/useAuth';
 
 interface QuizQuestion {
   id: string;
@@ -25,14 +27,14 @@ type ViewState = 'subject-selection' | 'exam' | 'results';
 export function JAMBExamPage() {
   const navigate = useNavigate();
   const [currentView, setCurrentView] = useState<ViewState>('subject-selection');
-  
+
   // Subject selection state
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [englishSubject, setEnglishSubject] = useState<Subject | null>(null);
   const [availableYears, setAvailableYears] = useState<number[]>([]);
   const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
-  
+
   // Exam state
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -41,6 +43,8 @@ export function JAMBExamPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
+  const [userPlan, setUserPlan] = useState<string>(SUBSCRIPTION_PLANS.FREE);
+  const { user } = useAuth();
 
   // Timer effect
   useEffect(() => {
@@ -59,11 +63,18 @@ export function JAMBExamPage() {
     }
   }, [currentView, timeRemaining]);
 
-  // Load subjects and years on mount
+  // Load subjects, years and user plan on mount
   useEffect(() => {
     loadSubjects();
     loadAvailableYears();
-  }, []);
+    loadUserPlan();
+  }, [user]);
+
+  const loadUserPlan = async () => {
+    if (!user) return;
+    const plan = await subscriptionService.getActivePlan();
+    setUserPlan(plan);
+  };
 
   const loadSubjects = async () => {
     setLoading(true);
@@ -75,15 +86,15 @@ export function JAMBExamPage() {
         .order('sort_order');
 
       if (error) throw error;
-      
+
       const subjectsData = data || [];
       setSubjects(subjectsData);
-      
+
       // Find English Language subject and auto-select it (only English Language is mandatory for all JAMB students)
-      const english = subjectsData.find((s: Subject) => 
+      const english = subjectsData.find((s: Subject) =>
         s.slug === 'english'
       ) as Subject | undefined;
-      
+
       if (english) {
         setEnglishSubject(english);
         setSelectedSubjects([english.id]);
@@ -121,7 +132,7 @@ export function JAMBExamPage() {
   const handleSubjectToggle = (subjectId: string) => {
     // Don't allow deselecting English Language
     if (englishSubject && subjectId === englishSubject.id) return;
-    
+
     setSelectedSubjects(prev => {
       if (prev.includes(subjectId)) {
         return prev.filter(id => id !== subjectId);
@@ -147,8 +158,11 @@ export function JAMBExamPage() {
     setError(null);
 
     try {
-      // Load 45 questions per subject (180 total for JAMB)
-      const questionsPerSubject = 45;
+      // Questions per subject: 45 for Premium, 20 for Free
+      const questionsPerSubject = userPlan === SUBSCRIPTION_PLANS.PREMIUM
+        ? FORCED_LIMITS.PREMIUM_QUESTIONS_PER_SUBJECT
+        : FORCED_LIMITS.FREE_QUESTIONS_PER_SUBJECT;
+
       const allQuestions: QuizQuestion[] = [];
 
       for (const subjectId of selectedSubjects) {
@@ -188,7 +202,7 @@ export function JAMBExamPage() {
 
       // Final shuffle of all questions
       const finalQuestions = allQuestions.sort(() => Math.random() - 0.5);
-      
+
       setQuestions(finalQuestions);
       setCurrentQuestionIndex(0);
       setAnswers({});
@@ -245,7 +259,7 @@ export function JAMBExamPage() {
       const subjectQuestions = questions.filter(q => q.subject_id === subjectId);
       const subjectCorrect = subjectQuestions.filter(q => answers[q.id] === q.correct_answer).length;
       const subjectAnswered = subjectQuestions.filter(q => answers[q.id]).length;
-      
+
       return {
         name: subject?.name || 'Unknown',
         total: subjectQuestions.length,
@@ -300,7 +314,7 @@ export function JAMBExamPage() {
             <p className="text-blue-100">Select your exam subjects</p>
           </div>
         </div>
-        
+
         <div className="container mx-auto px-4 py-6">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -318,16 +332,16 @@ export function JAMBExamPage() {
                   onChange={(e) => setSelectedYear(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
                   options={[
                     { value: 'all', label: 'All Years' },
-                    ...availableYears.map(year => ({ 
-                      value: year.toString(), 
-                      label: year.toString() 
+                    ...availableYears.map(year => ({
+                      value: year.toString(),
+                      label: year.toString()
                     }))
                   ]}
                 />
               </div>
             </div>
             <p className="text-sm text-green-700">
-              {selectedYear === 'all' 
+              {selectedYear === 'all'
                 ? 'Questions from all available years will be included in your exam'
                 : `Only questions from ${selectedYear} will be included in your exam`
               }
@@ -357,6 +371,27 @@ export function JAMBExamPage() {
             </ul>
           </div>
 
+          {userPlan === SUBSCRIPTION_PLANS.FREE && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-6 mb-6">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-orange-600 mt-0.5" />
+                <div>
+                  <h2 className="text-lg font-semibold text-orange-900 mb-1">Free Tier Limit</h2>
+                  <p className="text-orange-800">
+                    You are currently on the Free plan. Each subject is limited to <strong>20 questions</strong> (80 total).
+                    Upgrade to Premium to get the full <strong>45 questions</strong> per subject (180 total).
+                  </p>
+                  <button
+                    onClick={() => navigate('/subscriptions')}
+                    className="mt-3 px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 transition-colors"
+                  >
+                    Upgrade to Premium
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* English Language (Mandatory) */}
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-3">Mandatory Subject</h3>
@@ -378,7 +413,7 @@ export function JAMBExamPage() {
             <h3 className="text-lg font-semibold text-gray-900 mb-6">
               Select 3 Additional Subjects ({selectedOthers.length}/3)
             </h3>
-            
+
             {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mx-auto"></div>
@@ -388,12 +423,12 @@ export function JAMBExamPage() {
               <div className="space-y-8">
                 {/* Science Subjects */}
                 {(() => {
-                  const scienceSubjects = otherSubjects.filter(s => 
-                    s.subject_category === 'SCIENCE' || 
+                  const scienceSubjects = otherSubjects.filter(s =>
+                    s.subject_category === 'SCIENCE' ||
                     (s.subject_category === 'GENERAL' && s.name === 'Mathematics')
                   );
                   if (scienceSubjects.length === 0) return null;
-                  
+
                   return (
                     <div>
                       <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -404,19 +439,18 @@ export function JAMBExamPage() {
                         {scienceSubjects.map((subject) => {
                           const isSelected = selectedSubjects.includes(subject.id);
                           const canSelect = selectedOthers.length < 3 || isSelected;
-                          
+
                           return (
                             <button
                               key={subject.id}
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
-                              className={`p-4 border-2 rounded-lg text-left transition-all ${
-                                isSelected
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
                                   ? 'border-green-500 bg-green-50'
                                   : canSelect
-                                  ? 'border-gray-200 hover:border-green-300 hover:bg-green-50'
-                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                              }`}
+                                    ? 'border-gray-200 hover:border-green-300 hover:bg-green-50'
+                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
                                 {isSelected && <CheckCircle className="w-5 h-5 text-green-600" />}
@@ -441,7 +475,7 @@ export function JAMBExamPage() {
                 {(() => {
                   const commercialSubjects = otherSubjects.filter(s => s.subject_category === 'COMMERCIAL');
                   if (commercialSubjects.length === 0) return null;
-                  
+
                   return (
                     <div>
                       <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -452,19 +486,18 @@ export function JAMBExamPage() {
                         {commercialSubjects.map((subject) => {
                           const isSelected = selectedSubjects.includes(subject.id);
                           const canSelect = selectedOthers.length < 3 || isSelected;
-                          
+
                           return (
                             <button
                               key={subject.id}
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
-                              className={`p-4 border-2 rounded-lg text-left transition-all ${
-                                isSelected
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
                                   ? 'border-blue-500 bg-blue-50'
                                   : canSelect
-                                  ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                              }`}
+                                    ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
                                 {isSelected && <CheckCircle className="w-5 h-5 text-blue-600" />}
@@ -489,7 +522,7 @@ export function JAMBExamPage() {
                 {(() => {
                   const artsSubjects = otherSubjects.filter(s => s.subject_category === 'ARTS');
                   if (artsSubjects.length === 0) return null;
-                  
+
                   return (
                     <div>
                       <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -500,19 +533,18 @@ export function JAMBExamPage() {
                         {artsSubjects.map((subject) => {
                           const isSelected = selectedSubjects.includes(subject.id);
                           const canSelect = selectedOthers.length < 3 || isSelected;
-                          
+
                           return (
                             <button
                               key={subject.id}
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
-                              className={`p-4 border-2 rounded-lg text-left transition-all ${
-                                isSelected
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
                                   ? 'border-purple-500 bg-purple-50'
                                   : canSelect
-                                  ? 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
-                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                              }`}
+                                    ? 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
                                 {isSelected && <CheckCircle className="w-5 h-5 text-purple-600" />}
@@ -537,7 +569,7 @@ export function JAMBExamPage() {
                 {(() => {
                   const languageSubjects = otherSubjects.filter(s => s.subject_category === 'LANGUAGE');
                   if (languageSubjects.length === 0) return null;
-                  
+
                   return (
                     <div>
                       <h4 className="text-md font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -548,19 +580,18 @@ export function JAMBExamPage() {
                         {languageSubjects.map((subject) => {
                           const isSelected = selectedSubjects.includes(subject.id);
                           const canSelect = selectedOthers.length < 3 || isSelected;
-                          
+
                           return (
                             <button
                               key={subject.id}
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
-                              className={`p-4 border-2 rounded-lg text-left transition-all ${
-                                isSelected
+                              className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
                                   ? 'border-orange-500 bg-orange-50'
                                   : canSelect
-                                  ? 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
-                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                              }`}
+                                    ? 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
                                 {isSelected && <CheckCircle className="w-5 h-5 text-orange-600" />}
@@ -591,11 +622,10 @@ export function JAMBExamPage() {
             <button
               onClick={handleStartExam}
               disabled={!canStartExam() || loading}
-              className={`flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-lg transition-all ${
-                canStartExam() && !loading
+              className={`flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-lg transition-all ${canStartExam() && !loading
                   ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               <Play className="w-6 h-6" />
               {loading ? 'Loading Exam...' : 'Start JAMB Exam'}
@@ -632,7 +662,7 @@ export function JAMBExamPage() {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className={`px-3 py-1 rounded-lg text-sm font-medium ${getTimeColor()}`}>
                   <Clock className="w-4 h-4 inline mr-1" />
@@ -646,11 +676,11 @@ export function JAMBExamPage() {
                 </button>
               </div>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="mt-3">
               <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
+                <div
                   className="bg-blue-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 ></div>
@@ -673,7 +703,7 @@ export function JAMBExamPage() {
             <h2 className="text-lg font-medium text-gray-900 mb-6 leading-relaxed">
               {currentQuestion.question_text}
             </h2>
-            
+
             {/* Options */}
             <div className="space-y-3 mb-8">
               {[
@@ -683,21 +713,19 @@ export function JAMBExamPage() {
                 { key: 'D', text: currentQuestion.option_d }
               ].map((option) => {
                 const isSelected = answers[currentQuestion.id] === option.key;
-                
+
                 return (
                   <button
                     key={option.key}
                     onClick={() => handleAnswerSelect(currentQuestion.id, option.key)}
-                    className={`w-full p-4 text-left border-2 rounded-xl transition-all ${
-                      isSelected
+                    className={`w-full p-4 text-left border-2 rounded-xl transition-all ${isSelected
                         ? 'border-blue-500 bg-blue-50'
                         : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-start gap-3">
-                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                        isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
+                        }`}>
                         {option.key}
                       </span>
                       <span className="text-gray-900 pt-1">{option.text}</span>
@@ -745,25 +773,23 @@ export function JAMBExamPage() {
             <p className="text-blue-100">Your performance summary</p>
           </div>
         </div>
-        
+
         <div className="container mx-auto px-4 py-6">
           <div className="bg-white rounded-xl shadow-sm border p-6">
             {/* Overall Score */}
             <div className="text-center mb-8">
-              <div className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                results.scorePercentage >= 70 ? 'bg-green-100' : 
-                results.scorePercentage >= 50 ? 'bg-amber-100' : 'bg-red-100'
-              }`}>
-                <span className={`text-4xl font-bold ${
-                  results.scorePercentage >= 70 ? 'text-green-600' : 
-                  results.scorePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
+              <div className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-4 ${results.scorePercentage >= 70 ? 'bg-green-100' :
+                  results.scorePercentage >= 50 ? 'bg-amber-100' : 'bg-red-100'
                 }`}>
+                <span className={`text-4xl font-bold ${results.scorePercentage >= 70 ? 'text-green-600' :
+                    results.scorePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                  }`}>
                   {results.scorePercentage}%
                 </span>
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                {results.scorePercentage >= 70 ? 'Excellent Performance!' : 
-                 results.scorePercentage >= 50 ? 'Good Effort!' : 'Keep Practicing!'}
+                {results.scorePercentage >= 70 ? 'Excellent Performance!' :
+                  results.scorePercentage >= 50 ? 'Good Effort!' : 'Keep Practicing!'}
               </h2>
               <p className="text-gray-600">JAMB CBT Exam Simulation</p>
             </div>
@@ -800,10 +826,9 @@ export function JAMBExamPage() {
                         {subject.correct}/{subject.total} correct ({subject.answered} answered)
                       </p>
                     </div>
-                    <div className={`text-lg font-bold ${
-                      subject.percentage >= 70 ? 'text-green-600' :
-                      subject.percentage >= 50 ? 'text-amber-600' : 'text-red-600'
-                    }`}>
+                    <div className={`text-lg font-bold ${subject.percentage >= 70 ? 'text-green-600' :
+                        subject.percentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                      }`}>
                       {subject.percentage}%
                     </div>
                   </div>

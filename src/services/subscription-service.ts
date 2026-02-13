@@ -11,12 +11,24 @@ export interface UserSubscription {
   created_at: string;
   updated_at: string;
   subscription_plans?: {
+    id: string;
     name: string;
     description: string;
     price_ngn: number;
     duration_days: number;
+    plan_code?: string; // Paystack plan code
   };
 }
+
+export const SUBSCRIPTION_PLANS = {
+  FREE: 'free',
+  PREMIUM: 'premium',
+};
+
+export const FORCED_LIMITS = {
+  FREE_QUESTIONS_PER_SUBJECT: 20,
+  PREMIUM_QUESTIONS_PER_SUBJECT: 45,
+};
 
 class SubscriptionService {
   /**
@@ -178,6 +190,25 @@ class SubscriptionService {
       default:
         return { text: status, color: 'text-gray-600' };
     }
+  }
+
+  /**
+   * Get the current user's active plan name
+   */
+  async getActivePlan(): Promise<string> {
+    const subscription = await this.getActiveSubscription();
+    if (!subscription) return SUBSCRIPTION_PLANS.FREE;
+
+    // Any active subscription that isn't explicitly 'free' is considered premium
+    const planName = subscription.subscription_plans?.name?.toLowerCase();
+    const planSlug = (subscription as any).subscription_plans?.slug?.toLowerCase();
+
+    // Check both name and slug for 'free'
+    if (planName === 'free' || planSlug === 'free') {
+      return SUBSCRIPTION_PLANS.FREE;
+    }
+
+    return SUBSCRIPTION_PLANS.PREMIUM;
   }
 }
 

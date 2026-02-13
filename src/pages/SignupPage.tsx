@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
@@ -15,7 +15,7 @@ export function SignupPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Form state persistence
-  const formPersistence = createFormPersistence('signup');
+  const formPersistence = useMemo(() => createFormPersistence('signup'), []);
 
   // Load saved form state on component mount
   useEffect(() => {

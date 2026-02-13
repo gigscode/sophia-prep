@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
@@ -11,7 +11,7 @@ export function ForgotPasswordPage() {
   const [emailSent, setEmailSent] = useState(false);
 
   // Form state persistence
-  const formPersistence = createFormPersistence('forgotPassword');
+  const formPersistence = useMemo(() => createFormPersistence('forgotPassword'), []);
 
   // Load saved form state on component mount
   useEffect(() => {

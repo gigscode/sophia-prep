@@ -4,6 +4,8 @@ import { ArrowLeft, RotateCcw, BookOpen, CheckCircle, XCircle, ChevronDown } fro
 import { PageHeader } from '../components/layout';
 import { supabase } from '../integrations/supabase/client';
 import type { Subject } from '../integrations/supabase/types';
+import { subscriptionService, SUBSCRIPTION_PLANS, FORCED_LIMITS } from '../services/subscription-service';
+import { useAuth } from '../hooks/useAuth';
 
 interface Topic {
   id: string;
@@ -32,13 +34,13 @@ export function PracticeModePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [currentView, setCurrentView] = useState<ViewState>('selection');
-  
+
   // Selection state
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
-  
+
   // Quiz state
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -47,6 +49,8 @@ export function PracticeModePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<number>(0);
+  const [userPlan, setUserPlan] = useState<string>(SUBSCRIPTION_PLANS.FREE);
+  const { user } = useAuth();
 
   // Define functions first
   const loadSubjects = async () => {
@@ -107,12 +111,19 @@ export function PracticeModePage() {
   // Load subjects on mount and handle URL parameters
   useEffect(() => {
     loadSubjects();
-  }, []);
+    loadUserPlan();
+  }, [user]);
+
+  const loadUserPlan = async () => {
+    if (!user) return;
+    const plan = await subscriptionService.getActivePlan();
+    setUserPlan(plan);
+  };
 
   // Handle URL parameters for direct topic access
   useEffect(() => {
     const subjectSlug = searchParams.get('subject');
-    
+
     if (subjectSlug && subjects.length > 0) {
       const subject = subjects.find(s => s.slug === subjectSlug);
       if (subject) {
@@ -159,12 +170,14 @@ export function PracticeModePage() {
     setError(null);
 
     try {
+      const questionLimit = userPlan === SUBSCRIPTION_PLANS.PREMIUM ? 50 : 20;
+
       let query = supabase
         .from('questions')
         .select('*')
         .eq('subject_id', subjectId)
         .eq('is_active', true)
-        .limit(20);
+        .limit(questionLimit);
 
       if (topicId) {
         query = query.eq('topic_id', topicId);
@@ -293,7 +306,7 @@ export function PracticeModePage() {
           title="Practice Mode"
           description="Select subject and topic to start practicing"
         />
-        
+
         <div className="container mx-auto px-4 py-6">
           {error && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -452,7 +465,7 @@ export function PracticeModePage() {
             <h2 className="text-lg font-medium text-gray-900 mb-6 leading-relaxed">
               {currentQuestion.question_text}
             </h2>
-            
+
             <div className="space-y-3">
               {[
                 { key: 'A', text: currentQuestion.option_a },
@@ -463,7 +476,7 @@ export function PracticeModePage() {
                 const isSelected = currentAnswer === option.key;
                 const isCorrectOption = option.key === currentQuestion.correct_answer;
                 const showResult = showExplanation && currentAnswer;
-                
+
                 let buttonClass = 'border-gray-200 hover:border-gray-300';
                 if (showResult) {
                   if (isCorrectOption) {
@@ -483,14 +496,13 @@ export function PracticeModePage() {
                     className={`w-full p-4 text-left border-2 rounded-xl transition-all ${buttonClass} ${currentAnswer ? 'cursor-default' : ''}`}
                   >
                     <div className="flex items-start gap-3">
-                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                        showResult && isCorrectOption ? 'bg-green-500 text-white' :
-                        showResult && isSelected && !isCorrectOption ? 'bg-red-500 text-white' :
-                        isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
-                      }`}>
+                      <span className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${showResult && isCorrectOption ? 'bg-green-500 text-white' :
+                          showResult && isSelected && !isCorrectOption ? 'bg-red-500 text-white' :
+                            isSelected ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700'
+                        }`}>
                         {showResult && isCorrectOption ? <CheckCircle className="w-5 h-5" /> :
-                         showResult && isSelected && !isCorrectOption ? <XCircle className="w-5 h-5" /> :
-                         option.key}
+                          showResult && isSelected && !isCorrectOption ? <XCircle className="w-5 h-5" /> :
+                            option.key}
                       </span>
                       <span className="text-gray-900 pt-1">{option.text}</span>
                     </div>
@@ -545,25 +557,23 @@ export function PracticeModePage() {
           title="Practice Complete"
           description="Your performance summary"
         />
-        
+
         <div className="container mx-auto px-4 py-6">
           <div className="bg-white rounded-xl shadow-sm border p-6">
             {/* Score Circle */}
             <div className="text-center mb-8">
-              <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${
-                results.scorePercentage >= 70 ? 'bg-green-100' : 
-                results.scorePercentage >= 50 ? 'bg-amber-100' : 'bg-red-100'
-              }`}>
-                <span className={`text-3xl font-bold ${
-                  results.scorePercentage >= 70 ? 'text-green-600' : 
-                  results.scorePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
+              <div className={`w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4 ${results.scorePercentage >= 70 ? 'bg-green-100' :
+                  results.scorePercentage >= 50 ? 'bg-amber-100' : 'bg-red-100'
                 }`}>
+                <span className={`text-3xl font-bold ${results.scorePercentage >= 70 ? 'text-green-600' :
+                    results.scorePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                  }`}>
                   {results.scorePercentage}%
                 </span>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-1">
-                {results.scorePercentage >= 70 ? 'Great Job!' : 
-                 results.scorePercentage >= 50 ? 'Good Effort!' : 'Keep Practicing!'}
+                {results.scorePercentage >= 70 ? 'Great Job!' :
+                  results.scorePercentage >= 50 ? 'Good Effort!' : 'Keep Practicing!'}
               </h2>
               <p className="text-gray-600">
                 {selectedSubject?.name}

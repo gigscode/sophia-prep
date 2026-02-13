@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { Check, Crown, Calendar } from 'lucide-react';
 import { Card } from '../ui/Card';
 
@@ -16,30 +17,44 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ isLoading = false }: PricingSectionProps) {
+  const navigate = useNavigate();
   const plans: PricingPlan[] = [
     {
-      id: 'monthly',
-      name: 'Monthly Plan',
-      price: '₦1,500',
-      duration: 'per month',
+      id: 'free',
+      name: 'Free',
+      price: '₦0',
+      duration: 'forever',
       features: [
-        'Access to all JAMB subjects',
-      
+        '20 questions per subject',
+        'Basic practice mode',
+        'Progress tracking'
       ],
       icon: <Calendar className="w-6 h-6" />
     },
     {
-      id: 'quarterly',
-      name: '3 Months Plan',
-      price: '₦4,000',
-      duration: 'for 3 months',
+      id: 'monthly',
+      name: 'Monthly',
+      price: '₦1,500',
+      duration: 'per month',
       features: [
-        'Everything in Monthly Plan',
-        'Save ₦500 compared to monthly',
-       
+        'Full 45 questions per subject',
+        'Unlimited CBT simulations',
+        'Advanced analytics'
+      ],
+      icon: <Crown className="w-6 h-6" />
+    },
+    {
+      id: 'quarterly',
+      name: '3-Months',
+      price: '₦4,500',
+      duration: 'per 3 months',
+      features: [
+        'Everything in Monthly',
+        'Full access for a quarter',
+        'Priority support'
       ],
       isPopular: true,
-      icon: <Crown className="w-6 h-6" />
+      icon: <Check className="w-6 h-6" />
     }
   ];
 
@@ -50,7 +65,7 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
           <div className="h-8 bg-gray-200 rounded w-48 mx-auto mb-2 animate-pulse"></div>
           <div className="h-4 bg-gray-200 rounded w-64 mx-auto animate-pulse"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {[1, 2].map((i) => (
             <div key={i} className="h-80 bg-gray-200 rounded-xl animate-pulse"></div>
           ))}
@@ -72,17 +87,16 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {plans.map((plan) => (
           <Card
             key={plan.id}
-            className={`relative p-4 transition-all duration-300 hover:shadow-lg ${
-              plan.isPopular
-                ? 'border-2 border-[#B78628] bg-gradient-to-br from-[#FDF6E8] to-white'
-                : plan.id === 'monthly'
+            className={`relative p-4 transition-all duration-300 hover:shadow-lg ${plan.isPopular
+              ? 'border-2 border-[#B78628] bg-gradient-to-br from-[#FDF6E8] to-white'
+              : plan.id === 'monthly'
                 ? 'border-2 border-blue-400 bg-gradient-to-br from-blue-50 to-purple-50 hover:border-blue-500'
                 : 'border border-gray-200 hover:border-gray-300'
-            }`}
+              }`}
           >
             {/* Popular Badge */}
             {plan.isPopular && (
@@ -97,20 +111,19 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
             <div className="text-center mb-4">
               {/* Icon and Title on same line */}
               <div className="flex items-center justify-center gap-3 mb-3">
-                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full ${
-                  plan.isPopular 
-                    ? 'bg-[#B78628] text-white' 
-                    : plan.id === 'monthly'
+                <div className={`inline-flex items-center justify-center w-10 h-10 rounded-full ${plan.isPopular
+                  ? 'bg-[#B78628] text-white'
+                  : plan.id === 'monthly'
                     ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white'
                     : 'bg-gray-100 text-gray-600'
-                }`}>
+                  }`}>
                   {plan.icon}
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900">
                   {plan.name}
                 </h3>
               </div>
-              
+
               {/* Price only */}
               <div className="text-center">
                 <span className="text-3xl font-bold text-red-900">
@@ -138,13 +151,13 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
 
             {/* CTA Button - Compact */}
             <button
-              className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                plan.isPopular
-                  ? 'bg-[#B78628] text-white hover:bg-[#A67522]'
-                  : plan.id === 'monthly'
+              onClick={() => navigate('/subscriptions')}
+              className={`w-full py-2 px-3 rounded-lg text-sm font-medium transition-colors ${plan.isPopular
+                ? 'bg-[#B78628] text-white hover:bg-[#A67522]'
+                : plan.id === 'monthly'
                   ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
                   : 'bg-gray-900 text-white hover:bg-gray-800'
-              }`}
+                }`}
             >
               Choose Plan
             </button>
@@ -155,7 +168,7 @@ export function PricingSection({ isLoading = false }: PricingSectionProps) {
       {/* Additional Info */}
       <div className="text-center text-sm text-gray-500 max-w-2xl mx-auto">
         <p>
-          All plans include access to thousands of JAMB questions, detailed explanations, 
+          All plans include access to thousands of JAMB questions, detailed explanations,
           and progress tracking. Cancel anytime.
         </p>
       </div>

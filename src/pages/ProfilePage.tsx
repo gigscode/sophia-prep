@@ -70,22 +70,20 @@ export function ProfilePage() {
       <div className="flex gap-2 mb-6 border-b">
         <button
           onClick={() => setActiveTab('profile')}
-          className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
-            activeTab === 'profile'
+          className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${activeTab === 'profile'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-900'
-          }`}
+            }`}
         >
           <User className="w-4 h-4" />
           Profile
         </button>
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${
-            activeTab === 'analytics'
+          className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${activeTab === 'analytics'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-600 hover:text-gray-900'
-          }`}
+            }`}
         >
           <BarChart3 className="w-4 h-4" />
           Analytics
@@ -145,7 +143,7 @@ export function ProfilePage() {
                   Active
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
                 <div className="flex items-center gap-3">
                   <Calendar className="w-5 h-5 text-blue-600" />
@@ -161,7 +159,7 @@ export function ProfilePage() {
                   <div>
                     <p className="text-xs text-gray-600">Plan Price</p>
                     <p className="font-bold text-gray-900">
-                      {subscription.subscription_plans?.price_ngn 
+                      {subscription.subscription_plans?.price_ngn
                         ? `₦${subscription.subscription_plans.price_ngn.toLocaleString()}`
                         : 'N/A'
                       }
@@ -199,10 +197,10 @@ export function ProfilePage() {
                 </p>
                 <Button
                   variant="primary"
-                  onClick={() => navigate('/more')}
+                  onClick={() => navigate('/subscriptions')}
                   className="inline-flex items-center gap-2 px-6 py-3 text-lg"
                 >
-                  Upgrade Now
+                  Upgrade to Premium
                   <ArrowRight className="w-5 h-5" />
                 </Button>
                 <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-left">

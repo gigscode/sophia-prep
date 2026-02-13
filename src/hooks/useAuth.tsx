@@ -11,6 +11,7 @@ type User = {
   name?: string;
   avatarUrl?: string | null;
   isAdmin?: boolean;
+  subscriptionPlan?: string;
 };
 
 type AuthContextValue = {
@@ -20,6 +21,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<User>;
   signup: (email: string, password: string, name?: string) => Promise<User>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -306,12 +308,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })();
 
+    // Fetch latest profile data including subscription_plan
+    const { data: profile } = await (supabase
+      .from('user_profiles')
+      .select('full_name, avatar_url, subscription_plan')
+      .eq('id', supabaseUser.id)
+      .single() as any);
+
     return {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
-      name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
-      avatarUrl: supabaseUser.user_metadata?.avatar_url,
+      name: (profile as any)?.full_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
+      avatarUrl: (profile as any)?.avatar_url || supabaseUser.user_metadata?.avatar_url,
       isAdmin,
+      subscriptionPlan: (profile as any)?.subscription_plan || 'Free',
     };
   };
 
@@ -422,8 +432,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const refreshUser = async () => {
+    try {
+      const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+      if (supabaseUser) {
+        const u = await mapUser(supabaseUser);
+        setUser(u);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, initialized, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, initialized, login, signup, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
