@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePaystackPayment } from 'react-paystack';
 import { Check, X, Shield, Zap, Star, ArrowLeft } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { subscriptionService, SUBSCRIPTION_PLANS } from '../services/subscription-service';
@@ -92,27 +91,42 @@ export function SubscriptionPage() {
             setLoading(false);
             return;
         }
-        const plan = await subscriptionService.getActivePlan();
+        const plan = await subscriptionService.getActivePlan(user.id);
         setCurrentPlan(plan);
         setLoading(false);
     };
 
     const handlePaymentSuccess = async (reference: any, plan: Plan) => {
         setProcessingPayment(true);
-        try {
-            console.log('Payment successful. Reference:', reference);
-            // The actual update is handled by the webhook, but we can simulate/refresh here
-            showToast('Subscription payment successful! Your account will be upgraded shortly.', 'success');
+        const ref = reference?.reference || reference;
+        console.log(`[PAYMENT_SUCCESS_HANDLER] reference=${ref}, plan=${plan.slug}`);
 
-            // Wait a bit then redirect to success page
-            setTimeout(async () => {
+        try {
+            showToast('Payment successful! Finalizing subscription...', 'success');
+
+            // Robust fallback: Attempt to update client-side immediately
+            if (user?.id) {
+                console.log(`[PAYMENT_FINALIZING] Triggering database update for user ${user.id}...`);
+                const success = await subscriptionService.completeSubscriptionClientSide(user.id, plan, ref);
+                console.log(`[PAYMENT_FINALIZING] Database update ${success ? 'succeeded' : 'failed'}`);
+            } else {
+                console.warn('[PAYMENT_FINALIZING] No user ID found, skipping direct database update');
+            }
+
+            console.log('[PAYMENT_FINALIZING] Redirecting to success page in 1000ms...');
+            // Small delay to allow database replication/webhooks to catch up
+            setTimeout(() => {
                 setProcessingPayment(false);
-                navigate('/subscription-success');
-            }, 2000);
+                navigate('/subscription-success', { replace: true });
+            }, 1000);
         } catch (error) {
-            console.error('Error handling payment success:', error);
-            showToast('Payment successful, but we encountered an issue updating your account. Please contact support.', 'warning');
+            console.error('[PAYMENT_HANDLER_ERROR] Critical failure in success handler:', error);
+            showToast('Payment successful, but we encountered an issue finalizing. Please contact support.', 'warning');
+
+            // Still redirect to success page, polling will handle the rest
+            console.log('[PAYMENT_FINALIZING_ERROR] Redirecting to success page despite error...');
             setProcessingPayment(false);
+            navigate('/subscription-success', { replace: true });
         }
     };
 
@@ -245,8 +259,8 @@ interface PaystackButtonProps {
 const PaystackButton = ({ plan, user, processing, onSuccess, children }: PaystackButtonProps) => {
     const navigate = useNavigate();
 
-    const config = {
-        reference: new Date().getTime().toString(),
+    const config = useMemo(() => ({
+        reference: `SUB_${new Date().getTime()}_${Math.floor(Math.random() * 1000000)}`,
         email: user?.email || '',
         amount: plan.price * 100, // Amount in kobo
         publicKey: PAYSTACK_PUBLIC_KEY as string,
@@ -272,30 +286,71 @@ const PaystackButton = ({ plan, user, processing, onSuccess, children }: Paystac
                 }
             ]
         }
-    };
-
-    const initializePayment = usePaystackPayment(config);
-
-    const handlePaymentClose = () => {
-        console.log('Payment closed');
-        showToast('Payment cancelled', 'info');
-    };
+    }), [user?.email, user?.id, plan.price, plan.name, plan.slug]);
 
     const handleClick = () => {
+        console.log(`[PAYMENT_INIT] plan=${plan.slug}, email=${user?.email}`);
+
         if (!user) {
             navigate('/login?redirect=/subscriptions');
             return;
         }
 
         if (!PAYSTACK_PUBLIC_KEY || PAYSTACK_PUBLIC_KEY === 'pk_test_placeholder') {
+            console.error('[PAYMENT_AUTH_ERROR] Missing or placeholder Public Key');
             showToast('Unable to initialize payment. Please contact support.', 'error');
             return;
         }
 
-        initializePayment(
-            (ref: any) => onSuccess(ref, plan),
-            handlePaymentClose
-        );
+        const scriptId = 'paystack-inline-js';
+        const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+        const startPayment = () => {
+            const anyWindow = window as any;
+            const paystack = anyWindow.PaystackPop?.setup({
+                key: PAYSTACK_PUBLIC_KEY,
+                email: user?.email || '',
+                amount: plan.price * 100,
+                reference: config.reference,
+                metadata: config.metadata,
+                callback: (response: any) => {
+                    console.log('[PAYSTACK_CALLBACK] Success', response);
+                    onSuccess(response.reference, plan);
+                },
+                onClose: () => {
+                    console.log('Payment closed');
+                    showToast('Payment cancelled', 'info');
+                },
+            });
+
+            if (!paystack) {
+                console.error('[PAYSTACK_INIT_ERROR] PaystackPop not available on window');
+                showToast('Unable to initialize payment. Please refresh the page and try again.', 'error');
+                return;
+            }
+
+            paystack.openIframe();
+        };
+
+        if (existingScript) {
+            startPayment();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.id = scriptId;
+        script.src = 'https://js.paystack.co/v1/inline.js';
+        script.async = true;
+        script.onload = () => {
+            console.log('[PAYSTACK_SCRIPT] Loaded inline script');
+            startPayment();
+        };
+        script.onerror = () => {
+            console.error('[PAYSTACK_SCRIPT_ERROR] Failed to load inline script');
+            showToast('Unable to load payment gateway. Please check your connection and try again.', 'error');
+        };
+
+        document.body.appendChild(script);
     };
 
     return (

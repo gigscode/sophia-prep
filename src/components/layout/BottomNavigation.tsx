@@ -48,13 +48,13 @@ const navItems: NavItem[] = [
     route: '/study',
     description: 'Access study materials and learning resources'
   },
-  {
-    id: 'more',
-    label: 'More',
-    icon: MoreHorizontal,
-    route: '/more',
-    description: 'Access profile and additional options'
-  },
+  // {
+  //   id: 'more',
+  //   label: 'More',
+  //   icon: MoreHorizontal,
+  //   route: '/more',
+  //   description: 'Access profile and additional options'
+  // },
 ];
 
 export function BottomNavigation() {

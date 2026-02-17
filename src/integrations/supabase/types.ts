@@ -244,6 +244,94 @@ export interface Database {
           exam_type?: 'JAMB' | null;
         };
       };
+      subscription_plans: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          price_ngn: number;
+          features: string[] | null;
+          included_subjects: string[] | null;
+          exam_types: string[] | null;
+          is_active: boolean;
+          sort_order: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          price_ngn: number;
+          features?: string[] | null;
+          included_subjects?: string[] | null;
+          exam_types?: string[] | null;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          description?: string | null;
+          price_ngn?: number;
+          features?: string[] | null;
+          included_subjects?: string[] | null;
+          exam_types?: string[] | null;
+          is_active?: boolean;
+          sort_order?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      user_subscriptions: {
+        Row: {
+          id: string;
+          user_id: string;
+          plan_id: string;
+          status: string;
+          start_date: string;
+          end_date: string;
+          auto_renew: boolean;
+          payment_reference: string | null;
+          amount_paid: number;
+          currency: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          plan_id: string;
+          status?: string;
+          start_date?: string;
+          end_date: string;
+          auto_renew?: boolean;
+          payment_reference?: string | null;
+          amount_paid: number;
+          currency?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          plan_id?: string;
+          status?: string;
+          start_date?: string;
+          end_date?: string;
+          auto_renew?: boolean;
+          payment_reference?: string | null;
+          amount_paid?: number;
+          currency?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
     };
     Functions: {
       get_practice_questions: {

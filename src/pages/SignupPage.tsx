@@ -13,6 +13,7 @@ export function SignupPage() {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [signupComplete, setSignupComplete] = useState(false);
 
   // Form state persistence
   const formPersistence = useMemo(() => createFormPersistence('signup'), []);
@@ -30,9 +31,10 @@ export function SignupPage() {
     e.preventDefault();
     try {
       await signup(email, password, name);
-      // Clear form state on successful signup
       formPersistence.clearFormState();
-      navigate('/');
+      setPassword('');
+      setError(null);
+      setSignupComplete(true);
     } catch (err) {
       setError('Failed to sign up');
     }
@@ -41,58 +43,79 @@ export function SignupPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-md">
       <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-4">Create an account</h2>
-        <form onSubmit={handleSubmit}>
-          <label className="block text-sm font-medium">Full name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={e => {
-              setName(e.target.value);
-              formPersistence.autoSaveFormState({ name: e.target.value, email });
-            }}
-            className="w-full p-2 border rounded mb-3"
-          />
-
-          <label className="block text-sm font-medium">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => {
-              setEmail(e.target.value);
-              formPersistence.autoSaveFormState({ name, email: e.target.value });
-            }}
-            className="w-full p-2 border rounded mb-3"
-            required
-          />
-
-          <label className="block text-sm font-medium">Password</label>
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full p-2 border rounded mb-3"
-              required
-            />
+        {signupComplete ? (
+          <>
+            <h2 className="text-2xl font-bold mb-4">Verify your email</h2>
+            <p className="text-gray-700 mb-6">
+              We have sent a verification link to <span className="font-semibold">{email}</span>. Open your email inbox, click the link to verify your account, then return here to log in.
+            </p>
             <button
               type="button"
-              onClick={() => setShowPassword(s => !s)}
-              className="absolute right-2 top-2 text-gray-500"
-              aria-label="Toggle password visibility"
+              onClick={() => navigate('/login')}
+              className="w-full py-2 bg-blue-600 text-white rounded mb-3"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              Go to login
             </button>
-          </div>
+            <p className="text-sm text-gray-600">
+              Did not receive the email? Check your spam folder or try signing up again with the correct address.
+            </p>
+          </>
+        ) : (
+          <>
+            <h2 className="text-2xl font-bold mb-4">Create an account</h2>
+            <form onSubmit={handleSubmit}>
+              <label className="block text-sm font-medium">Full name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={e => {
+                  setName(e.target.value);
+                  formPersistence.autoSaveFormState({ name: e.target.value, email });
+                }}
+                className="w-full p-2 border rounded mb-3"
+              />
 
-          {error && <div className="text-red-600 mb-3">{error}</div>}
+              <label className="block text-sm font-medium">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={e => {
+                  setEmail(e.target.value);
+                  formPersistence.autoSaveFormState({ name, email: e.target.value });
+                }}
+                className="w-full p-2 border rounded mb-3"
+                required
+              />
 
-          <button className="w-full py-2 bg-blue-600 text-white rounded">Sign up</button>
-        </form>
+              <label className="block text-sm font-medium">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full p-2 border rounded mb-3"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  className="absolute right-2 top-2 text-gray-500"
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
 
-        <p className="text-sm text-gray-600 mt-4">
-          Already have an account? <Link to="/login" className="text-blue-600">Log in</Link>
-        </p>
+              {error && <div className="text-red-600 mb-3">{error}</div>}
+
+              <button className="w-full py-2 bg-blue-600 text-white rounded">Sign up</button>
+            </form>
+
+            <p className="text-sm text-gray-600 mt-4">
+              Already have an account? <Link to="/login" className="text-blue-600">Log in</Link>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

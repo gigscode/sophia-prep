@@ -25,9 +25,10 @@ export function ProfilePage() {
   }, [user]);
 
   const loadSubscription = async () => {
+    if (!user) return;
     setLoadingSubscription(true);
     try {
-      const activeSub = await subscriptionService.getActiveSubscription();
+      const activeSub = await subscriptionService.getActiveSubscription(user.id);
       setSubscription(activeSub);
     } catch (error) {
       console.error('Error loading subscription:', error);
@@ -71,8 +72,8 @@ export function ProfilePage() {
         <button
           onClick={() => setActiveTab('profile')}
           className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${activeTab === 'profile'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-900'
+            ? 'text-blue-600 border-b-2 border-blue-600'
+            : 'text-gray-600 hover:text-gray-900'
             }`}
         >
           <User className="w-4 h-4" />
@@ -81,8 +82,8 @@ export function ProfilePage() {
         <button
           onClick={() => setActiveTab('analytics')}
           className={`px-4 py-2 font-medium transition-colors flex items-center gap-2 ${activeTab === 'analytics'
-              ? 'text-blue-600 border-b-2 border-blue-600'
-              : 'text-gray-600 hover:text-gray-900'
+            ? 'text-blue-600 border-b-2 border-blue-600'
+            : 'text-gray-600 hover:text-gray-900'
             }`}
         >
           <BarChart3 className="w-4 h-4" />

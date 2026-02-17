@@ -3,16 +3,37 @@ import { CheckCircle2, ArrowRight, Star, Shield, Zap } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import confetti from 'canvas-confetti';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 export function SubscriptionSuccessPage() {
     const navigate = useNavigate();
-    const { refreshUser } = useAuth();
+    const { user, refreshUser } = useAuth();
+    const [isVerifying, setIsVerifying] = useState(true);
 
     useEffect(() => {
-        // Refresh user details to get the new subscription plan
+        // Initial refresh
         refreshUser();
+
+        // Check if user is already premium
+        if (user?.subscriptionPlan?.toLowerCase() === 'premium') {
+            setIsVerifying(false);
+        }
+
+        // Poll every 2 seconds for status update (max 10 seconds)
+        let attempts = 0;
+        const pollInterval = setInterval(async () => {
+            attempts++;
+            console.log(`[SUBSCRIPTION_POLLING] Attempt ${attempts}...`);
+
+            await refreshUser();
+
+            if (user?.subscriptionPlan?.toLowerCase() === 'premium' || attempts >= 5) {
+                clearInterval(pollInterval);
+                setIsVerifying(false);
+                console.log(`[SUBSCRIPTION_POLLING] Finished. Premium found: ${user?.subscriptionPlan?.toLowerCase() === 'premium'}`);
+            }
+        }, 2000);
 
         // Trigger confetti on mount
         const duration = 3 * 1000;
@@ -23,21 +44,23 @@ export function SubscriptionSuccessPage() {
             return Math.random() * (max - min) + min;
         }
 
-        const interval: any = setInterval(function () {
+        const confettiInterval: any = setInterval(function () {
             const timeLeft = animationEnd - Date.now();
 
             if (timeLeft <= 0) {
-                return clearInterval(interval);
+                return clearInterval(confettiInterval);
             }
 
             const particleCount = 50 * (timeLeft / duration);
-            // since particles fall down, start a bit higher than random
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
             confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
         }, 250);
 
-        return () => clearInterval(interval);
-    }, []);
+        return () => {
+            clearInterval(pollInterval);
+            clearInterval(confettiInterval);
+        };
+    }, [user?.subscriptionPlan]);
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20 px-4">
@@ -47,10 +70,12 @@ export function SubscriptionSuccessPage() {
                 </div>
 
                 <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                    Subscription Successful!
+                    {isVerifying ? 'Finalizing Your Upgrade...' : 'Subscription Successful!'}
                 </h1>
                 <p className="text-xl text-gray-600 mb-12">
-                    Welcome to the Premium family. Your account has been upgraded and all features are now unlocked.
+                    {isVerifying
+                        ? 'We are confirming your payment and upgrading your account. Please wait a moment.'
+                        : 'Welcome to the Premium family. Your account has been upgraded and all features are now unlocked.'}
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">

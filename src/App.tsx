@@ -31,6 +31,16 @@ const PageLoader = () => (
 export function App() {
   // Perform startup database verification checks
   useEffect(() => {
+    // One-time cache clear as requested by user
+    const CACHE_CLEAR_KEY = 'sophia_prep_cache_clear_v1';
+    if (!localStorage.getItem(CACHE_CLEAR_KEY)) {
+      console.log('Performing one-time cache clear...');
+      localStorage.clear();
+      sessionStorage.clear();
+      localStorage.setItem(CACHE_CLEAR_KEY, 'true');
+      console.log('Cache cleared successfully.');
+    }
+
     // Run verification in the background, don't block app startup
     performStartupDatabaseChecks().catch(error => {
       console.error('[APP] Startup verification failed:', error);
@@ -55,7 +65,7 @@ export function App() {
           console.error('[App] Navigation error caught by boundary:', error);
         }}
       >
-        <UnifiedNavigationProvider 
+        <UnifiedNavigationProvider
           enableDebugMode={false}
           config={{
             enablePersistence: true,
@@ -72,56 +82,56 @@ export function App() {
             enableSessionWarning={true}
             enableAutoRefresh={true}
           >
-              <ScrollToTop />
-              <WhatsAppButton />
-              <PWAInstall />
+            <ScrollToTop />
+            <WhatsAppButton />
+            <PWAInstall />
 
-              <ToastContainer />
-              <RouteErrorBoundary>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              {/* Generate routes from configuration */}
-              {routeConfigs.map((config) => {
-                const RouteComponent = config.component;
-                
-                // Create the route element with proper protection and validation
-                const routeElement = (
-                  <ProtectedRoute
-                    requireAuth={config.requireAuth}
-                    requireAdmin={config.requireAdmin}
-                    fallbackPath={config.fallbackPath}
-                  >
-                    <RouteParamValidator routeConfig={config}>
-                      {config.path === '/' ? (
-                        // Home page doesn't need Layout wrapper
-                        <RouteComponent />
-                      ) : (
-                        <Layout showFooter={config.showFooter}>
-                          <RouteComponent />
-                        </Layout>
-                      )}
-                    </RouteParamValidator>
-                  </ProtectedRoute>
-                );
+            <ToastContainer />
+            <RouteErrorBoundary>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  {/* Generate routes from configuration */}
+                  {routeConfigs.map((config) => {
+                    const RouteComponent = config.component;
 
-                return (
-                  <Route
-                    key={config.path}
-                    path={config.path}
-                    element={routeElement}
-                  />
-                );
-              })}
+                    // Create the route element with proper protection and validation
+                    const routeElement = (
+                      <ProtectedRoute
+                        requireAuth={config.requireAuth}
+                        requireAdmin={config.requireAdmin}
+                        fallbackPath={config.fallbackPath}
+                      >
+                        <RouteParamValidator routeConfig={config}>
+                          {config.path === '/' ? (
+                            // Home page doesn't need Layout wrapper
+                            <RouteComponent />
+                          ) : (
+                            <Layout showFooter={config.showFooter}>
+                              <RouteComponent />
+                            </Layout>
+                          )}
+                        </RouteParamValidator>
+                      </ProtectedRoute>
+                    );
 
-              {/* Events - placeholder routes until EventsPage is created */}
-              <Route path="/events" element={<Navigate to="/" replace />} />
-              <Route path="/events/:id" element={<Navigate to="/" replace />} />
+                    return (
+                      <Route
+                        key={config.path}
+                        path={config.path}
+                        element={routeElement}
+                      />
+                    );
+                  })}
 
-              {/* Fallback - 404 Page */}
-              <Route path="*" element={<NotFoundPage />} />
-            </Routes>
-          </Suspense>
-        </RouteErrorBoundary>
+                  {/* Events - placeholder routes until EventsPage is created */}
+                  <Route path="/events" element={<Navigate to="/" replace />} />
+                  <Route path="/events/:id" element={<Navigate to="/" replace />} />
+
+                  {/* Fallback - 404 Page */}
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+              </Suspense>
+            </RouteErrorBoundary>
           </EnhancedAuthProvider>
         </UnifiedNavigationProvider>
       </NavigationErrorBoundary>

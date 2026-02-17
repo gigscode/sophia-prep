@@ -53,18 +53,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (session?.user) {
           console.log(`Session found for user: ${redactEmail(session.user.email)}`);
-          try {
-            const mappedUser = await mapUser(session.user);
-            if (isMounted) {
-              setUser(mappedUser);
-              console.log('Authentication state recovered from session');
-            }
-          } catch (mapError: any) {
-            console.error('Error mapping user from session:', mapError?.message || mapError);
-            if (isMounted) {
-              setUser(null);
-            }
+
+          // Set basic user info immediately to unblock UI
+          const basicUser: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+            avatarUrl: session.user.user_metadata?.avatar_url,
+            isAdmin: adminConfig.isAdmin(normalizeEmail(session.user.email || '')),
+            subscriptionPlan: 'Free',
+          };
+
+          if (isMounted) {
+            setUser(basicUser);
+            setLoading(false);
+            setInitialized(true);
+            console.log('Basic authentication state recovered from session');
           }
+
+          // Fetch full profile in background
+          mapUser(session.user).then(fullUser => {
+            if (isMounted) {
+              setUser(fullUser);
+              console.log('User profile recovered from background fetch');
+            }
+          }).catch(console.error);
+
         } else {
           console.log('No existing session found');
           if (isMounted) {
@@ -99,14 +113,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         if (session?.user) {
           console.log(`User authenticated: ${redactEmail(session.user.email)}`);
-          const mappedUser = await mapUser(session.user);
-          setUser(mappedUser);
+
+          // Set basic user info immediately to unblock UI
+          const basicUser: User = {
+            id: session.user.id,
+            email: session.user.email || '',
+            name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0],
+            avatarUrl: session.user.user_metadata?.avatar_url,
+            isAdmin: adminConfig.isAdmin(normalizeEmail(session.user.email || '')),
+            subscriptionPlan: 'Free',
+          };
+
+          setUser(basicUser);
+          setLoading(false);
 
           // Notify auth state manager of login
-          authStateManager.handleLogin(mappedUser, 'local');
+          authStateManager.handleLogin(basicUser, 'local');
+
+          // Fetch full profile in background
+          mapUser(session.user).then(fullUser => {
+            if (isMounted) {
+              setUser(fullUser);
+              console.log('User profile updated in background');
+            }
+          }).catch(console.error);
+
         } else {
           console.log('User signed out or session expired');
           setUser(null);
+          setLoading(false);
 
           // Notify auth state manager of logout
           authStateManager.handleLogout('local');
@@ -114,11 +149,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error: any) {
         console.error('Error handling auth state change:', error?.message || error);
         setUser(null);
+        setLoading(false);
         authStateManager.handleLogout('local');
       }
-
-      // Ensure loading is false after any auth state change
-      setLoading(false);
     });
 
     return () => {
@@ -286,43 +319,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log(`Admin status check for ${redactEmail(supabaseUser.email)}: ${isAdmin}`);
 
     // Ensure user profile exists (non-blocking)
-    // We don't await this anymore to speed up login
     ensureUserProfile(supabaseUser).catch(error => {
       console.error('Background profile verification failed:', error?.message || error);
     });
 
-    // Update last_login timestamp in user_profiles (non-blocking)
-    // We don't await this anymore to speed up login
+    // Update last_login timestamp (non-blocking)
     (async () => {
       try {
-        const { error: updateError } = await (supabase
+        await (supabase
           .from('user_profiles')
           .update as any)({ last_login: new Date().toISOString() })
           .eq('id', supabaseUser.id);
-
-        if (updateError) {
-          console.error(`Failed to update last_login for user ${supabaseUser.id}:`, updateError.message);
-        }
-      } catch (error: any) {
-        console.error('Last login update failed:', error?.message || error);
+      } catch (error) {
+        // Silent fail for background tasks
       }
     })();
 
-    // Fetch latest profile data including subscription_plan
-    const { data: profile } = await (supabase
-      .from('user_profiles')
-      .select('full_name, avatar_url, subscription_plan')
-      .eq('id', supabaseUser.id)
-      .single() as any);
-
-    return {
+    // Basic user object for immediate use
+    const user: User = {
       id: supabaseUser.id,
       email: supabaseUser.email || '',
-      name: (profile as any)?.full_name || supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
-      avatarUrl: (profile as any)?.avatar_url || supabaseUser.user_metadata?.avatar_url,
+      name: supabaseUser.user_metadata?.full_name || supabaseUser.email?.split('@')[0],
+      avatarUrl: supabaseUser.user_metadata?.avatar_url,
       isAdmin,
-      subscriptionPlan: (profile as any)?.subscription_plan || 'Free',
+      subscriptionPlan: 'Free', // Default to free until profile is loaded
     };
+
+    // Attempt to fetch full profile details in the background/non-blocking way for the initial return
+    // but we want to return the basic user object ASAP to unblock the UI.
+    // We already have a refreshUser method that can be used to update the state later.
+
+    try {
+      // We'll do a quick fetch, but with a timeout or just not block the main flow if it's lagging
+      const { data: profile, error } = await (supabase
+        .from('user_profiles')
+        .select('full_name, avatar_url, subscription_plan')
+        .eq('id', supabaseUser.id)
+        .single() as any);
+
+      if (profile && !error) {
+        user.name = profile.full_name || user.name;
+        user.avatarUrl = profile.avatar_url || user.avatarUrl;
+        user.subscriptionPlan = profile.subscription_plan || 'Free';
+      }
+    } catch (error) {
+      console.warn('Profile fetch delayed or failed, using basic user info');
+    }
+
+    return user;
   };
 
   const login = async (email: string, password: string) => {
