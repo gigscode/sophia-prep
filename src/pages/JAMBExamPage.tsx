@@ -237,9 +237,23 @@ export function JAMBExamPage() {
     }));
   };
 
+  const handleJumpToQuestion = (index: number) => {
+    if (index >= 0 && index < questions.length) {
+      setCurrentQuestionIndex(index);
+    }
+  };
+
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  const handleJumpToSubject = (subjectId: string) => {
+    const firstQuestionIndex = questions.findIndex(q => q.subject_id === subjectId);
+    if (firstQuestionIndex !== -1) {
+      setCurrentQuestionIndex(firstQuestionIndex);
+      showToast(`Switched to ${questions[firstQuestionIndex].subject_name} section`, 'info');
     }
   };
 
@@ -699,6 +713,37 @@ export function JAMBExamPage() {
                 ></div>
               </div>
             </div>
+
+            {/* Subject Tabs */}
+            <div className="mt-4 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              {selectedSubjects.map((id) => {
+                const subject = subjects.find(s => s.id === id);
+                const currentQuestion = questions[currentQuestionIndex];
+                const isActive = currentQuestion?.subject_id === id;
+
+                // Count answered in this subject
+                const subjectQuestions = questions.filter(q => q.subject_id === id);
+                const answeredInSubject = subjectQuestions.filter(q => answers[q.id]).length;
+
+                return (
+                  <button
+                    key={id}
+                    onClick={() => handleJumpToSubject(id)}
+                    className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive
+                      ? 'bg-blue-600 text-white shadow-md scale-105'
+                      : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-300 hover:bg-blue-50'
+                      }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{subject?.name}</span>
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-500'}`}>
+                        {answeredInSubject}/{subjectQuestions.length}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -767,6 +812,49 @@ export function JAMBExamPage() {
                 Next
                 <ArrowLeft className="w-4 h-4 rotate-180" />
               </button>
+            </div>
+
+            {/* Question Palette */}
+            <div className="mt-8 bg-white rounded-xl shadow-sm border p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-gray-900">Question Palette</h3>
+                <div className="flex gap-4 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-blue-600 rounded"></div>
+                    <span className="text-gray-600">Answered</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 bg-gray-100 border border-gray-300 rounded"></div>
+                    <span className="text-gray-600">Not Answered</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-3 h-3 ring-2 ring-blue-500 bg-white rounded"></div>
+                    <span className="text-gray-600">Current</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                {questions.map((q, idx) => {
+                  const isAnswered = !!answers[q.id];
+                  const isCurrent = idx === currentQuestionIndex;
+
+                  return (
+                    <button
+                      key={q.id}
+                      onClick={() => handleJumpToQuestion(idx)}
+                      className={`w-10 h-10 text-xs font-semibold rounded-lg transition-all flex items-center justify-center cursor-pointer ${isCurrent
+                        ? 'ring-2 ring-blue-500 bg-white text-blue-600 shadow-md'
+                        : isAnswered
+                          ? 'bg-blue-600 text-white border-transparent'
+                          : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                        }`}
+                    >
+                      {idx + 1}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
