@@ -106,6 +106,12 @@ export class AuthNavigationHandler {
 
       // Otherwise, stay on current page if it's accessible
       if (this.isPathAccessible(this.currentPath, user)) {
+        // Special case: don't redirect away from reset-password page even if user is logged in
+        // because the user needs to see the form to set a new password
+        if (this.currentPath === '/reset-password') {
+          return;
+        }
+
         // Stay on current page, just update state
         return;
       }
