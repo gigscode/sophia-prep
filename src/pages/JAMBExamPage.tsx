@@ -7,6 +7,7 @@ import type { Subject } from '../integrations/supabase/types';
 import { Select } from '../components/ui/Select';
 import { subscriptionService, SUBSCRIPTION_PLANS, FORCED_LIMITS } from '../services/subscription-service';
 import { useAuth } from '../hooks/useAuth';
+import { showToast } from '../components/ui/Toast';
 
 interface QuizQuestion {
   id: string;
@@ -62,6 +63,19 @@ export function JAMBExamPage() {
       return () => clearInterval(timer);
     }
   }, [currentView, timeRemaining]);
+
+  // Subject transition notification effect
+  useEffect(() => {
+    if (currentView === 'exam' && questions.length > 0) {
+      const currentQuestion = questions[currentQuestionIndex];
+      const previousQuestion = currentQuestionIndex > 0 ? questions[currentQuestionIndex - 1] : null;
+
+      // Notify if subject changes OR if it's the very first question of the exam
+      if (!previousQuestion || currentQuestion.subject_id !== previousQuestion.subject_id) {
+        showToast(`Starting ${currentQuestion.subject_name} section...`, 'info');
+      }
+    }
+  }, [currentQuestionIndex, currentView, questions]);
 
   // Load subjects, years and user plan on mount
   useEffect(() => {
@@ -200,10 +214,9 @@ export function JAMBExamPage() {
         return;
       }
 
-      // Final shuffle of all questions
-      const finalQuestions = allQuestions.sort(() => Math.random() - 0.5);
-
-      setQuestions(finalQuestions);
+      // No longer shuffling all questions together to maintain subject grouping
+      // Each subject was already shuffled individually when fetched
+      setQuestions(allQuestions);
       setCurrentQuestionIndex(0);
       setAnswers({});
       setTimeRemaining(150 * 60); // Reset timer to 2.5 hours
@@ -446,10 +459,10 @@ export function JAMBExamPage() {
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
                               className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
-                                  ? 'border-green-500 bg-green-50'
-                                  : canSelect
-                                    ? 'border-gray-200 hover:border-green-300 hover:bg-green-50'
-                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                ? 'border-green-500 bg-green-50'
+                                : canSelect
+                                  ? 'border-gray-200 hover:border-green-300 hover:bg-green-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
                                 }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
@@ -493,10 +506,10 @@ export function JAMBExamPage() {
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
                               className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
-                                  ? 'border-blue-500 bg-blue-50'
-                                  : canSelect
-                                    ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
-                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                ? 'border-blue-500 bg-blue-50'
+                                : canSelect
+                                  ? 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
                                 }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
@@ -540,10 +553,10 @@ export function JAMBExamPage() {
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
                               className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
-                                  ? 'border-purple-500 bg-purple-50'
-                                  : canSelect
-                                    ? 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
-                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                ? 'border-purple-500 bg-purple-50'
+                                : canSelect
+                                  ? 'border-gray-200 hover:border-purple-300 hover:bg-purple-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
                                 }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
@@ -587,10 +600,10 @@ export function JAMBExamPage() {
                               onClick={() => handleSubjectToggle(subject.id)}
                               disabled={!canSelect}
                               className={`p-4 border-2 rounded-lg text-left transition-all ${isSelected
-                                  ? 'border-orange-500 bg-orange-50'
-                                  : canSelect
-                                    ? 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
-                                    : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
+                                ? 'border-orange-500 bg-orange-50'
+                                : canSelect
+                                  ? 'border-gray-200 hover:border-orange-300 hover:bg-orange-50'
+                                  : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
                                 }`}
                             >
                               <div className="flex items-center gap-2 mb-2">
@@ -623,8 +636,8 @@ export function JAMBExamPage() {
               onClick={handleStartExam}
               disabled={!canStartExam() || loading}
               className={`flex items-center gap-3 px-8 py-4 rounded-xl font-semibold text-lg transition-all ${canStartExam() && !loading
-                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-green-600 text-white hover:bg-green-700 shadow-lg'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               <Play className="w-6 h-6" />
@@ -719,8 +732,8 @@ export function JAMBExamPage() {
                     key={option.key}
                     onClick={() => handleAnswerSelect(currentQuestion.id, option.key)}
                     className={`w-full p-4 text-left border-2 rounded-xl transition-all ${isSelected
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                       }`}
                   >
                     <div className="flex items-start gap-3">
@@ -779,10 +792,10 @@ export function JAMBExamPage() {
             {/* Overall Score */}
             <div className="text-center mb-8">
               <div className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-4 ${results.scorePercentage >= 70 ? 'bg-green-100' :
-                  results.scorePercentage >= 50 ? 'bg-amber-100' : 'bg-red-100'
+                results.scorePercentage >= 50 ? 'bg-amber-100' : 'bg-red-100'
                 }`}>
                 <span className={`text-4xl font-bold ${results.scorePercentage >= 70 ? 'text-green-600' :
-                    results.scorePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                  results.scorePercentage >= 50 ? 'text-amber-600' : 'text-red-600'
                   }`}>
                   {results.scorePercentage}%
                 </span>
@@ -827,7 +840,7 @@ export function JAMBExamPage() {
                       </p>
                     </div>
                     <div className={`text-lg font-bold ${subject.percentage >= 70 ? 'text-green-600' :
-                        subject.percentage >= 50 ? 'text-amber-600' : 'text-red-600'
+                      subject.percentage >= 50 ? 'text-amber-600' : 'text-red-600'
                       }`}>
                       {subject.percentage}%
                     </div>
