@@ -1,12 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, MailCheck, ArrowRight, RefreshCw } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigation } from '../hooks/useNavigation';
 import { createFormPersistence } from '../utils/form-state-persistence';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
 
 export function SignupPage() {
-  const { signup } = useAuth();
+  const { signup, resendVerification } = useAuth();
   const { navigate } = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,6 +17,7 @@ export function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signupComplete, setSignupComplete] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   // Form state persistence
   const formPersistence = useMemo(() => createFormPersistence('signup'), []);
@@ -25,7 +29,7 @@ export function SignupPage() {
       if (savedState.name) setName(savedState.name);
       if (savedState.email) setEmail(savedState.email);
     }
-  }, []);
+  }, [formPersistence]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,87 +40,142 @@ export function SignupPage() {
       setError(null);
       setSignupComplete(true);
     } catch (err) {
-      setError('Failed to sign up');
+      setError('Failed to sign up. Please try again.');
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (isResending) return;
+    setIsResending(true);
+    try {
+      await resendVerification(email);
+    } catch (err) {
+      // Error handled by showToast in hook
+    } finally {
+      setIsResending(false);
     }
   };
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-md">
-      <div className="bg-white rounded-lg shadow-lg p-6">
+    <div className="container mx-auto px-4 py-16 max-w-lg min-h-[80vh] flex items-center justify-center">
+      <Card className="w-full shadow-2xl border-blue-100 overflow-hidden animate-fade-in">
         {signupComplete ? (
-          <>
-            <h2 className="text-2xl font-bold mb-4">Verify your email</h2>
-            <p className="text-gray-700 mb-6">
-              We have sent a verification link to <span className="font-semibold">{email}</span>. Open your email inbox, click the link to verify your account, then return here to log in.
+          <div className="text-center py-8 px-4 animate-fade-in-up">
+            <div className="flex justify-center mb-6">
+              <div className="bg-blue-50 p-6 rounded-full">
+                <MailCheck className="w-16 h-16 text-blue-600" />
+              </div>
+            </div>
+
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Check your email</h2>
+            <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+              We've sent a verification link to <br />
+              <span className="font-semibold text-blue-600 break-all">{email}</span>
             </p>
-            <button
-              type="button"
-              onClick={() => navigate('/login')}
-              className="w-full py-2 bg-blue-600 text-white rounded mb-3"
-            >
-              Go to login
-            </button>
-            <p className="text-sm text-gray-600">
-              Did not receive the email? Check your spam folder or try signing up again with the correct address.
-            </p>
-          </>
+
+            <div className="grid gap-4 mb-8">
+              <Button
+                onClick={() => navigate('/login')}
+                className="w-full flex items-center justify-center gap-2 py-4 text-lg"
+              >
+                Go to login <ArrowRight className="w-5 h-5" />
+              </Button>
+
+              <Button
+                variant="outline"
+                onClick={handleResendEmail}
+                disabled={isResending}
+                className="w-full flex items-center justify-center gap-2 py-4"
+              >
+                {isResending ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    Resending...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-5 h-5" />
+                    Resend verification email
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-500 border border-gray-100 italic">
+              "Psst! If you don't see it, please check your spam or junk folder."
+            </div>
+          </div>
         ) : (
-          <>
-            <h2 className="text-2xl font-bold mb-4">Create an account</h2>
-            <form onSubmit={handleSubmit}>
-              <label className="block text-sm font-medium">Full name</label>
-              <input
-                type="text"
+          <div className="p-2">
+            <div className="mb-8">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">Create an account</h2>
+              <p className="text-gray-600">Join Sophia Prep and start your learning journey today.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <Input
+                label="Full name"
+                placeholder="Enter your full name"
                 value={name}
                 onChange={e => {
                   setName(e.target.value);
                   formPersistence.autoSaveFormState({ name: e.target.value, email });
                 }}
-                className="w-full p-2 border rounded mb-3"
+                required
               />
 
-              <label className="block text-sm font-medium">Email</label>
-              <input
+              <Input
+                label="Email"
                 type="email"
+                placeholder="name@example.com"
                 value={email}
                 onChange={e => {
                   setEmail(e.target.value);
                   formPersistence.autoSaveFormState({ name, email: e.target.value });
                 }}
-                className="w-full p-2 border rounded mb-3"
                 required
               />
 
-              <label className="block text-sm font-medium">Password</label>
               <div className="relative">
-                <input
+                <Input
+                  label="Password"
                   type={showPassword ? 'text' : 'password'}
+                  placeholder="Create a strong password"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full p-2 border rounded mb-3"
                   required
+                  className="pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(s => !s)}
-                  className="absolute right-2 top-2 text-gray-500"
+                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 transition-colors"
                   aria-label="Toggle password visibility"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
 
-              {error && <div className="text-red-600 mb-3">{error}</div>}
+              {error && (
+                <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-100 animate-shake">
+                  {error}
+                </div>
+              )}
 
-              <button className="w-full py-2 bg-blue-600 text-white rounded">Sign up</button>
+              <Button type="submit" className="w-full py-4 text-lg mt-2">
+                Sign up
+              </Button>
             </form>
 
-            <p className="text-sm text-gray-600 mt-4">
-              Already have an account? <Link to="/login" className="text-blue-600">Log in</Link>
+            <p className="text-center text-gray-600 mt-8">
+              Already have an account?{' '}
+              <Link to="/login" className="text-blue-600 font-semibold hover:underline">
+                Log in
+              </Link>
             </p>
-          </>
+          </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

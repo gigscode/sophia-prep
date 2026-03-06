@@ -45,11 +45,36 @@ export function EnhancedAuthProvider({
     // The auth state manager is already initialized as a singleton
     // We just need to set up the navigation handler
     authNavigationHandler.setNavigator(navigate, currentPath);
-    
+
     // Update navigation handler configuration
     authNavigationHandler.updateConfig({
-      protectedPaths: ['/7351/admin', '/profile', '/quiz', '/7351/admin/import-questions'],
-      publicPaths: ['/', '/login', '/signup', '/about', '/contact', '/help', '/privacy', '/terms'],
+      protectedPaths: [
+        '/7351/admin',
+        '/profile',
+        '/subscriptions',
+        '/subscription-success'
+      ],
+      publicPaths: [
+        '/',
+        '/login',
+        '/signup',
+        '/forgot-password',
+        '/reset-password',
+        '/study',
+        '/syllabus',
+        '/summaries',
+        '/novels',
+        '/practice',
+        '/jamb-exam',
+        '/quiz/results',
+        '/help',
+        '/about',
+        '/privacy',
+        '/terms',
+        '/contact',
+        '/more',
+        '/topics'
+      ],
     });
   }, [navigate, currentPath]);
 
@@ -103,7 +128,7 @@ export function EnhancedAuthProvider({
   return (
     <>
       {children}
-      
+
       {/* Session Timeout Handler */}
       {enableSessionWarning && enableSessionTimeout && (
         <SessionTimeoutHandler
@@ -112,7 +137,7 @@ export function EnhancedAuthProvider({
           enableAutoRefresh={enableAutoRefresh}
         />
       )}
-      
+
       {/* Cross-Tab Authentication Sync */}
       {enableCrossTabSync && (
         <CrossTabAuthSync

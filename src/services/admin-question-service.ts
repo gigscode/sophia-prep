@@ -41,7 +41,7 @@ export class AdminQuestionService {
    * @returns Object with isValid flag and array of error messages
    */
   async validateQuestionInput(
-    question: QuestionInput, 
+    question: QuestionInput,
     subjectSlug?: string
   ): Promise<{ isValid: boolean; errors: string[]; warnings: string[] }> {
     const errors: string[] = [];
@@ -264,7 +264,17 @@ export class AdminQuestionService {
       } catch (err: any) {
         result.failed++;
         const questionPreview = question.question_text?.substring(0, 30) || 'Unknown question';
-        result.errors.push(`Failed to import question: "${questionPreview}...". Error: ${err.message || JSON.stringify(err)}`);
+
+        // Detailed error logging for diagnostics
+        console.error(`Import failure for question: "${questionPreview}..."`, {
+          error: err,
+          message: err.message,
+          stack: err.stack,
+          question: question
+        });
+
+        const errorMessage = err.message || JSON.stringify(err);
+        result.errors.push(`Failed to import question: "${questionPreview}...". Error: ${errorMessage}`);
       }
     }
 

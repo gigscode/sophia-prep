@@ -55,7 +55,16 @@ export function ProtectedRoute({
   }, [user, pendingRedirect]);
 
   // Show loading spinner while auth is initializing
-  if (loading || !initialized) {
+  if (!initialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  // Only block for loading on protected routes
+  if (requireAuth && loading && !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <LoadingSpinner size="lg" />
@@ -67,13 +76,13 @@ export function ProtectedRoute({
   if (requireAuth && !user) {
     // Redirect to login with state containing the intended destination
     return (
-      <Navigate 
-        to={fallbackPath} 
-        state={{ 
+      <Navigate
+        to={fallbackPath}
+        state={{
           from: location.pathname + location.search,
           message: 'Please log in to access this page'
-        }} 
-        replace 
+        }}
+        replace
       />
     );
   }

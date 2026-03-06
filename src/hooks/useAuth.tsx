@@ -22,6 +22,7 @@ type AuthContextValue = {
   signup: (email: string, password: string, name?: string) => Promise<User>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -444,7 +445,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         const u = await mapUser(data.user);
-        // Note: loading will be set to false by the auth state change listener
+
+        // If there is no session (signup requiring verification), we MUST set loading to false
+        // because the onAuthStateChange listener won't be triggered
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          console.log('No immediate session after signup (likely requires email verification)');
+          setLoading(false);
+        }
+
         return u;
       }
 
@@ -488,8 +497,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resendVerification = async (email: string) => {
+    console.log(`Resending verification email to: ${redactEmail(email)}`);
+    const { error } = await supabase.auth.resend({
+      type: 'signup',
+      email: email,
+    });
+
+    if (error) {
+      console.error(`Resend failed for ${redactEmail(email)}:`, error.message);
+      showToast(error.message, 'error');
+      throw error;
+    }
+
+    console.log(`Verification email resent to: ${redactEmail(email)}`);
+    showToast('Verification email sent!', 'success');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, initialized, login, signup, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, initialized, login, signup, logout, refreshUser, resendVerification }}>
       {children}
     </AuthContext.Provider>
   );
