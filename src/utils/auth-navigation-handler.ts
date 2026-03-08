@@ -112,6 +112,12 @@ export class AuthNavigationHandler {
           return;
         }
 
+        // Special case: don't redirect away from signup page — the user just registered
+        // and needs to see the "Check your email" confirmation screen
+        if (this.currentPath === '/signup') {
+          return;
+        }
+
         // Stay on current page, just update state
         return;
       }

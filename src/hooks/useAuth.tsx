@@ -446,13 +446,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         const u = await mapUser(data.user);
 
-        // If there is no session (signup requiring verification), we MUST set loading to false
-        // because the onAuthStateChange listener won't be triggered
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) {
-          console.log('No immediate session after signup (likely requires email verification)');
-          setLoading(false);
-        }
+        // Always set loading to false after signup is complete.
+        // When email verification is required, Supabase may still create a
+        // temporary session that triggers onAuthStateChange — but we want
+        // the SignupPage to immediately render the "Check your email" screen
+        // without waiting for that event (which could redirect the user).
+        setLoading(false);
 
         return u;
       }
