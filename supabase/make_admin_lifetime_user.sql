@@ -49,25 +49,31 @@ BEGIN
   IF v_plan_id IS NULL THEN
     -- Create a Lifetime plan if it doesn't exist
     INSERT INTO subscription_plans (
+      plan_id,
       name,
       slug,
       description,
-      price_ngn,
-      duration_days,
+      amount,
+      currency,
+      interval,
       features,
       included_subjects,
-      exam_types,
+      exam_type,
+      bundle_type,
       is_active,
       sort_order
     ) VALUES (
+      'lifetime',
       'Lifetime',
       'lifetime',
       'Lifetime access to all Sophia Prep features.',
       0,
-      36500,  -- ~100 years
+      'NGN',
+      'MONTHLY',
       ARRAY['Unlimited practice questions', 'All subjects', 'JAMB CBT simulation', 'Study materials', 'Priority support'],
       ARRAY['mathematics', 'english', 'physics', 'chemistry', 'biology', 'economics', 'government', 'literature'],
-      ARRAY['JAMB'],
+      'BOTH',
+      'FULL_ACCESS',
       true,
       99
     )
