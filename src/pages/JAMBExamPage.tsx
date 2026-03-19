@@ -194,7 +194,7 @@ export function JAMBExamPage() {
           query = query.eq('exam_year', selectedYear);
         }
 
-        const { data, error } = await query.limit(questionsPerSubject);
+        const { data, error } = await query.limit(1000); // Fetch up to 1000 to ensure good randomness
 
         if (error) throw error;
 

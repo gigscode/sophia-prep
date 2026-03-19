@@ -4,7 +4,7 @@ import { ArrowLeft, RotateCcw, BookOpen, CheckCircle, XCircle, ChevronDown } fro
 import { PageHeader } from '../components/layout';
 import { supabase } from '../integrations/supabase/client';
 import type { Subject } from '../integrations/supabase/types';
-import { subscriptionService, SUBSCRIPTION_PLANS, FORCED_LIMITS } from '../services/subscription-service';
+import { subscriptionService, SUBSCRIPTION_PLANS } from '../services/subscription-service';
 import { useAuth } from '../hooks/useAuth';
 
 interface Topic {
@@ -89,7 +89,7 @@ export function PracticeModePage() {
       }
 
       // Convert to the expected format
-      const formattedTopics: Topic[] = (data || []).map(topic => ({
+      const formattedTopics: Topic[] = (data || []).map((topic: any) => ({
         id: topic.id,
         name: topic.name,
         slug: topic.slug || '',
@@ -177,7 +177,7 @@ export function PracticeModePage() {
         .select('*')
         .eq('subject_id', subjectId)
         .eq('is_active', true)
-        .limit(questionLimit);
+        .limit(1000); // Fetch up to 1000 for better randomness
 
       if (topicId) {
         query = query.eq('topic_id', topicId);
@@ -192,9 +192,9 @@ export function PracticeModePage() {
         return;
       }
 
-      // Shuffle questions
+      // Shuffle questions and select up to questionLimit
       const shuffled = data.sort(() => Math.random() - 0.5);
-      setQuestions(shuffled);
+      setQuestions(shuffled.slice(0, questionLimit));
       setCurrentQuestionIndex(0);
       setAnswers({});
       setShowExplanation(false);
